@@ -1,0 +1,27 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "${workspaceFolder}/install/px4_ros_com/include/**",
+        "${workspaceFolder}/install/px4_msgs/include/**",
+        "${workspaceFolder}/install/form_msgs/include/**",
+        "${workspaceFolder}/install/formation/include/**",
+        "/opt/ros/humble/include/**",
+        "${workspaceFolder}/src/formation/include/**",
+        "${workspaceFolder}/src/formation/model/**",
+        "${workspaceFolder}/src/px4_ros_com/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

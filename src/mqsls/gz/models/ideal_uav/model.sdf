@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version='1.9'>
+  <model name='ideal_uav'>
+    <link name='base_link'>
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>1.5</mass>
+        <inertia>
+          <ixx>1.314e-02</ixx>
+          <iyy>1.314e-02</iyy>
+          <izz>2.375e-02</izz>
+        </inertia>
+      </inertial>
+      <!-- <collision name='base_link_collision'>
+        <geometry>
+          <sphere>
+            <radius>0.03</radius>
+          </sphere>
+        </geometry>
+      </collision> -->
+      <visual name='base_link_visual'>
+        <geometry>
+          <sphere>
+            <radius>0.03</radius>
+          </sphere>
+        </geometry>
+      </visual>
+      <velocity_decay/>
+    </link>
+  </model>
+</sdf>

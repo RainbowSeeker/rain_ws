@@ -1,0 +1,31 @@
+<?xml version="1.0" ?>
+<mavlink>
+  <version>3</version>
+  <dialect>0</dialect>
+  <enums>
+    <enum name="UAV_COMMAND_ENUM">
+      <entry value="100" name="UAV_CMD_FORM_START">
+        <description>Command to start formation.</description>
+      </entry>
+      <entry value="101" name="UAV_CMD_FORM_STOP">
+        <description>Command to stop formation.</description>
+      </entry>
+    </enum>
+  </enums>
+  <messages>
+    <message id="1000" name="UAV_COMMAND">
+      <description>Command message for UAV.</description>
+      <field type="uint64_t" name="timestamp" units="">time since system start (microseconds).</field>
+      <field type="float" name="param1" units="">Parameter 1, as defined by MAVLink uint16 VEHICLE_CMD enum.</field>
+      <field type="double" name="param2" units="">Parameter 2, as defined by MAVLink uint16 VEHICLE_CMD enum.</field>
+      <field type="double" name="param3" units="">Parameter 3, as defined by MAVLink uint16 VEHICLE_CMD enum.</field>
+      <field type="uint32_t" name="command" units="">Command ID</field>
+    </message>
+    <message id="1001" name="UAV_STATUS">
+      <description>Status message for UAV.</description>
+      <field type="uint64_t" name="timestamp" units="">time since system start (microseconds).</field>
+      <field type="uint8_t" name="stage" units="">stage of amc. 0:None / 1:"FORMATION" / 2:"OVER"...</field>
+      <field type="uint8_t[20]" name="sta_msg" units="">Display state message, including error.</field>
+    </message>
+  </messages>
+</mavlink>

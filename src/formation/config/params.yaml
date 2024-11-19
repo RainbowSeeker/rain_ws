@@ -1,0 +1,34 @@
+/**:  # global parameters
+  ros__parameters:
+    dds_baudrate: 2000000
+    gcs_ip: 192.168.1.10  # 127.0.0.1 or 192.168.1.10
+    origin_lat: 47.3977420
+    origin_lon: 8.5455940
+    origin_alt: 488.157990
+    lasting_time: 30
+
+/amc_1:
+  ros__parameters:
+    test_phase: formation
+    mc_hgt_ki: 0.05
+    mc_hgt_kp: 0.5
+    mc_hgt_sp: 5.0
+    mc_yaw_sp: 0.0
+
+
+/amc_2:
+  ros__parameters:
+    test_phase: formation
+    mc_hgt_ki: 0.05
+    mc_hgt_kp: 0.5
+    mc_hgt_sp: 5.0
+    mc_yaw_sp: 0.0
+    
+
+/amc_3:
+  ros__parameters:
+    test_phase: formation
+    mc_hgt_ki: 0.05
+    mc_hgt_kp: 0.5
+    mc_hgt_sp: 5.0
+    mc_yaw_sp: 0.0
