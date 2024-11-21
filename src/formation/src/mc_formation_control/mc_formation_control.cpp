@@ -54,10 +54,8 @@ static bool is_ignore_state(uint8_t state)
 }
 
 MulticopterFormationControl::MulticopterFormationControl(int node_index, std::chrono::milliseconds control_period) :
-    Node("amc_" + std::to_string(node_index)), _control_interval(control_period / 1ms * 1e6) // [ns]
+    Node("amc_" + std::to_string(node_index)), Parameter::ParameterManager(this) ,_control_interval(control_period / 1ms * 1e6) // [ns]
 {
-    parameters_declare();
-
     std::string topic_ns{""};
 
     if (node_index)
@@ -103,7 +101,7 @@ MulticopterFormationControl::MulticopterFormationControl(int node_index, std::ch
         topic_ns + "/fmu/in/vehicle_command", 10);
 
     // Subscribe formation cross
-    _test_phase = _param_test_phase.as_string() == "formation" ? PHASE_FORMATION : PHASE_SINGLE;
+    _test_phase = _param_test_phase->as_string() == "formation" ? PHASE_FORMATION : PHASE_SINGLE;
 
     if (_test_phase == PHASE_FORMATION)
     {
@@ -128,9 +126,9 @@ MulticopterFormationControl::MulticopterFormationControl(int node_index, std::ch
                     _is_same_origin[i] = false;
                 }
 
-                if (!_is_same_origin[i] && std::isfinite(msg->ref_lat) && std::abs(msg->ref_lat - _param_ori_lat.as_double()) < 1e-7 &&
-                    std::isfinite(msg->ref_lon) && std::abs(msg->ref_lon - _param_ori_lon.as_double()) < 1e-7 &&
-                    std::isfinite(msg->ref_alt) && std::abs(msg->ref_alt - (float)_param_ori_alt.as_double()) < 1e-3)
+                if (!_is_same_origin[i] && std::isfinite(msg->ref_lat) && std::abs(msg->ref_lat - _param_ori_lat->as_double()) < 1e-7 &&
+                    std::isfinite(msg->ref_lon) && std::abs(msg->ref_lon - _param_ori_lon->as_double()) < 1e-7 &&
+                    std::isfinite(msg->ref_alt) && std::abs(msg->ref_alt - (float)_param_ori_alt->as_double()) < 1e-3)
                 {
                     _is_same_origin[i] = true;
                 }
@@ -145,7 +143,7 @@ MulticopterFormationControl::MulticopterFormationControl(int node_index, std::ch
     _uav_status_pub = this->create_publisher<formation::msg::UavStatus>(
         topic_ns + "/fmu/out/uav_status", 10);
 
-    RCLCPP_INFO(this->get_logger(), "Formation node for %s started. Phase: %s", topic_ns.c_str(), _param_test_phase.as_string().c_str());
+    RCLCPP_INFO(this->get_logger(), "Formation node for %s started. Phase: %s", topic_ns.c_str(), _param_test_phase->as_string().c_str());
     _timer = this->create_wall_timer(control_period, std::bind(&MulticopterFormationControl::timer_callback, this));
 }
 
@@ -185,7 +183,7 @@ int MulticopterFormationControl::runtime_preprocess()
     }
 
     // is over time ?
-    if (_running_time > 1s * _param_lasting_time.as_int())
+    if (_running_time > 1s * _param_lasting_time->as_int())
     {
         if (_vehicle_status.nav_state == VehicleStatus::NAVIGATION_STATE_AUTO_LAND)
         {
@@ -329,10 +327,10 @@ void MulticopterFormationControl::fms_step()
     const uint64_t dt = _control_interval;
 
     // height hold
-    double vh_cmd = _hgt_ctrl.computeCommand(_takeoff_hgt + _param_hgt_sp.as_double() + _local_pos.z, dt);
+    double vh_cmd = _hgt_ctrl.computeCommand(_takeoff_hgt + _param_hgt_sp->as_double() + _local_pos.z, dt);
 
     // yaw hold
-    const double yaw_cmd = math::radians(_param_yaw_sp.as_double());
+    const double yaw_cmd = math::radians(_param_yaw_sp->as_double());
 
     // formation control
     Vector3d pos_err{0, 0, 0};

@@ -128,58 +128,58 @@
     <!-- put your plugin here -->
     <plugin name='virtual_wrench_plugin' filename='virtual_wrench_plugin'/>
     <!-- !!! IMPORTANT !!! The force on uav is always in ENU.-->
-    <!-- mi = 1.5 mr = 0.21 mL = 1 avg = 17.966666666666669-->
+    <!-- mi = 1.5 mr = ~0 mL = 1 avg = 17.966666666666669-->
     <plugin
       filename="gz-sim-apply-link-wrench-system"
       name="gz::sim::systems::ApplyLinkWrench">
       <persistent>
         <entity_name>x500_1</entity_name>
         <entity_type>model</entity_type>
-        <force>0 0 17.15</force>
+        <force>-1.633333333333335 -0.943005439676388 17.966666666666669</force>
         <torque>0 0 0</torque>
       </persistent>
       <persistent>
         <entity_name>x500_2</entity_name>
         <entity_type>model</entity_type>
-        <force>0 0 17.15</force>
+        <force>0 1.886010879352777 17.966666666666669</force>
         <torque>0 0 0</torque>
       </persistent>
       <persistent>
         <entity_name>x500_3</entity_name>
         <entity_type>model</entity_type>
-        <force>0 0 19.6000</force>
+        <force>1.633333333333335 -0.943005439676388 17.966666666666669</force>
         <torque>0 0 0</torque>
       </persistent>
     </plugin>
     <!-- put your model here -->
     <include>
       <name>x500_1</name>
-      <pose>0 0 6.1 0 0 0</pose>
+      <pose>-0.433012701892219 -0.25 5.966025403784439 0 0 0</pose>
       <uri>model://ideal_uav</uri>
     </include>
     <include>
       <name>x500_2</name>
-      <pose>0 0 6.1 0 0 0</pose>
+      <pose>0 0.5 5.966025403784439 0 0 0</pose>
       <uri>model://ideal_uav</uri>
     </include>
     <include>
       <name>x500_3</name>
-      <pose>0 0 6.1 0 0 0</pose>
+      <pose>0.433012701892219 -0.25 5.966025403784439 0 0 0</pose>
       <uri>model://ideal_uav</uri>
     </include>
     <include>
       <name>rope_1</name>
-      <pose>0 0 5.1 0 -1.570796326794897 0</pose>
+      <pose>0 0 5.1 0 -1.047197551196598 -2.617993877991494</pose>
       <uri>model://rope</uri>
     </include>
     <include>
       <name>rope_2</name>
-      <pose>0 0 5.1 0 -1.570796326794897 0</pose>
+      <pose>0 0 5.1 0 -1.047197551196598 1.570796326794897</pose>
       <uri>model://rope</uri>
     </include>
     <include>
       <name>rope_3</name>
-      <pose>0 0 5.1 0 -1.570796326794897 0</pose>
+      <pose>0 0 5.1 0 -1.047197551196598 -0.523598775598299</pose>
       <uri>model://rope</uri>
     </include>
     <!-- ball -->

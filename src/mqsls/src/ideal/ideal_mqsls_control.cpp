@@ -2,33 +2,35 @@
 
 namespace mqsls {
 
-IdealMqslsControl::IdealMqslsControl(std::chrono::milliseconds control_period)
- : rclcpp::Node("ideal_mqsls_control"), _control_interval(control_period / 1ms * 1e3)
+IdealMqslsControl::IdealMqslsControl(uint64_t control_period) : 
+    rclcpp::Node("ideal_mqsls_control"), Parameter::ParameterManager(this), _control_interval(control_period)
 {
     init();
 }
 
 int IdealMqslsControl::init()
 {
+    const std::string world_name = _param_world_name->as_string();
+    
     // clock
-    std::string clock_topic = "/world/" + _world_name + "/clock";
+    std::string clock_topic = "/world/" + world_name + "/clock";
     if (!_node.Subscribe(clock_topic, &IdealMqslsControl::clockCallback, this)) {
         RCLCPP_ERROR(this->get_logger(), "Failed to subscribe to %s", clock_topic.c_str());
         return -1;
     }
 
     // pose: /world/$WORLD/pose/info
-    std::string pose_topic = "/world/" + _world_name + "/pose/info";
+    std::string pose_topic = "/world/" + world_name + "/pose/info";
     if (!_node.Subscribe(pose_topic, &IdealMqslsControl::poseInfoCallback, this)) {
         RCLCPP_ERROR(this->get_logger(), "Failed to subscribe to %s", pose_topic.c_str());
         return -1;
     }
 
     // publisher for EntityWrench msg
-    std::string wrench_topic = "/world/" + _world_name + "/virtual_wrench";
+    std::string wrench_topic = "/world/" + world_name + "/virtual_wrench";
     _wrench_pub = _node.Advertise<gz::msgs::EntityWrench>(wrench_topic);
 
-    RCLCPP_INFO(this->get_logger(), "IdealMqslsControl initialized");
+    RCLCPP_INFO(this->get_logger(), "Setup in %s", world_name.c_str());
     return 0;
 }
 
@@ -154,7 +156,7 @@ void IdealMqslsControl::poseInfoCallback(const gz::msgs::Pose_V &pose)
 int main(int argc, const char** argv) {
     rclcpp::init(argc, argv);
 
-    rclcpp::spin(std::make_shared<mqsls::IdealMqslsControl>(20ms));
+    rclcpp::spin(std::make_shared<mqsls::IdealMqslsControl>(20_ms));
 
     rclcpp::shutdown();
     

@@ -2,9 +2,6 @@
 #include <gz/math.hh>
 #include <gz/msgs.hh>
 #include <gz/transport.hh>
-#include <gz/msgs/imu.pb.h>
-#include <gz/msgs/pose_v.pb.h>
-#include <gz/msgs/entity_wrench.pb.h>
 #include <Eigen/Eigen>
 #include <Eigen/Geometry>
 #include <chrono>
@@ -12,20 +9,60 @@
 #include <cfloat>
 #include <algorithm>
 #include <control_toolbox/pid.hpp>
+#include <formation/msg/uav_command.hpp>
+#include <formation/parameter_manager.hpp>
+#include <formation/data_recorder.hpp>
+#include <formation/utils.hpp>
 
-#include <mqsls/utils.hpp>
-#include "data_recorder.hpp"
-
-using namespace std::chrono_literals;
 namespace mqsls {
 
-class IdealMqslsControl : public rclcpp::Node {
+struct MqslsDataFrame {
+    // timestamp
+    uint64_t timestamp;
+    // payload state
+    Eigen::Vector3d load_position;
+    Eigen::Vector3d load_velocity;
+
+    // uav state
+    Eigen::Vector3d uav_position[3];
+    Eigen::Vector3d uav_velocity[3];
+
+    // operator<<
+    friend std::ostream &operator<<(std::ostream &os, const MqslsDataFrame &frame) {
+        os << frame.timestamp << ' '
+           << frame.load_position.x() << ' ' << frame.load_position.y() << ' ' << frame.load_position.z() << ' '
+           << frame.load_velocity.x() << ' ' << frame.load_velocity.y() << ' ' << frame.load_velocity.z() << ' ';
+        for (int i = 0; i < 3; i++) {
+            os << frame.uav_position[i].x() << ' ' << frame.uav_position[i].y() << ' ' << frame.uav_position[i].z() << ' '
+               << frame.uav_velocity[i].x() << ' ' << frame.uav_velocity[i].y() << ' ' << frame.uav_velocity[i].z() << ' ';
+        }
+        os << '\n';
+        return os;
+    }
+
+    static std::string header() {
+        std::stringstream ss;
+        ss  << "timestamp" << ' '
+            << "x y z" << ' '
+            << "vx vy vz" << ' ';
+        for (int i = 1; i <= 3; i++) {
+            ss  << "x" << i << " y" << i << " z" << i << ' '
+                << "vx" << i << " vy" << i << " vz" << i << ' ';
+        }
+
+        return ss.str();
+    }
+};
+
+
+class IdealMqslsControl : public rclcpp::Node, public Parameter::ParameterManager
+{
 public:
 
     /**
      * @brief Construct a new Ideal Mqsls Control object
      */
-    IdealMqslsControl(std::chrono::milliseconds control_period = 20ms);
+    IdealMqslsControl(uint64_t control_period = 20_ms);
 
     /**
      * @brief Destroy the Ideal Mqsls Control object
@@ -50,7 +87,7 @@ public:
      * @param q_FRD_to_NED 
      * @param q_FLU_to_ENU 
      */
-    void rotateQuaternion(gz::math::Quaterniond &q_FRD_to_NED, const gz::math::Quaterniond q_FLU_to_ENU)
+    static void rotateQuaternion(gz::math::Quaterniond &q_FRD_to_NED, const gz::math::Quaterniond q_FLU_to_ENU)
     {
         // FLU (ROS) to FRD (PX4) static rotation
         static const auto q_FLU_to_FRD = gz::math::Quaterniond(0, 1, 0, 0);
@@ -68,6 +105,8 @@ public:
         q_FRD_to_NED = q_ENU_to_NED * q_FLU_to_ENU * q_FLU_to_FRD.Inverse();
     }
 private:
+    
+    
     // callbacks
     void clockCallback(const gz::msgs::Clock &msg);
     void poseInfoCallback(const gz::msgs::Pose_V &pose);
@@ -77,7 +116,7 @@ private:
 
     // data recorder [us]
     void record(const uint64_t timestamp) {
-        DataFrame frame;
+        MqslsDataFrame frame;
         frame.timestamp = timestamp;
         frame.load_position = _load_position;
         frame.load_velocity = _load_velocity;
@@ -87,14 +126,16 @@ private:
         }
         _recorder.push(frame);
     }
-    DataRecorder<DataFrame> _recorder{"install/" + utils::realtime_str() + ".csv", 10};
+    DataRecorder<MqslsDataFrame> _recorder{"install/" + utils::nowstr() + ".csv", 10};
 
     // publisher for EntityWrench msg
     gz::transport::Node::Publisher _wrench_pub;
 
+    // parameters
+    Parameter::SharedPtr    _param_world_name {add_parameter("world_name", "mqsls")};
+
     control_toolbox::Pid _pid_z {5, 0.5, 0, 5, -5};
 
-    const std::string _world_name = "mqsls";
     const std::string _payload_name = "ball";
     const std::string _uav_name_prefix = "x500_";
     

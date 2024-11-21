@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/install/gcs_transfer/lib/gcs_transfer/gcs_transfer_node",
+            "program": "${workspaceFolder}/install/mqsls/lib/mqsls/ideal_mqsls_control_node",
             "args": ["3"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

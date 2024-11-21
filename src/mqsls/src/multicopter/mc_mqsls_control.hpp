@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <cstring>
 #include <memory.h>
-#include <formation/msg/detail/uav_status__struct.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <string>
 #include <chrono>
@@ -15,9 +14,14 @@
 #include <px4_msgs/msg/formation_cross.hpp>
 #include <formation/msg/uav_command.hpp>
 #include <formation/msg/uav_status.hpp>
-
-#include <mqsls/parameter_manager.hpp>
+#include <formation/parameter_manager.hpp>
+#include <formation/data_recorder.hpp>
+#include <formation/utils.hpp>
 #include <control_toolbox/pid.hpp>
+
+#include <Eigen/Eigen>
+#include "px4_ros_com/frame_transforms.h"
+
 
 
 #define SILSIM		1	// Software in the loop simulation
@@ -33,7 +37,8 @@
 using namespace std::chrono_literals;
 
 namespace formation {
-class MulticopterFormationControl : public rclcpp::Node {
+class MulticopterFormationControl : public rclcpp::Node, public Parameter::ParameterManager
+{
 
 public:
     MulticopterFormationControl(int node_index, std::chrono::milliseconds control_period = 20ms);
@@ -91,20 +96,6 @@ private:
     rclcpp::Parameter      _param_hgt_kp{"mc_hgt_kp", 0.5};
     rclcpp::Parameter      _param_hgt_ki{"mc_hgt_ki", 0.05};
     rclcpp::Parameter      _param_yaw_sp{"mc_yaw_sp", 0.0}; // [deg]
-
-    inline void parameters_declare()
-    {
-        ParameterManager::add_parameter(&_param_test_phase);
-        ParameterManager::add_parameter(&_param_lasting_time);
-        ParameterManager::add_parameter(&_param_ori_lat);
-        ParameterManager::add_parameter(&_param_ori_lon);
-        ParameterManager::add_parameter(&_param_ori_alt);
-        ParameterManager::add_parameter(&_param_hgt_sp);
-        ParameterManager::add_parameter(&_param_hgt_kp);
-        ParameterManager::add_parameter(&_param_hgt_ki);
-        ParameterManager::add_parameter(&_param_yaw_sp);
-        ParameterManager::attach(this).declare_parameters();
-    }
 
     // Deprecated. Parameters are updated in parameter_manager.hpp
     inline void parameters_update()

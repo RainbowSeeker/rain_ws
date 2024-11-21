@@ -32,7 +32,8 @@
 using namespace std::chrono_literals;
 
 namespace formation {
-class MulticopterFormationControl : public rclcpp::Node {
+class MulticopterFormationControl : public rclcpp::Node, public Parameter::ParameterManager
+{
 
 public:
     MulticopterFormationControl(int node_index, std::chrono::milliseconds control_period = 20ms);
@@ -81,38 +82,24 @@ private:
     rclcpp::Publisher<formation::msg::UavStatus>::SharedPtr                 _uav_status_pub;
 
     // Parameters
-    rclcpp::Parameter      _param_test_phase{"test_phase", "formation"};
-    rclcpp::Parameter      _param_lasting_time{"lasting_time", 60}; // [s]
-    rclcpp::Parameter      _param_ori_lat{"origin_lat", 47.397742}; // [deg]
-    rclcpp::Parameter      _param_ori_lon{"origin_lon", 8.5455940}; // [deg]
-    rclcpp::Parameter      _param_ori_alt{"origin_alt", 488.15799}; // [m]
-    rclcpp::Parameter      _param_hgt_sp{"mc_hgt_sp", 5.0}; // [m]
-    rclcpp::Parameter      _param_hgt_kp{"mc_hgt_kp", 0.5};
-    rclcpp::Parameter      _param_hgt_ki{"mc_hgt_ki", 0.05};
-    rclcpp::Parameter      _param_yaw_sp{"mc_yaw_sp", 0.0}; // [deg]
-
-    inline void parameters_declare()
-    {
-        ParameterManager::add_parameter(&_param_test_phase);
-        ParameterManager::add_parameter(&_param_lasting_time);
-        ParameterManager::add_parameter(&_param_ori_lat);
-        ParameterManager::add_parameter(&_param_ori_lon);
-        ParameterManager::add_parameter(&_param_ori_alt);
-        ParameterManager::add_parameter(&_param_hgt_sp);
-        ParameterManager::add_parameter(&_param_hgt_kp);
-        ParameterManager::add_parameter(&_param_hgt_ki);
-        ParameterManager::add_parameter(&_param_yaw_sp);
-        ParameterManager::attach(this).declare_parameters();
-    }
+    Parameter::SharedPtr    _param_test_phase {add_parameter("test_phase", "formation")};
+    Parameter::SharedPtr    _param_lasting_time {add_parameter("lasting_time", 60)}; // [s]
+    Parameter::SharedPtr    _param_ori_lat {add_parameter("origin_lat", 47.397742)}; // [deg]
+    Parameter::SharedPtr    _param_ori_lon {add_parameter("origin_lon", 8.5455940)}; // [deg]
+    Parameter::SharedPtr    _param_ori_alt {add_parameter("origin_alt", 488.15799)}; // [m]
+    Parameter::SharedPtr    _param_hgt_sp {add_parameter("mc_hgt_sp", 5.0)}; // [m]
+    Parameter::SharedPtr    _param_hgt_kp {add_parameter("mc_hgt_kp", 0.5)};
+    Parameter::SharedPtr    _param_hgt_ki {add_parameter("mc_hgt_ki", 0.05)};
+    Parameter::SharedPtr    _param_yaw_sp {add_parameter("mc_yaw_sp", 0.0)}; // [deg]
 
     // Deprecated. Parameters are updated in parameter_manager.hpp
     inline void parameters_update()
     {
-        _hgt_ctrl.setGains(_param_hgt_kp.as_double(), _param_hgt_ki.as_double(), 0.0, 0.5, -0.5);
+        _hgt_ctrl.setGains(_param_hgt_kp->as_double(), _param_hgt_ki->as_double(), 0.0, 0.5, -0.5);
     }
 
     // control_toolbox
-    control_toolbox::Pid _hgt_ctrl {_param_hgt_kp.as_double(), _param_hgt_ki.as_double(), 0.0, 0.0, -0.0};
+    control_toolbox::Pid _hgt_ctrl {_param_hgt_kp->as_double(), _param_hgt_ki->as_double(), 0.0, 0.0, -0.0};
 
     px4_msgs::msg::FormationCross		_formation_cross{};
     px4_msgs::msg::VehicleLocalPosition _local_pos{};

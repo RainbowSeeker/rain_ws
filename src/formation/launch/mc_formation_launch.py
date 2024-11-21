@@ -48,7 +48,7 @@ def generate_launch_description():
                 executable='mc_formation_control_node',
                 output='screen',
                 shell=True,
-                name='mc_formation_control_node_' + str(i + 1),
+                name='amc_' + str(i + 1),
                 arguments=[str(i + 1)],
                 parameters=[param_file_path]
             )

@@ -1,6 +1,10 @@
-#pragma once
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
+#include <string>
+#include <iomanip>
 #include <cmath>
+#include <cstdint>
 
 #ifndef MATH_PI
 #define MATH_PI		3.141592653589793238462643383280
@@ -40,3 +44,54 @@ constexpr T degrees(T radians)
 
 }
 
+
+namespace utils {
+
+std::string nowstr()
+{
+    // format: MM-DD HH_MM_SS
+    auto now = std::time(nullptr);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&now), "%m-%d %H_%M_%S");
+    return ss.str();
+}
+
+}
+
+// literals
+constexpr double operator""_deg(long double deg)
+{
+    return math::radians(deg);
+}
+
+constexpr uint64_t operator""_us(long double us)
+{
+    return us;
+}
+
+constexpr uint64_t operator""_us(unsigned long long us)
+{
+    return us;
+}
+
+constexpr uint64_t operator""_ms(long double ms)
+{
+    return ms * 1e3;
+}
+
+constexpr uint64_t operator""_ms(unsigned long long ms)
+{
+    return ms * 1e3;
+}
+
+constexpr uint64_t operator""_s(long double s)
+{
+    return s * 1e6;
+}
+
+constexpr uint64_t operator""_s(unsigned long long s)
+{
+    return s * 1e6;
+}
+
+#endif // !UTILS_HPP

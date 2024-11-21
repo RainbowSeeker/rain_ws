@@ -35,6 +35,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ament_export_dependencies(rosidl_default_runtime)
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 
+# add include for library
+install(DIRECTORY include/ DESTINATION include)
+ament_export_include_directories(include)
+
 # ##############################################################################
 # Build Packages #
 # ##############################################################################
@@ -49,10 +53,10 @@ include_directories(
 add_subdirectory(src)
 
 # Install launch files.
-install(DIRECTORY launch DESTINATION share/${PROJECT_NAME}/)
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 # Install config files.
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME}/)
+install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

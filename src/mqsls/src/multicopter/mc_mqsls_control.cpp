@@ -1,9 +1,5 @@
 #include "mc_mqsls_control.hpp"
-#include <mqsls/utils.hpp>
-#include "px4_ros_com/frame_transforms.h"
 #include <variant>
-#include <Eigen/Eigen>
-#include <Eigen/Geometry>
 
 using namespace Eigen;
 using namespace px4_msgs::msg;
@@ -54,10 +50,8 @@ static bool is_ignore_state(uint8_t state)
 }
 
 MulticopterFormationControl::MulticopterFormationControl(int node_index, std::chrono::milliseconds control_period) :
-    Node("amc_" + std::to_string(node_index)), _control_interval(control_period / 1ms * 1e6) // [ns]
+    Node("amc_" + std::to_string(node_index)), Parameter::ParameterManager(this), _control_interval(control_period / 1ms * 1e6) // [ns]
 {
-    parameters_declare();
-
     std::string topic_ns{""};
 
     if (node_index)
