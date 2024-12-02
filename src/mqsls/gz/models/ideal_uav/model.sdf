@@ -11,13 +11,13 @@
           <izz>2.375e-02</izz>
         </inertia>
       </inertial>
-      <!-- <collision name='base_link_collision'>
+      <collision name='base_link_collision'>
         <geometry>
           <sphere>
             <radius>0.03</radius>
           </sphere>
         </geometry>
-      </collision> -->
+      </collision>
       <visual name='base_link_visual'>
         <geometry>
           <sphere>

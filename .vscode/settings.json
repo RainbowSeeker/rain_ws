@@ -101,13 +101,15 @@
         "*.inc": "cpp",
         "regex": "cpp",
         "*.proto": "cpp",
-        "sparseqr": "cpp"
+        "sparseqr": "cpp",
+        "core": "cpp"
     },
     "cSpell.words": [
         "baudrate",
         "Fixedwing",
         "mqsls",
         "Multicopter",
+        "nowstr",
         "Offboard",
         "rclcpp",
         "yawspeed"

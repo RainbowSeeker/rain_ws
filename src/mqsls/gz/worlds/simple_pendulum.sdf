@@ -126,13 +126,30 @@
     </model>
 
     <!-- put your plugin here -->
-    <plugin name='virtual_wrench_plugin' filename='virtual_wrench_plugin'/>
-    <!-- !!! IMPORTANT !!! The force on uav is always in ENU.-->
-    <!-- mi = 1.5 mr = 0.21 mL = 1 avg = 17.966666666666669-->
+    <!-- !!! IMPORTANT !!! The force on uav is always in ENU.
+        mi = 1.5 mr = 0.21 mL = 1 avg = 17.966666666666669-->
     <plugin
       filename="gz-sim-apply-link-wrench-system"
       name="gz::sim::systems::ApplyLinkWrench">
       <persistent>
+        <entity_name>x500_1</entity_name>
+        <entity_type>model</entity_type>
+        <force>0 0 17.966666666666669</force>
+        <torque>0 0 0</torque>
+      </persistent>
+      <persistent>
+        <entity_name>x500_2</entity_name>
+        <entity_type>model</entity_type>
+        <force>0 0 17.966666666666669</force>
+        <torque>0 0 0</torque>
+      </persistent>
+      <persistent>
+        <entity_name>x500_3</entity_name>
+        <entity_type>model</entity_type>
+        <force>0 0 17.966666666666669</force>
+        <torque>0 0 0</torque>
+      </persistent>
+      <!-- <persistent>
         <entity_name>x500_1</entity_name>
         <entity_type>model</entity_type>
         <force>0 0 17.15</force>
@@ -149,7 +166,7 @@
         <entity_type>model</entity_type>
         <force>0 0 19.6000</force>
         <torque>0 0 0</torque>
-      </persistent>
+      </persistent> -->
     </plugin>
     <!-- put your model here -->
     <include>

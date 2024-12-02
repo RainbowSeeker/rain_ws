@@ -126,13 +126,12 @@
     </model>
 
     <!-- put your plugin here -->
-    <plugin name='virtual_wrench_plugin' filename='virtual_wrench_plugin'/>
     <!-- !!! IMPORTANT !!! The force on uav is always in ENU.-->
     <!-- mi = 1.5 mr = ~0 mL = 1 avg = 17.966666666666669-->
     <plugin
       filename="gz-sim-apply-link-wrench-system"
       name="gz::sim::systems::ApplyLinkWrench">
-      <persistent>
+      <!-- <persistent>
         <entity_name>x500_1</entity_name>
         <entity_type>model</entity_type>
         <force>-1.633333333333335 -0.943005439676388 17.966666666666669</force>
@@ -149,42 +148,12 @@
         <entity_type>model</entity_type>
         <force>1.633333333333335 -0.943005439676388 17.966666666666669</force>
         <torque>0 0 0</torque>
-      </persistent>
+      </persistent> -->
     </plugin>
     <!-- put your model here -->
-    <include>
-      <name>x500_1</name>
-      <pose>-0.433012701892219 -0.25 5.966025403784439 0 0 0</pose>
-      <uri>model://ideal_uav</uri>
-    </include>
-    <include>
-      <name>x500_2</name>
-      <pose>0 0.5 5.966025403784439 0 0 0</pose>
-      <uri>model://ideal_uav</uri>
-    </include>
-    <include>
-      <name>x500_3</name>
-      <pose>0.433012701892219 -0.25 5.966025403784439 0 0 0</pose>
-      <uri>model://ideal_uav</uri>
-    </include>
-    <include>
-      <name>rope_1</name>
-      <pose>0 0 5.1 0 -1.047197551196598 -2.617993877991494</pose>
-      <uri>model://rope</uri>
-    </include>
-    <include>
-      <name>rope_2</name>
-      <pose>0 0 5.1 0 -1.047197551196598 1.570796326794897</pose>
-      <uri>model://rope</uri>
-    </include>
-    <include>
-      <name>rope_3</name>
-      <pose>0 0 5.1 0 -1.047197551196598 -0.523598775598299</pose>
-      <uri>model://rope</uri>
-    </include>
     <!-- ball -->
     <model name="ball">
-      <pose>0 0 5.05 0 0 0</pose>
+      <pose>0 0 .05 0 0 0</pose>
       <link name="ball_link">
         <collision name="ball_collision">
           <geometry>
@@ -215,10 +184,50 @@
         </inertial>
       </link>
     </model>
+    <include>
+      <name>x500_1</name>
+      <pose>-0.433012701892219 -0.25 .966025403784439 0 0 0</pose>
+      <uri>model://ideal_uav</uri>
+    </include>
+    <include>
+      <name>rope_1</name>
+      <pose>0 0 .1 0 -1.047197551196598 -2.617993877991494</pose>
+      <uri>model://rope</uri>
+    </include>
     <joint name="uav_joint1" type="fixed">
       <child>x500_1::base_link</child>
       <parent>rope_1::end_link</parent>
     </joint>
+    <joint name="ball_joint1" type="fixed">
+      <child>rope_1::begin_link</child>
+      <parent>ball::ball_link</parent>
+    </joint>
+    
+    <!-- <joint name="fixed_ball" type="fixed">
+      <parent>world</parent>
+      <child>ball::ball_link</child>
+    </joint> -->
+    <!-- addon -->
+    <include>
+      <name>x500_2</name>
+      <pose>0 0.5 .966025403784439 0 0 0</pose>
+      <uri>model://ideal_uav</uri>
+    </include>
+    <include>
+      <name>x500_3</name>
+      <pose>0.433012701892219 -0.25 .966025403784439 0 0 0</pose>
+      <uri>model://ideal_uav</uri>
+    </include>
+    <include>
+      <name>rope_2</name>
+      <pose>0 0 .1 0 -1.047197551196598 1.570796326794897</pose>
+      <uri>model://rope</uri>
+    </include>
+    <include>
+      <name>rope_3</name>
+      <pose>0 0 .1 0 -1.047197551196598 -0.523598775598299</pose>
+      <uri>model://rope</uri>
+    </include>
     <joint name="uav_joint2" type="fixed">
       <child>x500_2::base_link</child>
       <parent>rope_2::end_link</parent>
@@ -227,17 +236,13 @@
       <child>x500_3::base_link</child>
       <parent>rope_3::end_link</parent>
     </joint>
-    <joint name="ball_joint1" type="fixed">
-      <parent>ball::ball_link</parent>
-      <child>rope_1::begin_link</child>
-    </joint>
     <joint name="ball_joint2" type="fixed">
-      <parent>ball::ball_link</parent>
       <child>rope_2::begin_link</child>
+      <parent>ball::ball_link</parent>
     </joint>
     <joint name="ball_joint3" type="fixed">
-      <parent>ball::ball_link</parent>
       <child>rope_3::begin_link</child>
+      <parent>ball::ball_link</parent>
     </joint>
     
     <light name='sunUTC' type='directional'>

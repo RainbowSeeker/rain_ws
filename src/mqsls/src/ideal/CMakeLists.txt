@@ -19,7 +19,7 @@ endif()
 add_executable(ideal_mqsls_control_node
   ideal_mqsls_control.cpp
 )
-target_link_libraries(ideal_mqsls_control_node ${GZ_TRANSPORT_LIB})
+target_link_libraries(ideal_mqsls_control_node ${GZ_TRANSPORT_LIB} mqsls_model)
 
 ament_target_dependencies(ideal_mqsls_control_node 
         rclcpp px4_msgs px4_ros_com formation 

@@ -36,8 +36,8 @@ ament_export_dependencies(rosidl_default_runtime)
 rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
 
 # add include for library
-install(DIRECTORY include/ DESTINATION include)
-ament_export_include_directories(include)
+# install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME})
+ament_export_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # ##############################################################################
 # Build Packages #

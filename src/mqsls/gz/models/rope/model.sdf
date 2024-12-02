@@ -6,869 +6,664 @@
     <link name='begin_link'>
       <pose>0 0 0 0 0 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>4.000000000000001e-08</ixx>
+          <iyy>4.000000000000001e-08</iyy>
+          <izz>4.000000000000001e-08</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='begin_link_collision'>
+       <collision name='begin_link_collision'>
         <geometry>
           <sphere>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </sphere>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='begin_link_visual'>
         <geometry>
           <sphere>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </sphere>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
     </link>
     <link name='link_0'>
-      <pose>0 0 0 0 0 0</pose>
+      <pose>0.05 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_0_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_0_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_0_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_0_2' type='revolute'>
+    <joint name='begin_joint_2' type='universal'>
       <pose relative_to='begin_link'/>
       <child>link_0</child>
       <parent>begin_link</parent>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
-        </limit>
-        <!--<dynamics>
-          <damping>0.1</damping>
-        </dynamics> -->
+        <xyz>1 0 0</xyz>
       </axis>
+      <axis2>
+        <xyz>0 1 0</xyz>
+      </axis2>
     </joint>
-    <link name='sphere_1'>
-      <pose>0.1 0 0 0 0 0</pose>
+    
+    <link name='link_1'>
+      <pose>0.15000000000000002 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='sphere_1_collision'>
+       <collision name='link_1_collision'>
         <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
         </geometry>
-      </collision> -->
-      <visual name='sphere_1_vis'>
+      </collision> 
+      <visual name='link_1_vis'>
         <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
+          <cylinder>
+            <length>0.1</length>
+            <radius>0.01</radius>
+          </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_1_1' type='revolute'>
-      <child>sphere_1</child>
+    <joint name='joint_1_2' type='universal'>
+      <pose relative_to='link_0'>0 0 0.05 0 0 0</pose>
+      <child>link_1</child>
       <parent>link_0</parent>
       <axis>
-        <xyz>0 0 1</xyz>
+        <xyz expressed_in='link_0'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
-    </joint>
-    <link name='link_1'>
-      <pose>0.1 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='link_1_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
-        <geometry>
-          <cylinder>
-            <length>0.1</length>
-            <radius>0.003</radius>
-          </cylinder>
-        </geometry>
-      </collision> -->
-      <visual name='link_1_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
-        <geometry>
-          <cylinder>
-            <length>0.1</length>
-            <radius>0.003</radius>
-          </cylinder>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_1_2' type='revolute'>
-      <child>link_1</child>
-      <parent>sphere_1</parent>
-      <axis>
-        <xyz>0 1 0</xyz>
+      <axis2>
+        <xyz expressed_in='link_0'>0 1 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
-    </joint>
-    <link name='sphere_2'>
-      <pose>0.2 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='sphere_2_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> -->
-      <visual name='sphere_2_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_2_1' type='revolute'>
-      <child>sphere_2</child>
-      <parent>link_1</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
-        <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
-        </limit>
-        <!--<dynamics>
-          <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='link_2'>
-      <pose>0.2 0 0 0 0 0</pose>
+      <pose>0.25 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_2_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_2_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_2_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_2_2' type='revolute'>
+    <joint name='joint_2_2' type='universal'>
+      <pose relative_to='link_1'>0 0 0.05 0 0 0</pose>
       <child>link_2</child>
-      <parent>sphere_2</parent>
+      <parent>link_1</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_1'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
-    </joint>
-    <link name='sphere_3'>
-      <pose>0.30000000000000004 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='sphere_3_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> -->
-      <visual name='sphere_3_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_3_1' type='revolute'>
-      <child>sphere_3</child>
-      <parent>link_2</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
+      <axis2>
+        <xyz expressed_in='link_1'>0 1 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='link_3'>
-      <pose>0.30000000000000004 0 0 0 0 0</pose>
+      <pose>0.35000000000000003 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_3_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_3_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_3_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_3_2' type='revolute'>
+    <joint name='joint_3_2' type='universal'>
+      <pose relative_to='link_2'>0 0 0.05 0 0 0</pose>
       <child>link_3</child>
-      <parent>sphere_3</parent>
+      <parent>link_2</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_2'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
-    </joint>
-    <link name='sphere_4'>
-      <pose>0.4 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='sphere_4_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> -->
-      <visual name='sphere_4_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_4_1' type='revolute'>
-      <child>sphere_4</child>
-      <parent>link_3</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
+      <axis2>
+        <xyz expressed_in='link_2'>0 1 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='link_4'>
-      <pose>0.4 0 0 0 0 0</pose>
+      <pose>0.45 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_4_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_4_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_4_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_4_2' type='revolute'>
+    <joint name='joint_4_2' type='universal'>
+      <pose relative_to='link_3'>0 0 0.05 0 0 0</pose>
       <child>link_4</child>
-      <parent>sphere_4</parent>
+      <parent>link_3</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_3'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
-    </joint>
-    <link name='sphere_5'>
-      <pose>0.5 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='sphere_5_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> -->
-      <visual name='sphere_5_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_5_1' type='revolute'>
-      <child>sphere_5</child>
-      <parent>link_4</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
+      <axis2>
+        <xyz expressed_in='link_3'>0 1 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='link_5'>
-      <pose>0.5 0 0 0 0 0</pose>
+      <pose>0.55 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_5_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_5_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_5_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_5_2' type='revolute'>
+    <joint name='joint_5_2' type='universal'>
+      <pose relative_to='link_4'>0 0 0.05 0 0 0</pose>
       <child>link_5</child>
-      <parent>sphere_5</parent>
+      <parent>link_4</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_4'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
-    </joint>
-    <link name='sphere_6'>
-      <pose>0.6000000000000001 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='sphere_6_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> -->
-      <visual name='sphere_6_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_6_1' type='revolute'>
-      <child>sphere_6</child>
-      <parent>link_5</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
+      <axis2>
+        <xyz expressed_in='link_4'>0 1 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='link_6'>
-      <pose>0.6000000000000001 0 0 0 0 0</pose>
+      <pose>0.6500000000000001 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_6_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_6_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_6_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_6_2' type='revolute'>
+    <joint name='joint_6_2' type='universal'>
+      <pose relative_to='link_5'>0 0 0.05 0 0 0</pose>
       <child>link_6</child>
-      <parent>sphere_6</parent>
+      <parent>link_5</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_5'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
-    </joint>
-    <link name='sphere_7'>
-      <pose>0.7000000000000001 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='sphere_7_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> -->
-      <visual name='sphere_7_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_7_1' type='revolute'>
-      <child>sphere_7</child>
-      <parent>link_6</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
+      <axis2>
+        <xyz expressed_in='link_5'>0 1 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='link_7'>
-      <pose>0.7000000000000001 0 0 0 0 0</pose>
+      <pose>0.7500000000000001 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_7_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_7_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_7_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_7_2' type='revolute'>
+    <joint name='joint_7_2' type='universal'>
+      <pose relative_to='link_6'>0 0 0.05 0 0 0</pose>
       <child>link_7</child>
-      <parent>sphere_7</parent>
+      <parent>link_6</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_6'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
-    </joint>
-    <link name='sphere_8'>
-      <pose>0.8 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='sphere_8_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> -->
-      <visual name='sphere_8_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_8_1' type='revolute'>
-      <child>sphere_8</child>
-      <parent>link_7</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
+      <axis2>
+        <xyz expressed_in='link_6'>0 1 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='link_8'>
-      <pose>0.8 0 0 0 0 0</pose>
+      <pose>0.8500000000000001 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_8_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_8_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_8_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_8_2' type='revolute'>
+    <joint name='joint_8_2' type='universal'>
+      <pose relative_to='link_7'>0 0 0.05 0 0 0</pose>
       <child>link_8</child>
-      <parent>sphere_8</parent>
+      <parent>link_7</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_7'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
-    </joint>
-    <link name='sphere_9'>
-      <pose>0.9 0 0 0 0 0</pose>
-      <inertial>
-        <mass>1e-13</mass>
-        <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
-        </inertia>
-      </inertial>
-      <!--  <collision name='sphere_9_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> -->
-      <visual name='sphere_9_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_9_1' type='revolute'>
-      <child>sphere_9</child>
-      <parent>link_8</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
+      <axis2>
+        <xyz expressed_in='link_7'>0 1 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='link_9'>
-      <pose>0.9 0 0 0 0 0</pose>
+      <pose>0.9500000000000001 0 0 0 1.570796326794896558 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>8.583333333333335e-05</ixx>
+          <iyy>8.583333333333335e-05</iyy>
+          <izz>5e-06</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='link_9_collision'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
+       <collision name='link_9_collision'>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='link_9_vis'>
-        <pose>0.05 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>0.1</length>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
     </link>
-    <joint name='joint_9_2' type='revolute'>
+    <joint name='joint_9_2' type='universal'>
+      <pose relative_to='link_8'>0 0 0.05 0 0 0</pose>
       <child>link_9</child>
-      <parent>sphere_9</parent>
+      <parent>link_8</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_8'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
+      <axis2>
+        <xyz expressed_in='link_8'>0 1 0</xyz>
+        <limit>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>
     <link name='end_link'>
       <pose>1 0 0 0 0 0</pose>
       <inertial>
-        <mass>1e-13</mass>
+        <mass>0.001</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>4.000000000000001e-08</ixx>
+          <iyy>4.000000000000001e-08</iyy>
+          <izz>4.000000000000001e-08</izz>
         </inertia>
       </inertial>
-      <!--  <collision name='end_link_collision'>
+       <collision name='end_link_collision'>
         <geometry>
           <sphere>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </sphere>
         </geometry>
-      </collision> -->
+      </collision> 
       <visual name='end_link_visual'>
         <geometry>
           <sphere>
-            <radius>0.003</radius>
+            <radius>0.01</radius>
           </sphere>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
     </link>
-    <joint name='joint_end_1' type='revolute'>
+    <joint name='joint_end_1' type='universal'>
+      <pose relative_to='end_link'/>
       <child>end_link</child>
       <parent>link_9</parent>
       <axis>
         <xyz>0 0 1</xyz>
-        <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
-        </limit>
-        <!--<dynamics>
-          <damping>0.1</damping>
-        </dynamics> -->
       </axis>
+      <axis2>
+        <xyz>0 1 0</xyz>
+      </axis2>
     </joint>
   </model>
 </sdf>

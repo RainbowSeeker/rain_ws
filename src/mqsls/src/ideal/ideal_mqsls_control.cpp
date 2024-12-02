@@ -27,65 +27,42 @@ int IdealMqslsControl::init()
     }
 
     // publisher for EntityWrench msg
-    std::string wrench_topic = "/world/" + world_name + "/virtual_wrench";
+    std::string wrench_topic = "/world/" + world_name + "/wrench";
     _wrench_pub = _node.Advertise<gz::msgs::EntityWrench>(wrench_topic);
+
+    // stats
+    std::string stats_topic = "/world/" + world_name + "/stats";
+    if (!_node.Subscribe(stats_topic, &IdealMqslsControl::statsCallback, this)) {
+        RCLCPP_ERROR(this->get_logger(), "Failed to subscribe to %s", stats_topic.c_str());
+        return -1;
+    }
 
     RCLCPP_INFO(this->get_logger(), "Setup in %s", world_name.c_str());
     return 0;
 }
 
-void IdealMqslsControl::control_step(const uint64_t dt)
+void IdealMqslsControl::statsCallback(const gz::msgs::WorldStatistics &stats)
 {
-    // x500_1
-    gz::msgs::EntityWrench wrench;
-    wrench.mutable_entity()->set_name("x500_1");
-    wrench.mutable_entity()->set_type(gz::msgs::Entity::MODEL);
-
-    gz::math::Vector3d force{0, 0, 16.758};
-    gz::math::Vector3d torque{0, 0, 0};
-
-    gz::msgs::Set(wrench.mutable_wrench()->mutable_force(), force);
-    gz::msgs::Set(wrench.mutable_wrench()->mutable_torque(), torque);
-
-    // _wrench_pub.Publish(wrench);
-
-    // // x500_2
-    // wrench.mutable_entity()->set_name("x500_2");
-    // _wrench_pub.Publish(wrench);
-
-    // // x500_3
-    // wrench.mutable_entity()->set_name("x500_3");
-    // wrench.mutable_wrench()->mutable_force()->set_z(26.558);
-    // _wrench_pub.Publish(wrench);
-
-#if 1
-    // simulate external disturbance
-    wrench.mutable_entity()->set_name(_payload_name);
-    wrench.mutable_entity()->set_type(gz::msgs::Entity::MODEL);
-    if (_gz_sim_time > 5_s && _gz_sim_time < 5.5_s) {
-        gz::msgs::Set(wrench.mutable_wrench()->mutable_force(), gz::math::Vector3d(0, 1, 0));
-        gz::msgs::Set(wrench.mutable_wrench()->mutable_torque(), gz::math::Vector3d(0, 0, 0));
-        RCLCPP_INFO(this->get_logger(), "External disturbance applied");
+    static bool first = true;
+    bool paused = stats.paused();
+    if (first || paused != _is_paused) {
+        RCLCPP_INFO(this->get_logger(), "Simulation is %s", paused ? "paused" : "resumed");
+        first = false;
     }
-    else {
-        gz::msgs::Set(wrench.mutable_wrench()->mutable_force(), gz::math::Vector3d(0, 0, 0));
-        gz::msgs::Set(wrench.mutable_wrench()->mutable_torque(), gz::math::Vector3d(0, 0, 0));
-    }
-    _wrench_pub.Publish(wrench);
-#endif
-
-    RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 1000, "Control force: %f", force.Z());
+    _is_paused = paused;
 }
 
 void IdealMqslsControl::clockCallback(const gz::msgs::Clock &clock)
 {
+    if (_is_paused) {
+        return;
+    }
     // get current time
-    static uint64_t last_time = 0;
     _gz_sim_time = clock.sim().sec() * 1e6 + clock.sim().nsec() / 1e3;
-    
+    static uint64_t last_time = _gz_sim_time;
+
     // dt [us] --> [1ms, 100ms]
     const uint64_t dt = std::clamp(_gz_sim_time - last_time, 1_ms, 100_ms);
-    
     // control
     if (dt >= _control_interval) {
         // control logic
@@ -93,10 +70,17 @@ void IdealMqslsControl::clockCallback(const gz::msgs::Clock &clock)
 
         last_time = _gz_sim_time;
     }
+    
+    // simulate_disturbance();
+    // publish every step
+    publish_wrench_command();
 }
 
 void IdealMqslsControl::poseInfoCallback(const gz::msgs::Pose_V &pose)
 {
+    if (_is_paused) {
+        return;
+    }
 #define get_ned_motion(ref_last_time, ref_postion, ref_velocity) \
 { \
     const uint64_t current_time = pose.header().stamp().sec() * 1e6 + pose.header().stamp().nsec() / 1e3; \
@@ -117,12 +101,18 @@ void IdealMqslsControl::poseInfoCallback(const gz::msgs::Pose_V &pose)
     ref_postion = position; \
     ref_velocity = velocity; \
 }
+    static const Eigen::Vector3d max_velocity{10, 10, 10}; 
+    static const Eigen::Vector3d min_velocity{-10, -10, -10};
+
 
     for (int i = 0; i < pose.pose_size(); i++) {
         if (pose.pose(i).name() == _payload_name) {
             
             static uint64_t last_time = 0;
             get_ned_motion(last_time, _load_position, _load_velocity);
+
+            // saturation
+            _load_velocity = _load_velocity.cwiseMax(min_velocity).cwiseMin(max_velocity);
 
             record(pose.header().stamp().sec() * 1e6 + pose.header().stamp().nsec() / 1e3);
 
@@ -140,6 +130,9 @@ void IdealMqslsControl::poseInfoCallback(const gz::msgs::Pose_V &pose)
 
             static uint64_t last_time[3] = {0};
             get_ned_motion(last_time[uav_id], _uav_position[uav_id], _uav_velocity[uav_id]);
+
+            // saturation
+            _uav_velocity[uav_id] = _uav_velocity[uav_id].cwiseMax(min_velocity).cwiseMin(max_velocity);
 
             RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 1000, "%s Position: [%f, %f, %f], Velocity: [%f %f %f]", 
                             pose.pose(i).name().c_str(), 

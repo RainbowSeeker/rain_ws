@@ -14,6 +14,8 @@
 #include <formation/data_recorder.hpp>
 #include <formation/utils.hpp>
 
+#include "../model/interface.hpp"
+
 namespace mqsls {
 
 struct MqslsDataFrame {
@@ -105,14 +107,91 @@ public:
         q_FRD_to_NED = q_ENU_to_NED * q_FLU_to_ENU * q_FLU_to_FRD.Inverse();
     }
 private:
-    
-    
     // callbacks
+    void statsCallback(const gz::msgs::WorldStatistics &stats);
     void clockCallback(const gz::msgs::Clock &msg);
     void poseInfoCallback(const gz::msgs::Pose_V &pose);
 
-    // control
-    void control_step(const uint64_t dt);
+    // step at every 0.02s
+    void control_step(const uint64_t dt)
+    {
+        if (_gz_sim_time < 0_s)
+        {
+            return;
+        }
+        
+        Controller::InputBus input;
+        input.Payload_Out1.timestamp = _gz_sim_time;
+        input.Payload_Out1.pL[0] = _load_position.x();
+        input.Payload_Out1.pL[1] = _load_position.y();
+        input.Payload_Out1.pL[2] = _load_position.z();
+        input.Payload_Out1.vL[0] = _load_velocity.x();
+        input.Payload_Out1.vL[1] = _load_velocity.y();
+        input.Payload_Out1.vL[2] = _load_velocity.z();
+
+        Eigen::Vector3d q, w, p_err, v_err, dot_q;
+#define FILL_INPUT_Q_W(i) \
+        p_err = _load_position - _uav_position[i - 1]; \
+        q = p_err / p_err.norm(); \
+        v_err = _load_velocity - _uav_velocity[i - 1]; \
+        dot_q = v_err / p_err.norm(); \
+        w = q.cross(dot_q); \
+        input.Payload_Out1.q_##i[0] = q.x(); \
+        input.Payload_Out1.q_##i[1] = q.y(); \
+        input.Payload_Out1.q_##i[2] = q.z(); \
+        input.Payload_Out1.w_##i[0] = w.x(); \
+        input.Payload_Out1.w_##i[1] = w.y(); \
+        input.Payload_Out1.w_##i[2] = w.z();
+
+        FILL_INPUT_Q_W(1);
+        FILL_INPUT_Q_W(2);
+        FILL_INPUT_Q_W(3);
+
+        _controller.step(input);
+
+        // get control output
+        const auto &output = _controller.getOutput();
+
+// ned to enu
+#define FILL_OUTPUT_FORCE(i) \
+        gz::msgs::Set(_apply_wrench[i - 1].mutable_force(), gz::math::Vector3d(output.force_sp##i[1], output.force_sp##i[0], -output.force_sp##i[2]));
+
+        FILL_OUTPUT_FORCE(1);
+        FILL_OUTPUT_FORCE(2);
+        FILL_OUTPUT_FORCE(3);
+        RCLCPP_INFO(this->get_logger(), "Control step: %f %f %f", output.force_sp1[0], output.force_sp1[1], output.force_sp1[2]);
+    }
+    void simulate_disturbance()
+    {
+        // simulate external disturbance
+        if (_gz_sim_time > 5_s && _gz_sim_time < 5.5_s) {
+            gz::msgs::EntityWrench wrench;
+            wrench.mutable_entity()->set_name(_payload_name);
+            wrench.mutable_entity()->set_type(gz::msgs::Entity::MODEL);
+            gz::msgs::Set(wrench.mutable_wrench()->mutable_force(), gz::math::Vector3d(0, 1, 0));
+            gz::msgs::Set(wrench.mutable_wrench()->mutable_torque(), gz::math::Vector3d(0, 0, 0));
+
+            _wrench_pub.Publish(wrench);
+            RCLCPP_INFO_ONCE(this->get_logger(), "External disturbance applied to %s", _payload_name.c_str());
+        }
+    }
+    /**
+     * @brief zero-order hold output
+     *  it will publish _apply_wrench until next control_step
+     */
+    void publish_wrench_command()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            // x500_i
+            gz::msgs::EntityWrench wrench;
+            wrench.mutable_entity()->set_name("x500_" + std::to_string(i + 1));
+            wrench.mutable_entity()->set_type(gz::msgs::Entity::MODEL);
+            wrench.mutable_wrench()->mutable_force()->CopyFrom(_apply_wrench[i].force());
+
+            _wrench_pub.Publish(wrench);
+        }
+    }
 
     // data recorder [us]
     void record(const uint64_t timestamp) {
@@ -130,10 +209,13 @@ private:
 
     // publisher for EntityWrench msg
     gz::transport::Node::Publisher _wrench_pub;
+    gz::msgs::Wrench _apply_wrench[3];
 
     // parameters
     Parameter::SharedPtr    _param_world_name {add_parameter("world_name", "mqsls")};
 
+    // controller
+    Controller _controller;
     control_toolbox::Pid _pid_z {5, 0.5, 0, 5, -5};
 
     const std::string _payload_name = "ball";
@@ -142,6 +224,7 @@ private:
     gz::transport::Node _node;
     uint64_t _control_interval; // [us]
     uint64_t _gz_sim_time {0}; // [us]
+    bool    _is_paused {true};
 
     // state
     Eigen::Vector3d _load_position;

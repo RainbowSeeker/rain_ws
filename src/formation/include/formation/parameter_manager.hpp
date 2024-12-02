@@ -46,12 +46,13 @@ public:
         }
     
         // create a new parameter
-        param = Parameter::make_shared(name);
+        param = Parameter::make_shared(name, value);
         // declare & get new value of parameter
         _node->declare_parameter(name, value);
+        // retrieve the newest parameter
         *param = _node->get_parameter(name);
 
-        // add to map
+        // add to container
         insert(param);
         
         return param;

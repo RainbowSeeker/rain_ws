@@ -2,21 +2,34 @@ import os
 
 class RopeGenerator:
     def __init__(self, rope_length: float, seg_num: int, 
-                mass: float = 0, collision_free: bool = True):
+                mass: float = 0, collision_free: bool = False):
         self.rope_length = rope_length
         self.seg_num = seg_num
         self.seg_length = rope_length / seg_num
+        self.radius = 0.01
+        self.seg_mass = max(mass, 0.01) / seg_num
+        self.collision_free = collision_free
 
-        self.mass_content = f"""
+        self.gripper_mass = 0.001
+        self.gripper_inertial = f"""
       <inertial>
-        <mass>{max(mass, 0.000000000001) / seg_num}</mass>
+        <mass>{self.gripper_mass}</mass>
         <inertia>
-          <ixx>0.01</ixx>
-          <iyy>0.01</iyy>
-          <izz>0.01</izz>
+          <ixx>{self.gripper_mass*0.4*self.radius*self.radius}</ixx>
+          <iyy>{self.gripper_mass*0.4*self.radius*self.radius}</iyy>
+          <izz>{self.gripper_mass*0.4*self.radius*self.radius}</izz>
         </inertia>
       </inertial>"""
-        self.collision_free = collision_free
+        
+        self.link_inertial = f"""
+      <inertial>
+        <mass>{self.seg_mass}</mass>
+        <inertia>
+          <ixx>{1e2*self.seg_mass / 12 * (3*self.radius*self.radius + self.seg_length * self.seg_length)}</ixx>
+          <iyy>{1e2*self.seg_mass / 12 * (3*self.radius*self.radius + self.seg_length * self.seg_length)}</iyy>
+          <izz>{1e2*0.5*self.seg_mass*self.radius*self.radius}</izz>
+        </inertia>
+      </inertial>"""
 
     def gen_rope(self):
         result = self.head_text()
@@ -32,168 +45,130 @@ class RopeGenerator:
     <pose>0 0 2 0 0 0</pose>
     <static>false</static>
     <link name='begin_link'>
-      <pose>0 0 0 0 0 0</pose>{self.mass_content}
+      <pose>0 0 0 0 0 0</pose>{self.gripper_inertial}
       {self.collision_free * "<!-- "} <collision name='begin_link_collision'>
         <geometry>
           <sphere>
-            <radius>0.003</radius>
+            <radius>{self.radius}</radius>
           </sphere>
         </geometry>
       </collision> {self.collision_free * "-->"}
       <visual name='begin_link_visual'>
         <geometry>
           <sphere>
-            <radius>0.003</radius>
+            <radius>{self.radius}</radius>
           </sphere>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <link name='link_0'>
-      <pose>0 0 0 0 0 0</pose>{self.mass_content}
-      {self.collision_free * "<!-- "} <collision name='link_0_collision'>
-        <pose>{self.seg_length / 2} 0 0 0 1.570796326794896558 0</pose>
-        <geometry>
-          <cylinder>
-            <length>{self.seg_length}</length>
-            <radius>0.003</radius>
-          </cylinder>
-        </geometry>
-      </collision> {self.collision_free * "-->"}
-      <visual name='link_0_vis'>
-        <pose>{self.seg_length / 2} 0 0 0 1.570796326794896558 0</pose>
-        <geometry>
-          <cylinder>
-            <length>{self.seg_length}</length>
-            <radius>0.003</radius>
-          </cylinder>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_0_2' type='revolute'>
+    </link>{self.seg_link_text(0)}
+    <joint name='begin_joint_2' type='universal'>
       <pose relative_to='begin_link'/>
       <child>link_0</child>
       <parent>begin_link</parent>
       <axis>
-        <xyz>0 1 0</xyz>
-        <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
-        </limit>
-        <!--<dynamics>
-          <damping>0.1</damping>
-        </dynamics> -->
+        <xyz>1 0 0</xyz>
       </axis>
-    </joint>"""
+      <axis2>
+        <xyz>0 1 0</xyz>
+      </axis2>
+    </joint>
+    """ 
 
     def tail_text(self) -> str:
         return f"""
     <link name='end_link'>
-      <pose>{self.rope_length} 0 0 0 0 0</pose>{self.mass_content}
+      <pose>{self.rope_length} 0 0 0 0 0</pose>{self.gripper_inertial}
       {self.collision_free * "<!-- "} <collision name='end_link_collision'>
         <geometry>
           <sphere>
-            <radius>0.003</radius>
+            <radius>{self.radius}</radius>
           </sphere>
         </geometry>
       </collision> {self.collision_free * "-->"}
       <visual name='end_link_visual'>
         <geometry>
           <sphere>
-            <radius>0.003</radius>
+            <radius>{self.radius}</radius>
           </sphere>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
     </link>
-    <joint name='joint_end_1' type='revolute'>
+    <joint name='joint_end_1' type='universal'>
+      <pose relative_to='end_link'/>
       <child>end_link</child>
       <parent>link_{self.seg_num-1}</parent>
       <axis>
         <xyz>0 0 1</xyz>
-        <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
-        </limit>
-        <!--<dynamics>
-          <damping>0.1</damping>
-        </dynamics> -->
       </axis>
+      <axis2>
+        <xyz>0 1 0</xyz>
+      </axis2>
     </joint>
   </model>
 </sdf>"""
 
-    def repeated_body_text(self, i: int) -> str:
+    def seg_link_text(self, i: int) -> str:
         return f"""
-    <link name='sphere_{i}'>
-      <pose>{self.seg_length * i} 0 0 0 0 0</pose>{self.mass_content}
-      {self.collision_free * "<!-- "} <collision name='sphere_{i}_collision'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </collision> {self.collision_free * "-->"}
-      <visual name='sphere_{i}_vis'>
-        <geometry>
-          <sphere>
-            <radius>0.003</radius>
-          </sphere>
-        </geometry>
-      </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_{i}_1' type='revolute'>
-      <child>sphere_{i}</child>
-      <parent>link_{i-1}</parent>
-      <axis>
-        <xyz>0 0 1</xyz>
-        <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
-        </limit>
-        <!--<dynamics>
-          <damping>0.1</damping>
-        </dynamics> -->
-      </axis>
-    </joint>
     <link name='link_{i}'>
-      <pose>{self.seg_length * i} 0 0 0 0 0</pose>{self.mass_content}
+      <pose>{self.seg_length * i + self.seg_length / 2} 0 0 0 1.570796326794896558 0</pose>{self.link_inertial}
       {self.collision_free * "<!-- "} <collision name='link_{i}_collision'>
-        <pose>{self.seg_length / 2} 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>{self.seg_length}</length>
-            <radius>0.003</radius>
+            <radius>{self.radius}</radius>
           </cylinder>
         </geometry>
       </collision> {self.collision_free * "-->"}
       <visual name='link_{i}_vis'>
-        <pose>{self.seg_length / 2} 0 0 0 1.570796326794896558 0</pose>
         <geometry>
           <cylinder>
             <length>{self.seg_length}</length>
-            <radius>0.003</radius>
+            <radius>{self.radius}</radius>
           </cylinder>
         </geometry>
       </visual>
-      <!-- <velocity_decay/> -->
-    </link>
-    <joint name='joint_{i}_2' type='revolute'>
+      <velocity_decay>
+        <linear>0.1</linear>
+        <angular>0.1</angular>
+      </velocity_decay>
+    </link>"""
+
+    def seg_joint_text(self, i: int) -> str:
+        return f"""
+    <joint name='joint_{i}_2' type='universal'>
+      <pose relative_to='link_{i-1}'>0 0 {self.seg_length / 2} 0 0 0</pose>
       <child>link_{i}</child>
-      <parent>sphere_{i}</parent>
+      <parent>link_{i-1}</parent>
       <axis>
-        <xyz>0 1 0</xyz>
+        <xyz expressed_in='link_{i-1}'>1 0 0</xyz>
         <limit>
-          <lower>-3.14</lower>
-          <upper>3.14</upper>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
         </limit>
-        <!--<dynamics>
+        <dynamics>
           <damping>0.1</damping>
-        </dynamics> -->
+          <friction>0.0001</friction>
+        </dynamics>
       </axis>
+      <axis2>
+        <xyz expressed_in='link_{i-1}'>0 1 0</xyz>
+        <limit>
+          <lower>-3.141592653589793</lower>
+          <upper>3.141592653589793</upper>
+          <effort>100</effort>
+          <velocity>10</velocity>
+        </limit>
+        <dynamics>
+          <damping>0.1</damping>
+          <friction>0.0001</friction>
+        </dynamics>
+      </axis2>
     </joint>"""
+
+    def repeated_body_text(self, i: int) -> str:
+        return self.seg_link_text(i) + self.seg_joint_text(i)
 
 
 if __name__ == '__main__':

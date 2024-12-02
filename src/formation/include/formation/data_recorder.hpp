@@ -15,9 +15,6 @@ public:
     {
         _buffer.reserve(_buffer_size);
 
-        if (!_file.is_open()) {
-            throw std::runtime_error("Failed to open file: " + file_name);
-        }
         _file.rdbuf()->pubsetbuf(_buffer.data(), _buffer_size);
 
         // write header

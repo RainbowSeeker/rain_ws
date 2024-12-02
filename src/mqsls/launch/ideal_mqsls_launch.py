@@ -1,14 +1,15 @@
 import os, yaml
 from launch import LaunchDescription
 from launch_ros.actions import Node
-from launch.actions import ExecuteProcess, DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration, PythonExpression
+from launch.actions import LogInfo, ExecuteProcess, DeclareLaunchArgument, RegisterEventHandler, GroupAction
+from launch.substitutions import LaunchConfiguration, PythonExpression, PathJoinSubstitution
 from ament_index_python.packages import get_package_share_directory
+from launch.event_handlers import OnProcessExit
 
 def generate_launch_description():
 
-    # world_name = 'simple_pendulum.sdf'
-    world_name = 'mqsls.sdf'
+    # world_name = 'simple_pendulum'
+    world_name = 'mqsls'
     args = [DeclareLaunchArgument('world_name', default_value=world_name, description='World name'),]
 
     model_dir = os.path.join(get_package_share_directory('mqsls'), 'gz', 'models')
@@ -38,12 +39,33 @@ def generate_launch_description():
                 shell=True,
                 name='ideal_mqsls_control_node_' + str(i + 1),
                 arguments=[str(i + 1)],
-                parameters=[{'world_name': LaunchConfiguration('world_name')}],
+                parameters=[{
+                    'world_name': LaunchConfiguration('world_name'),
+                }],
             )
         )
 
+    # run pkgconfig script
+    config_dir = os.path.join(get_package_share_directory('mqsls'), 'config')
+    pkgconfig = ExecuteProcess(
+        cmd=['/bin/bash', PathJoinSubstitution([config_dir, 'pkgconfig.sh']), model_dir],
+        shell=True,
+        on_exit=[LogInfo(msg='pkgconfig script exited')],
+    )
+
+    # register event handler
+    all_actions = RegisterEventHandler(
+        event_handler=OnProcessExit(
+            target_action=pkgconfig,
+            on_exit=[GroupAction(actions=[
+                *args,
+                gz_client, 
+                *node,
+            ])],
+        ),
+    )
+
     return LaunchDescription([
-        *args,
-        gz_client,
-        *node,
+        pkgconfig,
+        all_actions,
     ])

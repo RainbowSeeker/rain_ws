@@ -7,6 +7,11 @@ endif()
 
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_STANDARD 17)
+add_compile_options(
+  -Wno-unused-function
+  -Wno-unused-parameter
+  -Wno-unused-variable
+)
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
