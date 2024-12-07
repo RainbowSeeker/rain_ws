@@ -1,3 +1,3 @@
+# add_subdirectory(actual)
 add_subdirectory(model)
-add_subdirectory(ideal)
-add_subdirectory(multicopter)
+add_subdirectory(sim)

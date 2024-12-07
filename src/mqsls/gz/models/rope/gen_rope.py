@@ -42,7 +42,7 @@ class RopeGenerator:
         return f"""<?xml version="1.0" encoding="UTF-8"?>
 <sdf version='1.9'>
   <model name='rope'>
-    <pose>0 0 2 0 0 0</pose>
+    <enable_wind>true</enable_wind>
     <static>false</static>
     <link name='begin_link'>
       <pose>0 0 0 0 0 0</pose>{self.gripper_inertial}
@@ -126,6 +126,11 @@ class RopeGenerator:
             <radius>{self.radius}</radius>
           </cylinder>
         </geometry>
+        <material>
+          <ambient>0 1 0 1</ambient> <!-- green -->
+          <diffuse>0 1 0 1</diffuse>
+          <specular>0 1 0 1</specular>
+        </material>
       </visual>
       <velocity_decay>
         <linear>0.1</linear>
@@ -172,7 +177,7 @@ class RopeGenerator:
 
 
 if __name__ == '__main__':
-    rope_length = 1 # m
+    rope_length = 2 # m
     seg_num = 10
     rope_gen = RopeGenerator(rope_length, seg_num)
 

@@ -15,6 +15,32 @@ add_compile_options(
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
+
+# ##############################################################################
+# Generate ROS messages, ROS2 interfaces and IDL files #
+# ##############################################################################
+
+# get all msg files
+set(MSGS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/msg")
+file(GLOB ALL_MSGS RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}" "${MSGS_DIR}/*.msg")
+
+# Generate introspection typesupport for C and C++ and IDL files
+rosidl_generate_interfaces(${PROJECT_NAME} 
+  ${ALL_MSGS}
+)
+
+ament_export_dependencies(rosidl_default_runtime)
+rosidl_get_typesupport_target(cpp_typesupport_target ${PROJECT_NAME} rosidl_typesupport_cpp)
+
+# add include for library
+# install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME})
+# ament_export_include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# ##############################################################################
+# Build Packages #
+# ##############################################################################
+
 find_package(rclcpp REQUIRED)
 find_package(px4_msgs REQUIRED)
 find_package(px4_ros_com REQUIRED)

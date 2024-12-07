@@ -1,21 +1,22 @@
 #pragma once
 
-#include "controller/payload_controller.h"
+#include "controller/control_3dof.h"
 
 namespace mqsls {
 
-class Controller
+class CodeGenController
 {
+#if 1
 public:
-    using InputBus = payload_controller::ExtU_payload_controller_T;
-    using OutputBus = payload_controller::ExtY_payload_controller_T;
+    using InputBus = control_3dof::ExtU_control_3dof_T;
+    using OutputBus = control_3dof::ExtY_control_3dof_T;
    
-    Controller()
+    CodeGenController()
     {
         _ctl.initialize();
     }
 
-    ~Controller()
+    ~CodeGenController()
     {
         _ctl.terminate();
     }
@@ -32,7 +33,33 @@ public:
     }
 
 private:
-    payload_controller _ctl;
+    control_3dof _ctl;
+#else
+public:
+    using InputBus = ExtU_control_3dof_T;
+    using OutputBus = ExtY_control_3dof_T;
+   
+    CodeGenController()
+    {
+        control_3dof_initialize();
+    }
+
+    ~CodeGenController()
+    {
+        control_3dof_terminate();
+    }
+
+    void step(InputBus &input)
+    {
+        control_3dof_U = input;
+        control_3dof_step();
+    }
+
+    const OutputBus &getOutput() const
+    {
+        return control_3dof_Y;
+    }
+#endif
 };
     
 } // namespace mqsls

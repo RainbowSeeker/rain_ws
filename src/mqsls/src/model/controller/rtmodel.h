@@ -5,11 +5,11 @@
 //
 // File: rtmodel.h
 //
-// Code generated for Simulink model 'payload_controller'.
+// Code generated for Simulink model 'control_3dof'.
 //
-// Model version                  : 1.266
+// Model version                  : 1.442
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Wed Nov 27 19:34:30 2024
+// C/C++ source code generated on : Wed Dec  4 20:07:06 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -18,8 +18,8 @@
 //
 #ifndef rtmodel_h_
 #define rtmodel_h_
-#include "payload_controller.h"
-#define MODEL_CLASSNAME                payload_controller
+#include "control_3dof.h"
+#define MODEL_CLASSNAME                control_3dof
 #define MODEL_STEPNAME                 step
 
 //

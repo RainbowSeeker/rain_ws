@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sdf version='1.9'>
   <model name='ideal_uav'>
+    <enable_wind>true</enable_wind>
     <link name='base_link'>
       <pose>0 0 0 0 0 0</pose>
       <inertial>
