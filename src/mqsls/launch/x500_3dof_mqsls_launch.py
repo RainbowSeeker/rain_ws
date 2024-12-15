@@ -53,9 +53,15 @@ def generate_launch_description():
                     'event_handler': 'gz',# gz x500
                     'boot_wait': 10.0,
                     'cable_len': 2.0,
-                    'load_mass': 0.5,
+                    'load_mass': 1.0,
                     'uav_mass': 2.064307692307692,
                     'hover_thrust': 0.74,
+                    'eso_enable': True,
+                    'kq': 1.0,
+                    'kw': 4.0,
+                    'min_tension': 0.0,
+                    'max_tension': 20.0,
+                    'traj_type': 'circle',
                 }],
             )
         )

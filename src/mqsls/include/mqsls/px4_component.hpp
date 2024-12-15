@@ -96,11 +96,11 @@ public:
         Eigen::Quaterniond q_d;
         bodyzToAttitude(-thrust_sp, q_d);
         
-        // Eigen::Quaterniond q_att = {_att.q[0], _att.q[1], _att.q[2], _att.q[3]};
-        // double thrust_project = thrust_sp.dot((q_att.toRotationMatrix() * Eigen::Vector3d::UnitZ()));
+        Eigen::Quaterniond q_att = {_att.q[0], _att.q[1], _att.q[2], _att.q[3]};
+        double thrust_project = thrust_sp.dot(q_att.toRotationMatrix() * Eigen::Vector3d(0, 0, -1));
         // convert thrust to normalized thrust. 
         double thrust_coff = hover_thrust / uav_mass / 9.81;
-        publish_attitude_setpoint(q_d, -thrust_sp.norm() * thrust_coff);
+        publish_attitude_setpoint(q_d, -thrust_project * thrust_coff);
     }
 private:
     static void bodyzToAttitude(Eigen::Vector3d body_z, Eigen::Quaterniond &q_d)

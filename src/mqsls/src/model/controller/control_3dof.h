@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'control_3dof'.
 //
-// Model version                  : 1.442
+// Model version                  : 1.656
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Wed Dec  4 20:07:06 2024
+// C/C++ source code generated on : Sun Dec 15 15:40:18 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -28,14 +28,24 @@ struct Payload_Out_Bus
   uint32_T timestamp;
   real_T pL[3];
   real_T vL[3];
-  real_T q_1[3];
-  real_T q_2[3];
-  real_T q_3[3];
-  real_T w_1[3];
-  real_T w_2[3];
-  real_T w_3[3];
-  real_T euler[3];
-  real_T omega[3];
+  real_T p_1[3];
+  real_T p_2[3];
+  real_T p_3[3];
+  real_T v_1[3];
+  real_T v_2[3];
+  real_T v_3[3];
+};
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_TrajCmd_In_Bus_
+#define DEFINED_TYPEDEF_FOR_TrajCmd_In_Bus_
+
+struct TrajCmd_In_Bus
+{
+  real_T pos_sp[3];
+  real_T vel_sp[3];
+  real_T acc_ff[3];
 };
 
 #endif
@@ -57,28 +67,49 @@ struct Control_In_Bus
   real_T q[3];
   real_T w[3];
   real_T ai_sp[3];
+  real_T pi[3];
+  real_T vi[3];
 };
 
 #endif
 
-#ifndef DEFINED_TYPEDEF_FOR_struct_KOZZ2f41NjtyX9PsCFQIaF_
-#define DEFINED_TYPEDEF_FOR_struct_KOZZ2f41NjtyX9PsCFQIaF_
+#ifndef DEFINED_TYPEDEF_FOR_struct_n4M4IuMQiYjb6H8OxPPEC_
+#define DEFINED_TYPEDEF_FOR_struct_n4M4IuMQiYjb6H8OxPPEC_
 
-struct struct_KOZZ2f41NjtyX9PsCFQIaF
+struct struct_n4M4IuMQiYjb6H8OxPPEC
 {
   real_T MASS_LOAD;
   real_T MASS_UAV;
   real_T CABLE_LEN;
+  real_T TENSION_MIN;
+  real_T TENSION_MAX;
+  real_T ESO_PL[3];
+  real_T ESO_VL[3];
+  real_T ESO_PI[3];
+  real_T ESO_VI[3];
   real_T KP;
   real_T KV;
   real_T KQ;
   real_T KW;
-  real_T RHO[9];
-  real_T KR;
-  real_T KOMEGA;
 };
 
 #endif
+
+#ifndef struct_pos_2nd_eso_control_3dof_T
+#define struct_pos_2nd_eso_control_3dof_T
+
+struct pos_2nd_eso_control_3dof_T
+{
+  int32_T isInitialized;
+  real_T K_p[3];
+  real_T K_v[3];
+  real_T Z_1[3];
+  real_T Z_2[3];
+  real_T Z_3[3];
+  boolean_T is_init;
+};
+
+#endif                                 // struct_pos_2nd_eso_control_3dof_T
 
 //
 //  Exported Global Parameters
@@ -88,17 +119,27 @@ struct struct_KOZZ2f41NjtyX9PsCFQIaF
 //  these parameters and exports their symbols.
 //
 
-extern struct_KOZZ2f41NjtyX9PsCFQIaF CONTROL_PARAM;// Variable: CONTROL_PARAM
-                                                      //  Referenced by:
-                                                      //    '<S4>/Force Disturbution'
-                                                      //    '<S5>/Kp'
-                                                      //    '<S6>/Parallel Control'
-                                                      //    '<S7>/Vertical Control'
-                                                      //    '<S10>/Parallel Control'
-                                                      //    '<S11>/Vertical Control'
-                                                      //    '<S14>/Parallel Control'
-                                                      //    '<S15>/Vertical Control'
-                                                      //    '<S19>/Kv'
+extern struct_n4M4IuMQiYjb6H8OxPPEC CONTROL_PARAM;// Variable: CONTROL_PARAM
+                                                     //  Referenced by:
+                                                     //    '<S1>/Gain'
+                                                     //    '<S1>/Gain1'
+                                                     //    '<S1>/MATLAB System'
+                                                     //    '<S2>/Gain'
+                                                     //    '<S2>/Gain1'
+                                                     //    '<S2>/MATLAB System'
+                                                     //    '<S3>/Gain'
+                                                     //    '<S3>/Gain1'
+                                                     //    '<S3>/MATLAB System'
+                                                     //    '<S4>/Force Saturation && Disturbution'
+                                                     //    '<S4>/Position 2nd ESO'
+                                                     //    '<S6>/Parallel Control'
+                                                     //    '<S7>/Vertical Control'
+                                                     //    '<S11>/Parallel Control'
+                                                     //    '<S12>/Vertical Control'
+                                                     //    '<S16>/Parallel Control'
+                                                     //    '<S17>/Vertical Control'
+                                                     //    '<S22>/KP'
+                                                     //    '<S22>/KV'
 
 extern "C"
 {
@@ -125,6 +166,17 @@ class control_3dof final
 {
   // public data and function members
  public:
+  // Block signals for system '<S1>/MATLAB System'
+  struct B_MATLABSystem_control_3dof_T {
+    real_T MATLABSystem_o3[3];         // '<S1>/MATLAB System'
+  };
+
+  // Block states (default storage) for system '<S1>/MATLAB System'
+  struct DW_MATLABSystem_control_3dof_T {
+    pos_2nd_eso_control_3dof_T obj;    // '<S1>/MATLAB System'
+    boolean_T objisempty;              // '<S1>/MATLAB System'
+  };
+
   // Block signals for system '<S6>/Parallel Control'
   struct B_ParallelControl_control_3do_T {
     real_T rtu_q[9];
@@ -144,45 +196,57 @@ class control_3dof final
   struct B_VerticalControl_control_3do_T {
     real_T Sqi[9];
     real_T Sqi_m[9];
-    real_T rtp_mi[9];
     real_T e_q[3];
     real_T w_sp[3];
     real_T e_w[3];
+    real_T e_w_tmp[3];
+    real_T b_a[3];
     real_T rtp_Kw[3];
     real_T a;
-    real_T e_w_c;
-    real_T rtp_Kw_k;
+    real_T rtu_q;
+    real_T rtp_Kw_c;
     real_T rtu_ai_sp;
+    real_T rtu_ai_sp_k;
     real_T rtu_ai_sp_c;
-    real_T rtu_ai_sp_b;
-    real_T e_w_tmp;
+    real_T e_w_tmp_tmp;
     int32_T i;
-    int32_T i_p;
-    int32_T e_w_tmp_tmp;
+    int32_T i_b;
   };
 
   // Block signals (default storage)
   struct B_control_3dof_T {
     real_T state_e[12];                // '<S7>/Vertical Control'
+    real_T Q[9];
+    real_T Q_new[9];
     real_T a[9];
-    real_T A[9];
     real_T V[9];
     real_T U[9];
     real_T y[9];                       // '<S4>/Q sp'
     real_T b_A[9];
     real_T Vf[9];
+    real_T q_2[3];
+    real_T q_3[3];
+    real_T F_sp[3];
+    real_T F_d[3];
     real_T vu[3];
-    real_T aL_sp[3];                   // '<S19>/g'
-    real_T rtb_control_in1_vforce[3];
+    real_T e_1[3];
+    real_T e_2[3];
     real_T rtb_control_in2_vforce[3];
-    real_T y_n[3];                     // '<S7>/Vertical Control'
+    real_T rtb_control_in2_w[3];
+    real_T rtb_control_in3_w[3];
+    real_T vu_m[3];                  // '<S4>/Force Saturation && Disturbution'
+    real_T f_parallel[3];              // '<S6>/Parallel Control'
+    real_T y_a[3];                     // '<S1>/MATLAB Function'
+    real_T y_b[3];                     // '<S2>/MATLAB Function'
     real_T b_s[3];
     real_T e[3];
     real_T work[3];
     real_T dv[2];
+    real_T dv1[2];
     real_T absx;
-    real_T rtb_aL_sp_m;
-    real_T rtb_aL_sp_c;
+    real_T u0;
+    real_T F_d_c;
+    real_T F_d_k;
     real_T cscale;
     real_T anrm;
     real_T nrm;
@@ -196,28 +260,29 @@ class control_3dof final
     real_T cfrom1;
     real_T cto1;
     real_T mul;
-    real_T cfromc_k;
-    real_T ctoc_c;
-    real_T cfrom1_b;
-    real_T cto1_p;
-    real_T mul_c;
+    real_T cfromc_c;
+    real_T ctoc_b;
+    real_T cfrom1_p;
+    real_T cto1_c;
+    real_T mul_f;
     real_T roe;
     real_T absa;
     real_T absb;
     real_T scale;
     real_T ads;
     real_T bds;
-    real_T scale_f;
+    real_T scale_g;
     real_T absxk;
     real_T t;
-    real_T scale_g;
-    real_T absxk_g;
-    real_T t_m;
+    real_T scale_g1;
+    real_T absxk_m;
+    real_T t_n;
     real_T temp;
     real_T temp_tmp;
-    int32_T r_n;
+    int32_T r_p;
     int32_T vcol;
-    int32_T j;
+    int32_T k;
+    int32_T c_j;
     int32_T exponent;
     int32_T ar;
     int32_T b;
@@ -233,7 +298,7 @@ class control_3dof final
     int32_T e_k;
     int32_T qq_tmp;
     int32_T offset;
-    int32_T j_p;
+    int32_T j;
     int32_T b_i;
     int32_T scalarLB;
     int32_T vectorUB_l;
@@ -244,34 +309,52 @@ class control_3dof final
     int32_T scalarLB_l;
     int32_T vectorUB_d;
     int32_T i1;
-    int32_T k;
-    int32_T scalarLB_d;
-    int32_T vectorUB_lx;
+    int32_T k_d;
+    int32_T scalarLB_lx;
+    int32_T vectorUB_o;
     int32_T i2;
-    int32_T k_o;
-    int32_T scalarLB_b;
-    int32_T vectorUB_n;
+    int32_T k_b;
+    int32_T scalarLB_n;
+    int32_T vectorUB_b;
     int32_T i3;
     int32_T kend;
-    int32_T k_b;
-    int32_T kend_l;
-    int32_T k_h;
-    boolean_T p;
+    int32_T k_l;
+    int32_T kend_h;
+    int32_T k_bn;
+    boolean_T found[3];
+    boolean_T is_valid;
     boolean_T doscale;
     boolean_T apply_transform;
     boolean_T notdone;
-    boolean_T notdone_b;
-    B_VerticalControl_control_3do_T sf_VerticalControl_i;// '<S15>/Vertical Control' 
-    B_ParallelControl_control_3do_T sf_ParallelControl_k;// '<S14>/Parallel Control' 
-    B_VerticalControl_control_3do_T sf_VerticalControl_o;// '<S11>/Vertical Control' 
-    B_ParallelControl_control_3do_T sf_ParallelControl_g;// '<S10>/Parallel Control' 
+    boolean_T notdone_d;
+    B_VerticalControl_control_3do_T sf_VerticalControl_f;// '<S17>/Vertical Control' 
+    B_ParallelControl_control_3do_T sf_ParallelControl_a;// '<S16>/Parallel Control' 
+    B_MATLABSystem_control_3dof_T MATLABSystem_a;// '<S1>/MATLAB System'
+    B_VerticalControl_control_3do_T sf_VerticalControl_h;// '<S12>/Vertical Control' 
+    B_ParallelControl_control_3do_T sf_ParallelControl_h;// '<S11>/Parallel Control' 
+    B_MATLABSystem_control_3dof_T MATLABSystem_j;// '<S1>/MATLAB System'
     B_VerticalControl_control_3do_T sf_VerticalControl;// '<S7>/Vertical Control' 
     B_ParallelControl_control_3do_T sf_ParallelControl;// '<S6>/Parallel Control' 
+    B_MATLABSystem_control_3dof_T MATLABSystem;// '<S1>/MATLAB System'
+  };
+
+  // Block states (default storage) for system '<Root>'
+  struct DW_control_3dof_T {
+    pos_2nd_eso_control_3dof_T obj;    // '<S4>/Position 2nd ESO'
+    real_T DiscreteTimeIntegrator_DSTATE;// '<S20>/Discrete-Time Integrator'
+    real_T UnitDelay_DSTATE[3];        // '<S4>/Unit Delay'
+    real_T UnitDelay_DSTATE_h[3];      // '<S3>/Unit Delay'
+    real_T UnitDelay_DSTATE_e[3];      // '<S2>/Unit Delay'
+    real_T UnitDelay_DSTATE_f[3];      // '<S1>/Unit Delay'
+    DW_MATLABSystem_control_3dof_T MATLABSystem_a;// '<S1>/MATLAB System'
+    DW_MATLABSystem_control_3dof_T MATLABSystem_j;// '<S1>/MATLAB System'
+    DW_MATLABSystem_control_3dof_T MATLABSystem;// '<S1>/MATLAB System'
   };
 
   // External inputs (root inport signals with default storage)
   struct ExtU_control_3dof_T {
     Payload_Out_Bus Payload_Out;       // '<Root>/Payload_Out'
+    TrajCmd_In_Bus Traj_sp;            // '<Root>/Traj_sp'
   };
 
   // External outputs (root outports fed by signals with default storage)
@@ -316,7 +399,7 @@ class control_3dof final
   }
 
   // model initialize function
-  static void initialize();
+  void initialize();
 
   // model step function
   void step();
@@ -341,19 +424,34 @@ class control_3dof final
   // Block signals
   B_control_3dof_T control_3dof_B;
 
+  // Block states
+  DW_control_3dof_T control_3dof_DW;
+
+  // private member function(s) for subsystem '<S1>/MATLAB Function'
+  static void control_3dof_MATLABFunction(const real_T rtu_z3[3], const real_T
+    rtu_q[3], real_T rty_y[3]);
+
+  // private member function(s) for subsystem '<S1>/MATLAB System'
+  static void control_3dof_MATLABSystem_Init(DW_MATLABSystem_control_3dof_T
+    *localDW);
+  static void control_3dof_MATLABSystem(const real_T rtu_0[3], const real_T
+    rtu_1[3], const real_T rtu_2[3], B_MATLABSystem_control_3dof_T *localB,
+    DW_MATLABSystem_control_3dof_T *localDW);
+
   // private member function(s) for subsystem '<S6>/Parallel Control'
   static void control_3dof_ParallelControl(const real_T rtu_q[3], const real_T
     rtu_w[3], const real_T rtu_vforce[3], const real_T rtu_ai_sp[3], real_T
-    rty_y[3], real_T rtp_li, real_T rtp_mi, B_ParallelControl_control_3do_T
-    *localB);
+    rty_f_parallel[3], real_T rtp_li, real_T rtp_mi,
+    B_ParallelControl_control_3do_T *localB);
 
   // private member function(s) for subsystem '<S7>/Vertical Control'
   static void control_3dof_VerticalControl(const real_T rtu_q_sp[3], const
     real_T rtu_q[3], const real_T rtu_w[3], const real_T rtu_ai_sp[3], real_T
-    rty_y[3], real_T rty_state[12], real_T rtp_Kq, real_T rtp_Kw, real_T rtp_li,
-    real_T rtp_mi, B_VerticalControl_control_3do_T *localB);
+    rty_f_vertical[3], real_T rty_state[12], real_T rtp_Kq, real_T rtp_Kw,
+    real_T rtp_li, real_T rtp_mi, B_VerticalControl_control_3do_T *localB);
 
   // private member function(s) for subsystem '<Root>'
+  real_T control_3dof_norm(const real_T x[3]);
   real_T control_3dof_xzlangeM(const real_T x[9]);
   void control_3dof_xzlascl(real_T cfrom, real_T cto, int32_T m, int32_T n,
     real_T A[9], int32_T iA0, int32_T lda);
@@ -380,12 +478,6 @@ class control_3dof final
 };
 
 //-
-//  These blocks were eliminated from the model due to optimizations:
-//
-//  Block '<S19>/Saturation' : Eliminated Saturate block
-
-
-//-
 //  The generated code includes comments that allow you to trace directly
 //  back to the appropriate location in the model.  The basic format
 //  is <system>/block_name, where system is the system number (uniquely
@@ -404,22 +496,25 @@ class control_3dof final
 //  '<S2>'   : 'control_3dof/Cable Controller1'
 //  '<S3>'   : 'control_3dof/Cable Controller2'
 //  '<S4>'   : 'control_3dof/Payload Controller'
-//  '<S5>'   : 'control_3dof/Trajectory Generator'
+//  '<S5>'   : 'control_3dof/Cable Controller/MATLAB Function'
 //  '<S6>'   : 'control_3dof/Cable Controller/Parallel Control'
 //  '<S7>'   : 'control_3dof/Cable Controller/Vertical Control'
 //  '<S8>'   : 'control_3dof/Cable Controller/Parallel Control/Parallel Control'
 //  '<S9>'   : 'control_3dof/Cable Controller/Vertical Control/Vertical Control'
-//  '<S10>'  : 'control_3dof/Cable Controller1/Parallel Control'
-//  '<S11>'  : 'control_3dof/Cable Controller1/Vertical Control'
-//  '<S12>'  : 'control_3dof/Cable Controller1/Parallel Control/Parallel Control'
-//  '<S13>'  : 'control_3dof/Cable Controller1/Vertical Control/Vertical Control'
-//  '<S14>'  : 'control_3dof/Cable Controller2/Parallel Control'
-//  '<S15>'  : 'control_3dof/Cable Controller2/Vertical Control'
-//  '<S16>'  : 'control_3dof/Cable Controller2/Parallel Control/Parallel Control'
-//  '<S17>'  : 'control_3dof/Cable Controller2/Vertical Control/Vertical Control'
-//  '<S18>'  : 'control_3dof/Payload Controller/Force Disturbution'
-//  '<S19>'  : 'control_3dof/Payload Controller/Load Control Force'
-//  '<S20>'  : 'control_3dof/Payload Controller/Q sp'
+//  '<S10>'  : 'control_3dof/Cable Controller1/MATLAB Function'
+//  '<S11>'  : 'control_3dof/Cable Controller1/Parallel Control'
+//  '<S12>'  : 'control_3dof/Cable Controller1/Vertical Control'
+//  '<S13>'  : 'control_3dof/Cable Controller1/Parallel Control/Parallel Control'
+//  '<S14>'  : 'control_3dof/Cable Controller1/Vertical Control/Vertical Control'
+//  '<S15>'  : 'control_3dof/Cable Controller2/MATLAB Function'
+//  '<S16>'  : 'control_3dof/Cable Controller2/Parallel Control'
+//  '<S17>'  : 'control_3dof/Cable Controller2/Vertical Control'
+//  '<S18>'  : 'control_3dof/Cable Controller2/Parallel Control/Parallel Control'
+//  '<S19>'  : 'control_3dof/Cable Controller2/Vertical Control/Vertical Control'
+//  '<S20>'  : 'control_3dof/Payload Controller/Clock'
+//  '<S21>'  : 'control_3dof/Payload Controller/Force Saturation && Disturbution'
+//  '<S22>'  : 'control_3dof/Payload Controller/Load Control Force'
+//  '<S23>'  : 'control_3dof/Payload Controller/Q sp'
 
 #endif                                 // control_3dof_h_
 

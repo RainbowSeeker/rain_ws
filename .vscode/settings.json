@@ -112,6 +112,7 @@
         "nowstr",
         "Offboard",
         "rclcpp",
+        "traj",
         "yawspeed"
     ],
     "C_Cpp.errorSquiggles": "disabled",

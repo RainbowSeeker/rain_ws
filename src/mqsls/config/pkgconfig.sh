@@ -27,4 +27,3 @@ do
     rm "$line"
 done
 IFS=
-rm -rf log/*

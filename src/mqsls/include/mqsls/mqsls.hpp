@@ -13,23 +13,19 @@ struct MqslsDataFrame {
     // payload state
     Eigen::Vector3d load_position;
     Eigen::Vector3d load_velocity;
-    Eigen::Vector3d load_euler;
-    Eigen::Vector3d load_omega;
 
-    // cable state
-    Eigen::Vector3d q[3];
-    Eigen::Vector3d w[3];
+    // uav state
+    Eigen::Vector3d uav_position[3];
+    Eigen::Vector3d uav_velocity[3];
 
     // operator<<
     friend std::ostream &operator<<(std::ostream &os, const MqslsDataFrame &frame) {
         os << frame.timestamp << ' '
            << frame.load_position.x() << ' ' << frame.load_position.y() << ' ' << frame.load_position.z() << ' '
-           << frame.load_velocity.x() << ' ' << frame.load_velocity.y() << ' ' << frame.load_velocity.z() << ' '
-           << frame.load_euler.x() << ' ' << frame.load_euler.y() << ' ' << frame.load_euler.z() << ' '
-           << frame.load_omega.x() << ' ' << frame.load_omega.y() << ' ' << frame.load_omega.z() << ' ';
+           << frame.load_velocity.x() << ' ' << frame.load_velocity.y() << ' ' << frame.load_velocity.z() << ' ';
         for (int i = 0; i < 3; i++) {
-            os << frame.q[i].x() << ' ' << frame.q[i].y() << ' ' << frame.q[i].z() << ' '
-               << frame.w[i].x() << ' ' << frame.w[i].y() << ' ' << frame.w[i].z() << ' ';
+            os << frame.uav_position[i].x() << ' ' << frame.uav_position[i].y() << ' ' << frame.uav_position[i].z() << ' '
+               << frame.uav_velocity[i].x() << ' ' << frame.uav_velocity[i].y() << ' ' << frame.uav_velocity[i].z() << ' ';
         }
         os << '\n';
         return os;
@@ -39,12 +35,10 @@ struct MqslsDataFrame {
         std::stringstream ss;
         ss  << "timestamp" << ' '
             << "x y z" << ' '
-            << "vx vy vz" << ' '
-            << "phi theta psi" << ' '
-            << "p q r" << ' ';
+            << "vx vy vz" << ' ';
         for (int i = 1; i <= 3; i++) {
-            ss  << "qx" << i << " qy" << i << " qz" << i << ' '
-                << "wx" << i << " wy" << i << " wz" << i << ' ';
+            ss  << "x" << i << " y" << i << " z" << i << ' '
+                << "vx" << i << " vy" << i << " vz" << i << ' ';
         }
 
         return ss.str();

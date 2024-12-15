@@ -30,6 +30,13 @@ class RopeGenerator:
           <izz>{1e2*0.5*self.seg_mass*self.radius*self.radius}</izz>
         </inertia>
       </inertial>"""
+        
+        self.sensor_text = """
+      <sensor name="imu_sensor" type="imu">
+        <always_on>1</always_on>
+        <update_rate>250</update_rate>
+        <visualize>true</visualize>
+      </sensor>"""
 
     def gen_rope(self):
         result = self.head_text()
@@ -136,6 +143,7 @@ class RopeGenerator:
         <linear>0.1</linear>
         <angular>0.1</angular>
       </velocity_decay>
+      {(i == 1) * self.sensor_text}
     </link>"""
 
     def seg_joint_text(self, i: int) -> str:
@@ -153,8 +161,7 @@ class RopeGenerator:
           <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.1</damping>
-          <friction>0.0001</friction>
+          <damping>0.5</damping>
         </dynamics>
       </axis>
       <axis2>
@@ -166,8 +173,7 @@ class RopeGenerator:
           <velocity>10</velocity>
         </limit>
         <dynamics>
-          <damping>0.1</damping>
-          <friction>0.0001</friction>
+          <damping>0.5</damping>
         </dynamics>
       </axis2>
     </joint>"""

@@ -16,13 +16,22 @@ namespace mqsls {
 class GzInputSource : public InputSource
 {
 public:
-    GzInputSource(gz::transport::Node *node, int node_index, const std::string &world_name) : _node(node), _uav_name("x500_" + std::to_string(node_index))
+    const uint32_t rope_id_map[3] = {49, 172, 221};
+    const uint32_t rope_id_offset = 7;
+
+    GzInputSource(gz::transport::Node *node, int node_index, const std::string &world_name)
+     : _node(node), _uav_name("x500_" + std::to_string(node_index)), _rope_id(rope_id_map[node_index - 1])
     {
         // pose: /world/$WORLD/pose/info
         std::string pose_topic = "/world/" + world_name + "/pose/info";
         if (!_node->Subscribe(pose_topic, &GzInputSource::poseInfoCallback, this)) {
-            std::cerr << "Failed to subscribe to " << pose_topic << std::endl;
-            return;
+            throw std::runtime_error("Failed to subscribe to " + pose_topic);
+        }
+
+        // IMU: /world/$WORLD/model/rope_xxx/link/link_5/sensor/imu_sensor/imu
+        std::string imu_topic = "/world/" + world_name + "/model/rope_" + std::to_string(node_index) + "/link/link_5/sensor/imu_sensor/imu";
+        if (!_node->Subscribe(imu_topic, &GzInputSource::imuCallback, this)) {
+            throw std::runtime_error("Failed to subscribe to " + imu_topic);
         }
     }
 
@@ -41,12 +50,17 @@ private:
         _data.msg.velocity_uav[0] = _uav_velocity.x();
         _data.msg.velocity_uav[1] = _uav_velocity.y();
         _data.msg.velocity_uav[2] = _uav_velocity.z();
+
+        // _data.msg.delta_position[0] = _cable_direction[0] * 2;
+        // _data.msg.delta_position[1] = _cable_direction[1] * 2;
+        // _data.msg.delta_position[2] = _cable_direction[2] * 2;
         _data.msg.delta_position[0] = _load_position.x() - _uav_position.x();
         _data.msg.delta_position[1] = _load_position.y() - _uav_position.y();
         _data.msg.delta_position[2] = _load_position.z() - _uav_position.z();
         _data.msg.delta_velocity[0] = _load_velocity.x() - _uav_velocity.x();
         _data.msg.delta_velocity[1] = _load_velocity.y() - _uav_velocity.y();
         _data.msg.delta_velocity[2] = _load_velocity.z() - _uav_velocity.z();
+
         return _data;
     }
 
@@ -126,20 +140,72 @@ private:
                     cb(convert(current_time));
                 }
             }
+            else if (pose.pose(i).id() == _rope_id) {
+                _cable_att_enu = {
+                    pose.pose(i).orientation().w(),
+                    pose.pose(i).orientation().x(),
+                    pose.pose(i).orientation().y(),
+                    pose.pose(i).orientation().z()
+                };
+            }
+            else if (pose.pose(i).id() == _rope_id + rope_id_offset) {
+                static uint64_t last_time = 0;
+                const double dt = std::clamp((current_time - last_time) * 1e-6, 0.001, 0.1);
+                last_time = current_time;
+
+                Eigen::Quaterniond relative_att = {
+                    pose.pose(i).orientation().w(),
+                    pose.pose(i).orientation().x(),
+                    pose.pose(i).orientation().y(),
+                    pose.pose(i).orientation().z()
+                };
+
+                const Eigen::Vector3d flu_direction = _cable_att_enu * relative_att * Eigen::Vector3d(0, 0, -1);
+                const Eigen::Vector3d frd_direction = {flu_direction.y(), flu_direction.x(), -flu_direction.z()};
+                const Eigen::Vector3d dot_direction = (frd_direction - _cable_direction) / dt;
+                
+                _cable_direction = frd_direction;
+
+                static const Eigen::Vector3d max_dot_direction{0.5, 0.5, 0.5}; 
+                static const Eigen::Vector3d min_dot_direction{-0.5, -0.5, -0.5};
+                _cable_dot_direction = dot_direction.cwiseMax(min_dot_direction).cwiseMin(max_dot_direction);
+            }
         }
 
     #undef get_ned_motion
+    }
+
+    void imuCallback(const gz::msgs::IMU &imu)
+    {
+        // FLU -> FRD
+        static const auto q_FLU_to_FRD = gz::math::Quaterniond(0, 1, 0, 0);
+
+        gz::math::Vector3d accel_b = q_FLU_to_FRD.RotateVector(gz::math::Vector3d(
+					     imu.linear_acceleration().x(),
+					     imu.linear_acceleration().y(),
+					     imu.linear_acceleration().z()));
+
+        gz::math::Vector3d gyro_b = q_FLU_to_FRD.RotateVector(gz::math::Vector3d(
+					    imu.angular_velocity().x(),
+					    imu.angular_velocity().y(),
+					    imu.angular_velocity().z()));
     }
 
     InputData _data;
     gz::transport::Node *_node;
     const std::string _payload_name = "payload";
     const std::string _uav_name;
+    const uint32_t _rope_id;
     std::vector<std::function<void(const InputData &)>> _callbacks;
     Eigen::Vector3d _load_position;
     Eigen::Vector3d _load_velocity;
     Eigen::Vector3d _uav_position;
     Eigen::Vector3d _uav_velocity;
+
+    // addon
+    Eigen::Quaterniond _cable_att_enu;
+    Eigen::Vector3d _cable_direction {};
+    Eigen::Vector3d _cable_dot_direction {};
 };
 
 class GzOutputActuator : public OutputActuator
