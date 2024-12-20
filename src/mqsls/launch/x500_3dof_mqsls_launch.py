@@ -58,13 +58,21 @@ def generate_launch_description():
                     'hover_thrust': 0.74,
                     'eso_enable': True,
                     'kq': 1.0,
-                    'kw': 4.0,
+                    'kw': 2.0,
                     'min_tension': 0.0,
-                    'max_tension': 20.0,
-                    'traj_type': 'circle',
+                    'max_tension': 7.0,
+                    'traj_type': 'line',
                 }],
             )
         )
+
+    force_planner = Node(
+        package='mqsls',
+        executable='force_planner_node',
+        output='screen',
+        shell=True,
+        name='force_planner',
+    )
     
     px4_client = []
     for i in range(3):
@@ -98,8 +106,9 @@ def generate_launch_description():
             target_action=pkgconfig,
             on_exit=[GroupAction(actions=[
                 *args,
-                gz_client, 
+                gz_client,
                 *node,
+                force_planner,
                 *px4_client,
                 dds_agent,
             ])],

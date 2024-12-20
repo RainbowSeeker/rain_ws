@@ -1,10 +1,15 @@
 
+# controller
+aux_source_directory(controller/ CTL_SRC)
 
-file(GLOB SRC
-    ${CMAKE_CURRENT_SOURCE_DIR}/*/*.c*
+add_library(model_controller STATIC
+    ${CTL_SRC}
 )
+target_compile_options(model_controller PRIVATE -Wno-unused-function)
 
-add_library(mqsls_model STATIC
-    ${SRC}
+# force optimization
+aux_source_directory(force_opt/ OPT_SRC)
+
+add_library(model_force_opt STATIC
+    ${OPT_SRC}
 )
-target_compile_options(mqsls_model PRIVATE -Wno-unused-function)

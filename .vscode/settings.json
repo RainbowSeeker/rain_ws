@@ -102,7 +102,8 @@
         "regex": "cpp",
         "*.proto": "cpp",
         "sparseqr": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "*.txx": "cpp"
     },
     "cSpell.words": [
         "baudrate",

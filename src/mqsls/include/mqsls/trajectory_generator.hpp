@@ -21,8 +21,8 @@ public:
 class LineTrajectoryGenerator : public TrajectoryGenerator
 {
 public:
-    LineTrajectoryGenerator(const Eigen::Vector3d &start, const Eigen::Vector3d &end, const uint64_t duration)
-        : _duration(usec2sec(duration)), _avg_speed((end - start) / _duration), _current_position(start)
+    LineTrajectoryGenerator(const Eigen::Vector3d &start, const Eigen::Vector3d &end, const double average_speed)
+        : _duration(Eigen::Vector3d(end - start).norm() / average_speed), _avg_speed((end - start) / _duration), _current_position(start)
     {
     }
 
@@ -67,7 +67,8 @@ public:
         const double theta = _omega * _passed_time;
         out.position = _center + Eigen::Vector3d(_radius * cos(theta), _radius * sin(theta), 0);
         out.velocity = Eigen::Vector3d(-_radius * _omega * sin(theta), _radius * _omega * cos(theta), 0);
-        out.acceleration = Eigen::Vector3d::Zero();//Eigen::Vector3d(-_radius * _omega * _omega * cos(theta), -_radius * _omega * _omega * sin(theta), 0);
+        // out.acceleration = Eigen::Vector3d::Zero();
+        out.acceleration = Eigen::Vector3d(-_radius * _omega * _omega * cos(theta), -_radius * _omega * _omega * sin(theta), 0);
     }
 
 private:
@@ -88,7 +89,7 @@ class RectangleTrajectoryGenerator : public TrajectoryGenerator
         D_TO_U
     };
 public:
-    RectangleTrajectoryGenerator(const Eigen::Vector3d &start, const Eigen::Vector3d &end, const int average_speed)
+    RectangleTrajectoryGenerator(const Eigen::Vector3d &start, const Eigen::Vector3d &end, const double average_speed)
         : _start(start), _end(end), _average_speed(average_speed), _current_position(start)
     {
     }
@@ -142,7 +143,7 @@ public:
 private:
     const Eigen::Vector3d _start;
     const Eigen::Vector3d _end;
-    const int _average_speed;
+    const double _average_speed;
 
     Phase _phase = Phase::L_TO_R;
     Eigen::Vector3d _current_position;

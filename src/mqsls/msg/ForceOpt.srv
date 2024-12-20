@@ -1,0 +1,8 @@
+float64 tension_max
+float64[3] center
+float64[3] psi  # if psi is all finite, force is applied in the direction of psi
+---
+float64 radius
+float64[3] q_1
+float64[3] q_2
+float64[3] q_3

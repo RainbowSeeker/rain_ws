@@ -19,7 +19,7 @@ endif()
 add_executable(sim_mqsls_control_node
   sim_mqsls_control.cpp
 )
-target_link_libraries(sim_mqsls_control_node ${GZ_TRANSPORT_LIB} mqsls_model "${cpp_typesupport_target}")
+target_link_libraries(sim_mqsls_control_node ${GZ_TRANSPORT_LIB} model_controller "${cpp_typesupport_target}")
 
 ament_target_dependencies(sim_mqsls_control_node 
         rclcpp px4_msgs px4_ros_com formation 
