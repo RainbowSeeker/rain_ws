@@ -58,10 +58,10 @@ def generate_launch_description():
                     'hover_thrust': 0.74,
                     'eso_enable': True,
                     'kq': 1.0,
-                    'kw': 2.0,
+                    'kw': 4.0,
                     'min_tension': 0.0,
                     'max_tension': 7.0,
-                    'traj_type': 'line',
+                    'traj_type': 'circle',
                 }],
             )
         )

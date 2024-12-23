@@ -4,6 +4,7 @@
 #include "formation/utils.hpp"
 #include "../model/interface.hpp"
 #include "mqsls/mqsls.hpp"
+#include "mqsls/AlphaFilter.hpp"
 #include "mqsls/trajectory_generator.hpp"
 
 #include <mqsls/srv/force_opt.hpp>
@@ -244,23 +245,23 @@ private:
         output = _controller.getOutput();
 
         // test: every 5s, request force optimization
+        if (1)
         {
+            _disturbance_filter.update({output.state.dL[0], output.state.dL[1], output.state.dL[2]});
+
             static uint64_t last_request_time = _running_time;
             static Eigen::Vector3d last_trim_acc = {0, 0, -9.8};
 
             Eigen::Vector3d expected_trim_acc = {
-                0 - output.state.dL[0], 
-                0 - output.state.dL[1], 
-                -9.8 - output.state.dL[2]
+                -_disturbance_filter.getState()[0],
+                -_disturbance_filter.getState()[1],
+                -_disturbance_filter.getState()[2] - 9.8
             };
 
             bool need_request = false;
             for (int i = 0; i < 3; i++) {
-                if (std::abs(expected_trim_acc[i] - last_trim_acc[i]) > _margin_acc * 0.8) {
+                if (std::abs(expected_trim_acc[i] - last_trim_acc[i]) > _margin_acc * 0.6) {
                     need_request = true;
-                }
-                else {
-                    expected_trim_acc[i] = last_trim_acc[i];
                 }
             }
 
@@ -284,8 +285,9 @@ private:
                     _control_input.Payload_Out.p_3[0], _control_input.Payload_Out.p_3[1], _control_input.Payload_Out.p_3[2], 
                     _control_input.Payload_Out.v_3[0], _control_input.Payload_Out.v_3[1], _control_input.Payload_Out.v_3[2]);
 
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "Disturbance: [%f %f %f]",
-                    output.state.dL[0], output.state.dL[1], output.state.dL[2]);
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "\nDisturbance: [%f %f %f]\nFilter: [%f %f %f]",
+                    output.state.dL[0], output.state.dL[1], output.state.dL[2],
+                    _disturbance_filter.getState()[0], _disturbance_filter.getState()[1], _disturbance_filter.getState()[2]);
     }
 
     void state_stopping(CodeGenController::OutputBus &output)
@@ -373,6 +375,10 @@ private:
         CONTROL_PARAM.CABLE_LEN = _cable_len;
         CONTROL_PARAM.MASS_LOAD = _load_mass;
         CONTROL_PARAM.MASS_UAV = _uav_mass;
+
+        // disturbance filter
+        // sample freq: 50Hz, cutoff freq: 0.5Hz
+        _disturbance_filter.setCutoffFreq(1_s / 20_ms, 0.1);
     }
 
     void parameter_update()
@@ -460,6 +466,7 @@ private:
     CodeGenController::InputBus _control_input;
     CodeGenController _controller;
     std::shared_ptr<TrajectoryGenerator> _traj_gen;
+    AlphaFilter<Eigen::Vector3d> _disturbance_filter;
 
     // recorder
     void record()
