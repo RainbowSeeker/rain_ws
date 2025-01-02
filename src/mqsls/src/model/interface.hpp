@@ -1,13 +1,16 @@
 #pragma once
 
-#include "controller/control_3dof.h"
-#include "force_opt/mso_forces.h"
+extern "C"
+{
+    #include "controller/control_3dof.h"
+    #include "force_opt/mso_forces.h"
+}
 
 namespace mqsls {
 
-class CodeGenController
+class CodeGenController final
 {
-#if 1
+#if 0
 public:
     using InputBus = control_3dof::ExtU_control_3dof_T;
     using OutputBus = control_3dof::ExtY_control_3dof_T;
