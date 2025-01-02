@@ -5,7 +5,7 @@
  * File: rtwtypes.h
  *
  * MATLAB Coder version            : 24.2
- * C/C++ source code generated on  : 2024-12-19 20:42:18
+ * C/C++ source code generated on  : 2025-01-02 16:21:33
  */
 
 #ifndef RTWTYPES_H
@@ -23,15 +23,14 @@ extern "C" {
 
 /*=======================================================================*
  * Target hardware information
-*   Device type: Generic->64-bit Embedded Processor (LP64)
-*   Number of bits:     char:   8    short:   16    int:  32
-*                       long:  64     long long:  64
-
-*                       native word size:  64
-*   Byte ordering: LittleEndian
-*   Signed integer division rounds to: Zero
-*   Shift right on a signed integer as arithmetic shift: on
-*=======================================================================*/
+ *   Device type: Generic->64-bit Embedded Processor (LP64)
+ *   Number of bits:     char:   8    short:   16    int:  32
+ *                       long:  64
+ *                       native word size:  64
+ *   Byte ordering: Unspecified
+ *   Signed integer division rounds to: Zero
+ *   Shift right on a signed integer as arithmetic shift: on
+ *=======================================================================*/
 
 /*=======================================================================*
  * Fixed width word size data types:                                     *
@@ -52,7 +51,7 @@ typedef double real64_T;
 
 /*===========================================================================*
  * Generic type definitions: real_T, time_T, boolean_T, int_T, uint_T,       *
- *                           ulong_T, ulonglong_T, char_T and byte_T.        *
+ *                           ulong_T, char_T and byte_T.                     *
  *===========================================================================*/
 
 typedef double real_T;
@@ -61,7 +60,6 @@ typedef bool boolean_T;
 typedef int int_T;
 typedef unsigned int uint_T;
 typedef unsigned long ulong_T;
-typedef unsigned long long ulonglong_T;
 typedef char char_T;
 typedef char_T byte_T;
 

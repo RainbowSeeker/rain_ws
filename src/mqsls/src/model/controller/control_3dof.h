@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'control_3dof'.
 //
-// Model version                  : 1.701
+// Model version                  : 1.704
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Fri Dec 20 15:10:40 2024
+// C/C++ source code generated on : Tue Dec 31 19:55:02 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -233,53 +233,50 @@ class control_3dof final
 
   // Block signals (default storage)
   struct B_control_3dof_T {
+    real_T A_wrench[18];
     real_T state_f[12];                // '<S7>/Vertical Control'
     real_T Q_new[9];                   // '<S20>/Vector Concatenate'
-    real_T rtb_vu_tmp[9];
-    real_T Q_new_m[9];
+    real_T rtb_Q_new_m[9];
     real_T dv[9];
     real_T V[9];
     real_T U[9];
     real_T b_A[9];
     real_T Vf[9];
+    real_T b_wrench[6];
+    real_T A[6];
     real_T q_2[3];
     real_T q_3[3];
     real_T F_trim[3];
     real_T F_way[3];
+    real_T F_var[3];
     real_T e_1[3];
     real_T e_2[3];
     real_T acc_limit[3];               // '<S19>/acc_limit'
     real_T rtb_control_in2_w[3];
     real_T rtb_control_in3_w[3];
-    real_T vu[3];                    // '<S4>/Force Saturation && Disturbution'
     real_T f_vertical[3];              // '<S7>/Vertical Control'
     real_T dot_err_g[3];               // '<S7>/Vertical Control'
     real_T dot_err_c[3];               // '<S11>/Vertical Control'
     real_T dot_err[3];                 // '<S15>/Vertical Control'
-    real_T vu_c[3];
     real_T s[3];
     real_T b_s[3];
     real_T e[3];
     real_T work[3];
     real_T dv1[2];
     real_T dv2[2];
-    real_T dv3[2];
-    real_T q_3_k;
-    real_T F_trim_c;
-    real_T e_2_b;
+    real_T alpha;
+    real_T upper;
+    real_T lower;
+    real_T A_c;
+    real_T A_wrench_k;
+    real_T e_2_c;
     real_T u0;
-    real_T u0_p;
+    real_T F_var_b;
+    real_T F_var_p;
     real_T UnitDelay_DSTATE;
     real_T UnitDelay_DSTATE_c;
     real_T UnitDelay_DSTATE_f;
-    real_T rtb_vu_tmp_g;
-    real_T UnitDelay_DSTATE_tmp;
-    real_T UnitDelay_DSTATE_tmp_g;
-    real_T UnitDelay_DSTATE_tmp_m;
-    real_T result;
-    real_T F_d_idx_0;
-    real_T F_d_idx_1;
-    real_T F_d_idx_2;
+    real_T F_trim_g;
     real_T absx;
     real_T cscale;
     real_T anrm;
@@ -294,29 +291,28 @@ class control_3dof final
     real_T cfrom1;
     real_T cto1;
     real_T mul;
-    real_T cfromc_n;
-    real_T ctoc_p;
-    real_T cfrom1_l;
-    real_T cto1_j;
-    real_T mul_d;
+    real_T cfromc_g;
+    real_T ctoc_m;
+    real_T cfrom1_n;
+    real_T cto1_p;
+    real_T mul_l;
     real_T roe;
     real_T absa;
     real_T absb;
     real_T scale;
     real_T ads;
     real_T bds;
-    real_T scale_g;
+    real_T scale_j;
     real_T absxk;
     real_T t;
-    real_T scale_l;
-    real_T absxk_d;
-    real_T t_d;
+    real_T scale_d;
+    real_T absxk_g;
+    real_T t_l;
     real_T temp;
     real_T temp_tmp;
     int32_T i;
-    int32_T i_l;
-    int32_T b_i;
-    int32_T r_o;
+    int32_T i_d;
+    int32_T r_d;
     int32_T vcol;
     int32_T j;
     int32_T exponent;
@@ -334,38 +330,38 @@ class control_3dof final
     int32_T e_k;
     int32_T qq_tmp;
     int32_T offset;
-    int32_T j_b;
-    int32_T b_i_n;
+    int32_T j_l;
+    int32_T b_i;
     int32_T scalarLB;
-    int32_T vectorUB_b;
-    int32_T i_ln;
-    int32_T offset_h;
-    int32_T j_bn;
-    int32_T b_i_d;
-    int32_T scalarLB_e;
-    int32_T vectorUB_bj;
+    int32_T vectorUB_o;
     int32_T i1;
-    int32_T k;
-    int32_T scalarLB_j;
-    int32_T vectorUB_f;
+    int32_T offset_b;
+    int32_T j_n;
+    int32_T b_i_b;
+    int32_T scalarLB_l;
+    int32_T vectorUB_h;
     int32_T i2;
-    int32_T k_a;
-    int32_T scalarLB_ju;
-    int32_T vectorUB_j;
+    int32_T k;
+    int32_T scalarLB_b;
+    int32_T vectorUB_d;
     int32_T i3;
+    int32_T k_e;
+    int32_T scalarLB_bj;
+    int32_T vectorUB_j;
+    int32_T i4;
     int32_T kend;
-    int32_T k_o;
-    int32_T kend_n;
-    int32_T k_i;
-    boolean_T x[3];
-    boolean_T found[3];
+    int32_T k_f;
+    int32_T kend_a;
+    int32_T k_j;
+    int8_T a;
+    int8_T a_j;
+    int8_T a_o;
     boolean_T FixPtRelationalOperator; // '<S21>/FixPt Relational Operator'
-    boolean_T is_valid;
     boolean_T p;
     boolean_T doscale;
     boolean_T apply_transform;
     boolean_T notdone;
-    boolean_T notdone_o;
+    boolean_T notdone_n;
     B_VerticalControl_control_3do_T sf_VerticalControl_h;// '<S15>/Vertical Control' 
     B_ParallelControl_control_3do_T sf_ParallelControl_p;// '<S14>/Parallel Control' 
     B_VerticalControl_control_3do_T sf_VerticalControl_m;// '<S11>/Vertical Control' 
@@ -501,9 +497,6 @@ class control_3dof final
     s);
   void control_3dof_svd(const real_T A[9], real_T U[9], real_T s[3], real_T V[9]);
   void control_3dof_pinv(const real_T A[9], real_T X[9]);
-  void control_3dof_TCISolver(const real_T F_sp[3], const real_T F_fixed[3],
-    const real_T Q[9], real_T b_min_tension, real_T b_max_tension, real_T
-    result[3], real_T F_actual[3]);
 
   // Real-Time Model
   RT_MODEL_control_3dof_T control_3dof_M;

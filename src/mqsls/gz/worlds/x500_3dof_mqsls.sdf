@@ -197,12 +197,12 @@
     </include>
     <include>
       <name>x500_1</name>
-      <pose>-1.7321 -1 0 0 0 1.570796326794897</pose>
+      <pose>0 2 0 0 0 1.570796326794897</pose>
       <uri>model://x500</uri>
     </include>
     <include>
       <name>rope_1</name>
-      <pose>0 0 0 0 0 -2.617993877991494</pose>
+      <pose>0 0 0 0 0 1.570796326794897</pose>
       <uri>model://rope</uri>
     </include>
     <joint name="uav_joint1" type="fixed">
@@ -221,22 +221,22 @@
     <!-- addon -->
     <include>
       <name>x500_2</name>
-      <pose>0 2 0 0 0 1.570796326794897</pose>
-      <uri>model://x500</uri>
-    </include>
-    <include>
-      <name>x500_3</name>
       <pose>1.7321 -1 0 0 0 1.570796326794897</pose>
       <uri>model://x500</uri>
     </include>
     <include>
+      <name>x500_3</name>
+      <pose>-1.7321 -1 0 0 0 1.570796326794897</pose>
+      <uri>model://x500</uri>
+    </include>
+    <include>
       <name>rope_2</name>
-      <pose>0 0 0 0 0 1.570796326794897</pose>
+      <pose>0 0 0 0 0 -0.523598775598299</pose>
       <uri>model://rope</uri>
     </include>
     <include>
       <name>rope_3</name>
-      <pose>0 0 0 0 0 -0.523598775598299</pose>
+      <pose>0 0 0 0 0 -2.617993877991494</pose>
       <uri>model://rope</uri>
     </include>
     <joint name="uav_joint2" type="fixed">

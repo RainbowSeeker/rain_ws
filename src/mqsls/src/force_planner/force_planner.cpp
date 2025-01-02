@@ -22,82 +22,30 @@
 class MultiStartOptimizer
 {
 public:
-    struct Configuration
-    {
-        std::vector<Eigen::Vector3d> theta;
-        std::vector<Eigen::Vector3d> psi;
-    };
-    static Configuration default_config;
-
     using OutputBus = mqsls::CodeGenForceOptimizer::OutputBus;
 
-    MultiStartOptimizer(const Configuration &config = default_config, bool early_exit = true) : _early_exit(early_exit)
+    MultiStartOptimizer()
     {
-        _all_initial_guesses.reserve(config.theta.size() * config.psi.size());
-        for (const auto &theta : config.theta)
-        {
-            for (const auto &psi : config.psi)
-            {
-                Eigen::Matrix3d Q;
-                for (int i = 0; i < 3; i++)
-                {
-                    Q.col(i) = Eigen::Vector3d(-cos(psi[i]) * cos(theta[i]), -sin(psi[i]) * cos(theta[i]), sin(theta[i]));
-                }
-                _all_initial_guesses.push_back(Q);
-            }
-        }
     }
 
-    const OutputBus &optimize(const Eigen::Vector3d &center, const double T_max, const Eigen::Vector3d &psi = {NAN, NAN, NAN})
+    const OutputBus &optimize(const Eigen::Vector3d &center, const Eigen::Vector3d &T_min, const Eigen::Vector3d &T_max)
     {
-        _best_output = _suboptimal_output = OutputBus();
-
-        const Eigen::Vector3d T_min_vec = {0.0, 0.0, 0.0};
-        const Eigen::Vector3d T_max_vec = {T_max, T_max, T_max};
-
         // Define Input
         auto input = mqsls::CodeGenForceOptimizer::InputBus();
         memcpy(input.center, center.data(), sizeof(input.center));
-        memcpy(input.T_min, T_min_vec.data(), sizeof(input.T_min));
-        memcpy(input.T_max, T_max_vec.data(), sizeof(input.T_max));
-        memcpy(input.psi, psi.data(), sizeof(input.psi));
+        memcpy(input.T_min, T_min.data(), sizeof(input.T_min));
+        memcpy(input.T_max, T_max.data(), sizeof(input.T_max));
 
-        // Optimize forces for each initial guess
-        int iter = 1;
-        for (const auto &initial_guess : _all_initial_guesses)
-        {
-            memcpy(input.initial_guess, initial_guess.data(), sizeof(input.initial_guess));
-            auto output = _optimizer.optimize(input);
+        // Optimize forces
+        _best_output = _optimizer.optimize(input);
 
-            if (output.exitflag == 1 || output.exitflag == 2)
-            {
-                if (output.radius > _best_output.radius)
-                {
-                    _best_output = output;
-                }
-                else if (_early_exit)
-                {
-                    std::cout << "Early exit at iteration [" << iter << "]....." << std::endl;
-                    break;
-                }
-            }
-            else
-            {
-                if (output.radius > _suboptimal_output.radius)
-                {
-                    _suboptimal_output = output;
-                }
-            }
-            iter++;
-        }
-        if (_best_output.radius < _suboptimal_output.radius)
+        if (_best_output.exitflag == 1 || _best_output.exitflag == 2)
         {
-            _best_output = _suboptimal_output;
-            std::cout << "No feasible solution found, using suboptimal solution....." << std::endl;
+            std::cout << "Feasible solution found....." << std::endl;
         }
         else
         {
-            std::cout << "Feasible solution found....." << std::endl;
+            std::cout << "No feasible solution found..... " << "Exitflag: " << _best_output.exitflag << std::endl;
         }
 
         Eigen::Matrix3d best_result = Eigen::Map<Eigen::Matrix3d>(_best_output.result);
@@ -130,28 +78,8 @@ public:
     }
 
 private:
-    // Parameters
-    const bool _early_exit = false;
-
-    std::vector<Eigen::Matrix3d> _all_initial_guesses;
     mqsls::CodeGenForceOptimizer _optimizer;
-    OutputBus _best_output, _suboptimal_output;
-};
-
-MultiStartOptimizer::Configuration MultiStartOptimizer::default_config = {
-    {
-        {deg2rad(10), deg2rad(10), deg2rad(10)},
-        {deg2rad(20), deg2rad(20), deg2rad(20)},
-        {deg2rad(30), deg2rad(30), deg2rad(30)},
-        {deg2rad(40), deg2rad(40), deg2rad(40)},
-        {deg2rad(50), deg2rad(50), deg2rad(50)},
-        {deg2rad(60), deg2rad(60), deg2rad(60)},
-        {deg2rad(70), deg2rad(70), deg2rad(70)},
-        {deg2rad(80), deg2rad(80), deg2rad(80)},
-    },
-    {
-        {deg2rad(-120), deg2rad(0), deg2rad(120)},
-    }
+    OutputBus _best_output;
 };
 
 class ForcePlanner : public rclcpp::Node
@@ -168,7 +96,7 @@ public:
 private:
     void handle_force_opt(const std::shared_ptr<mqsls::srv::ForceOpt::Request> request, std::shared_ptr<mqsls::srv::ForceOpt::Response> response)
     {
-        auto output = _optimizer.optimize(Eigen::Vector3d(request->center[0], request->center[1], request->center[2]), request->tension_max, Eigen::Vector3d(request->psi[0], request->psi[1], request->psi[2]));
+        auto output = _ms_opt.optimize(Eigen::Vector3d(request->center[0], request->center[1], request->center[2]), request->tension_min * Eigen::Vector3d(1, 1, 1), request->tension_max * Eigen::Vector3d(1, 1, 1));
 
         response->radius = output.radius;
         Eigen::Matrix3d best_result = Eigen::Map<Eigen::Matrix3d>(output.result);
@@ -180,7 +108,7 @@ private:
         }
     }
 
-    MultiStartOptimizer _optimizer;
+    MultiStartOptimizer _ms_opt;
     rclcpp::Service<mqsls::srv::ForceOpt>::SharedPtr _service;
 };
 

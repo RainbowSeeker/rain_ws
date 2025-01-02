@@ -61,7 +61,7 @@ def generate_launch_description():
                     'kw': 4.0,
                     'min_tension': 0.0,
                     'max_tension': 7.0,
-                    'traj_type': 'circle',
+                    'traj_type': 'line',
                 }],
             )
         )

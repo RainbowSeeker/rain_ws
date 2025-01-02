@@ -119,7 +119,7 @@ public:
         
         RCLCPP_INFO(this->get_logger(), "Requesting initial cable direction");
 
-        async_request_force_opt({0, 0, -_load_mass * 9.8}, true);
+        async_request_force_opt({0, 0, -_load_mass * 9.8});
 
         // start
         _event_handler->register_periodic_callback(std::bind(&MqslsLeader::run, this, std::placeholders::_1), 20_ms);
@@ -271,7 +271,7 @@ private:
                         expected_trim_acc[0], expected_trim_acc[1], expected_trim_acc[2], 
                         last_trim_acc[0], last_trim_acc[1], last_trim_acc[2]);
 
-                async_request_force_opt(expected_trim_acc * _load_mass, false);
+                async_request_force_opt(expected_trim_acc * _load_mass);
                 last_request_time = _running_time;
                 last_trim_acc = expected_trim_acc;
             }
@@ -401,16 +401,12 @@ private:
         }
     }
 
-    void async_request_force_opt(const Eigen::Vector3d &center, bool fix_psi = false)
+    void async_request_force_opt(const Eigen::Vector3d &center)
     {
         auto request = std::make_shared<mqsls::srv::ForceOpt::Request>();
         request->center = {center[0], center[1], center[2]};
-        if (fix_psi) {
-            request->psi = {deg2rad(-120), deg2rad(0), deg2rad(120)};
-        } else {
-            request->psi = {NAN, NAN, NAN};
-        }
         request->tension_max = this->get_parameter("max_tension").as_double();
+        request->tension_min = this->get_parameter("min_tension").as_double();
         auto result = _force_opt_client->async_send_request(request, std::bind(&MqslsLeader::handle_force_opt_response, this, std::placeholders::_1));
     }
 

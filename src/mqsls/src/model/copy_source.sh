@@ -11,7 +11,7 @@ do
 done
 
 
-source_dir=~/MQSLS_Model/build/codegen/lib/optimize_forces
+source_dir=~/MQSLS_Model/build/codegen/lib/mso_forces
 source_files=$(ls $source_dir | grep -E '*\.(c|h)$')
 rm -rf $current_dir/force_opt/*
 for file in $source_files

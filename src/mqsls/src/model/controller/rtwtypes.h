@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'control_3dof'.
 //
-// Model version                  : 1.701
+// Model version                  : 1.704
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Fri Dec 20 15:10:40 2024
+// C/C++ source code generated on : Tue Dec 31 19:55:02 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "controller/control_3dof.h"
-#include "force_opt/optimize_forces.h"
+#include "force_opt/mso_forces.h"
 
 namespace mqsls {
 
@@ -69,10 +69,8 @@ public:
     struct InputBus
     {
         double center[3];
-        double initial_guess[9];
         double T_min[3];
         double T_max[3];
-        double psi[3];
     };
     
     struct OutputBus
@@ -83,17 +81,17 @@ public:
     };
     CodeGenForceOptimizer()
     {
-        optimize_forces_initialize();
+        mso_forces_initialize();
     }
 
     ~CodeGenForceOptimizer()
     {
-        optimize_forces_terminate();
+        mso_forces_terminate();
     }
 
     const OutputBus &optimize(const InputBus &input)
     {
-        optimize_forces(input.center, input.initial_guess, input.T_min, input.T_max, input.psi, _output.result, &_output.radius, &_output.exitflag);
+        mso_forces(input.center, input.T_min, input.T_max, _output.result, &_output.radius, &_output.exitflag);
         return _output;
     }
 private:

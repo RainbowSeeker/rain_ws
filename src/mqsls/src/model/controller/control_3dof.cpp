@@ -7,9 +7,9 @@
 //
 // Code generated for Simulink model 'control_3dof'.
 //
-// Model version                  : 1.701
+// Model version                  : 1.704
 // Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
-// C/C++ source code generated on : Fri Dec 20 15:10:40 2024
+// C/C++ source code generated on : Tue Dec 31 19:55:02 2024
 //
 // Target selection: ert.tlc
 // Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -20,7 +20,6 @@
 #include "rtwtypes.h"
 #include <cmath>
 #include <emmintrin.h>
-#include <cstring>
 #include "cmath"
 #include "limits"
 
@@ -431,43 +430,42 @@ real_T control_3dof::control_3dof_xzlangeM(const real_T x[9])
 void control_3dof::control_3dof_xzlascl(real_T cfrom, real_T cto, int32_T m,
   int32_T n, real_T A[9], int32_T iA0, int32_T lda)
 {
-  control_3dof_B.cfromc_n = cfrom;
-  control_3dof_B.ctoc_p = cto;
-  control_3dof_B.notdone_o = true;
-  while (control_3dof_B.notdone_o) {
-    control_3dof_B.cfrom1_l = control_3dof_B.cfromc_n * 2.0041683600089728E-292;
-    control_3dof_B.cto1_j = control_3dof_B.ctoc_p / 4.9896007738368E+291;
-    if ((std::abs(control_3dof_B.cfrom1_l) > std::abs(control_3dof_B.ctoc_p)) &&
-        (control_3dof_B.ctoc_p != 0.0)) {
-      control_3dof_B.mul_d = 2.0041683600089728E-292;
-      control_3dof_B.cfromc_n = control_3dof_B.cfrom1_l;
-    } else if (std::abs(control_3dof_B.cto1_j) > std::abs
-               (control_3dof_B.cfromc_n)) {
-      control_3dof_B.mul_d = 4.9896007738368E+291;
-      control_3dof_B.ctoc_p = control_3dof_B.cto1_j;
+  control_3dof_B.cfromc_g = cfrom;
+  control_3dof_B.ctoc_m = cto;
+  control_3dof_B.notdone_n = true;
+  while (control_3dof_B.notdone_n) {
+    control_3dof_B.cfrom1_n = control_3dof_B.cfromc_g * 2.0041683600089728E-292;
+    control_3dof_B.cto1_p = control_3dof_B.ctoc_m / 4.9896007738368E+291;
+    if ((std::abs(control_3dof_B.cfrom1_n) > std::abs(control_3dof_B.ctoc_m)) &&
+        (control_3dof_B.ctoc_m != 0.0)) {
+      control_3dof_B.mul_l = 2.0041683600089728E-292;
+      control_3dof_B.cfromc_g = control_3dof_B.cfrom1_n;
+    } else if (std::abs(control_3dof_B.cto1_p) > std::abs
+               (control_3dof_B.cfromc_g)) {
+      control_3dof_B.mul_l = 4.9896007738368E+291;
+      control_3dof_B.ctoc_m = control_3dof_B.cto1_p;
     } else {
-      control_3dof_B.mul_d = control_3dof_B.ctoc_p / control_3dof_B.cfromc_n;
-      control_3dof_B.notdone_o = false;
+      control_3dof_B.mul_l = control_3dof_B.ctoc_m / control_3dof_B.cfromc_g;
+      control_3dof_B.notdone_n = false;
     }
 
-    for (control_3dof_B.j_bn = 0; control_3dof_B.j_bn < n; control_3dof_B.j_bn++)
-    {
-      control_3dof_B.offset_h = (control_3dof_B.j_bn * lda + iA0) - 2;
-      control_3dof_B.scalarLB_e = (m / 2) << 1;
-      control_3dof_B.vectorUB_bj = control_3dof_B.scalarLB_e - 2;
-      for (control_3dof_B.b_i_d = 0; control_3dof_B.b_i_d <=
-           control_3dof_B.vectorUB_bj; control_3dof_B.b_i_d += 2) {
+    for (control_3dof_B.j_n = 0; control_3dof_B.j_n < n; control_3dof_B.j_n++) {
+      control_3dof_B.offset_b = (control_3dof_B.j_n * lda + iA0) - 2;
+      control_3dof_B.scalarLB_l = (m / 2) << 1;
+      control_3dof_B.vectorUB_h = control_3dof_B.scalarLB_l - 2;
+      for (control_3dof_B.b_i_b = 0; control_3dof_B.b_i_b <=
+           control_3dof_B.vectorUB_h; control_3dof_B.b_i_b += 2) {
         __m128d tmp;
-        control_3dof_B.i1 = (control_3dof_B.b_i_d + control_3dof_B.offset_h) + 1;
-        tmp = _mm_loadu_pd(&A[control_3dof_B.i1]);
-        _mm_storeu_pd(&A[control_3dof_B.i1], _mm_mul_pd(tmp, _mm_set1_pd
-          (control_3dof_B.mul_d)));
+        control_3dof_B.i2 = (control_3dof_B.b_i_b + control_3dof_B.offset_b) + 1;
+        tmp = _mm_loadu_pd(&A[control_3dof_B.i2]);
+        _mm_storeu_pd(&A[control_3dof_B.i2], _mm_mul_pd(tmp, _mm_set1_pd
+          (control_3dof_B.mul_l)));
       }
 
-      for (control_3dof_B.b_i_d = control_3dof_B.scalarLB_e;
-           control_3dof_B.b_i_d < m; control_3dof_B.b_i_d++) {
-        control_3dof_B.i1 = (control_3dof_B.b_i_d + control_3dof_B.offset_h) + 1;
-        A[control_3dof_B.i1] *= control_3dof_B.mul_d;
+      for (control_3dof_B.b_i_b = control_3dof_B.scalarLB_l;
+           control_3dof_B.b_i_b < m; control_3dof_B.b_i_b++) {
+        control_3dof_B.i2 = (control_3dof_B.b_i_b + control_3dof_B.offset_b) + 1;
+        A[control_3dof_B.i2] *= control_3dof_B.mul_l;
       }
     }
   }
@@ -483,22 +481,22 @@ real_T control_3dof::control_3dof_xnrm2(int32_T n, const real_T x[9], int32_T
     if (n == 1) {
       y = std::abs(x[ix0 - 1]);
     } else {
-      control_3dof_B.scale_l = 3.3121686421112381E-170;
-      control_3dof_B.kend_n = ix0 + n;
-      for (control_3dof_B.k_i = ix0; control_3dof_B.k_i < control_3dof_B.kend_n;
-           control_3dof_B.k_i++) {
-        control_3dof_B.absxk_d = std::abs(x[control_3dof_B.k_i - 1]);
-        if (control_3dof_B.absxk_d > control_3dof_B.scale_l) {
-          control_3dof_B.t_d = control_3dof_B.scale_l / control_3dof_B.absxk_d;
-          y = y * control_3dof_B.t_d * control_3dof_B.t_d + 1.0;
-          control_3dof_B.scale_l = control_3dof_B.absxk_d;
+      control_3dof_B.scale_d = 3.3121686421112381E-170;
+      control_3dof_B.kend_a = ix0 + n;
+      for (control_3dof_B.k_j = ix0; control_3dof_B.k_j < control_3dof_B.kend_a;
+           control_3dof_B.k_j++) {
+        control_3dof_B.absxk_g = std::abs(x[control_3dof_B.k_j - 1]);
+        if (control_3dof_B.absxk_g > control_3dof_B.scale_d) {
+          control_3dof_B.t_l = control_3dof_B.scale_d / control_3dof_B.absxk_g;
+          y = y * control_3dof_B.t_l * control_3dof_B.t_l + 1.0;
+          control_3dof_B.scale_d = control_3dof_B.absxk_g;
         } else {
-          control_3dof_B.t_d = control_3dof_B.absxk_d / control_3dof_B.scale_l;
-          y += control_3dof_B.t_d * control_3dof_B.t_d;
+          control_3dof_B.t_l = control_3dof_B.absxk_g / control_3dof_B.scale_d;
+          y += control_3dof_B.t_l * control_3dof_B.t_l;
         }
       }
 
-      y = control_3dof_B.scale_l * std::sqrt(y);
+      y = control_3dof_B.scale_d * std::sqrt(y);
     }
   }
 
@@ -543,22 +541,22 @@ real_T control_3dof::control_3dof_xnrm2_n(int32_T n, const real_T x[3], int32_T
     if (n == 1) {
       y = std::abs(x[ix0 - 1]);
     } else {
-      control_3dof_B.scale_g = 3.3121686421112381E-170;
+      control_3dof_B.scale_j = 3.3121686421112381E-170;
       control_3dof_B.kend = ix0 + n;
-      for (control_3dof_B.k_o = ix0; control_3dof_B.k_o < control_3dof_B.kend;
-           control_3dof_B.k_o++) {
-        control_3dof_B.absxk = std::abs(x[control_3dof_B.k_o - 1]);
-        if (control_3dof_B.absxk > control_3dof_B.scale_g) {
-          control_3dof_B.t = control_3dof_B.scale_g / control_3dof_B.absxk;
+      for (control_3dof_B.k_f = ix0; control_3dof_B.k_f < control_3dof_B.kend;
+           control_3dof_B.k_f++) {
+        control_3dof_B.absxk = std::abs(x[control_3dof_B.k_f - 1]);
+        if (control_3dof_B.absxk > control_3dof_B.scale_j) {
+          control_3dof_B.t = control_3dof_B.scale_j / control_3dof_B.absxk;
           y = y * control_3dof_B.t * control_3dof_B.t + 1.0;
-          control_3dof_B.scale_g = control_3dof_B.absxk;
+          control_3dof_B.scale_j = control_3dof_B.absxk;
         } else {
-          control_3dof_B.t = control_3dof_B.absxk / control_3dof_B.scale_g;
+          control_3dof_B.t = control_3dof_B.absxk / control_3dof_B.scale_j;
           y += control_3dof_B.t * control_3dof_B.t;
         }
       }
 
-      y = control_3dof_B.scale_g * std::sqrt(y);
+      y = control_3dof_B.scale_j * std::sqrt(y);
     }
   }
 
@@ -570,21 +568,21 @@ void control_3dof::control_3dof_xaxpy_f(int32_T n, real_T a, const real_T x[9],
   int32_T ix0, real_T y[3], int32_T iy0)
 {
   if ((n >= 1) && (!(a == 0.0))) {
-    control_3dof_B.scalarLB_ju = (n / 2) << 1;
-    control_3dof_B.vectorUB_j = control_3dof_B.scalarLB_ju - 2;
-    for (control_3dof_B.k_a = 0; control_3dof_B.k_a <= control_3dof_B.vectorUB_j;
-         control_3dof_B.k_a += 2) {
+    control_3dof_B.scalarLB_bj = (n / 2) << 1;
+    control_3dof_B.vectorUB_j = control_3dof_B.scalarLB_bj - 2;
+    for (control_3dof_B.k_e = 0; control_3dof_B.k_e <= control_3dof_B.vectorUB_j;
+         control_3dof_B.k_e += 2) {
       __m128d tmp;
-      control_3dof_B.i3 = (iy0 + control_3dof_B.k_a) - 1;
-      tmp = _mm_loadu_pd(&y[control_3dof_B.i3]);
-      _mm_storeu_pd(&y[control_3dof_B.i3], _mm_add_pd(_mm_mul_pd(_mm_loadu_pd
-        (&x[(ix0 + control_3dof_B.k_a) - 1]), _mm_set1_pd(a)), tmp));
+      control_3dof_B.i4 = (iy0 + control_3dof_B.k_e) - 1;
+      tmp = _mm_loadu_pd(&y[control_3dof_B.i4]);
+      _mm_storeu_pd(&y[control_3dof_B.i4], _mm_add_pd(_mm_mul_pd(_mm_loadu_pd
+        (&x[(ix0 + control_3dof_B.k_e) - 1]), _mm_set1_pd(a)), tmp));
     }
 
-    for (control_3dof_B.k_a = control_3dof_B.scalarLB_ju; control_3dof_B.k_a < n;
-         control_3dof_B.k_a++) {
-      control_3dof_B.i3 = (iy0 + control_3dof_B.k_a) - 1;
-      y[control_3dof_B.i3] += x[(ix0 + control_3dof_B.k_a) - 1] * a;
+    for (control_3dof_B.k_e = control_3dof_B.scalarLB_bj; control_3dof_B.k_e < n;
+         control_3dof_B.k_e++) {
+      control_3dof_B.i4 = (iy0 + control_3dof_B.k_e) - 1;
+      y[control_3dof_B.i4] += x[(ix0 + control_3dof_B.k_e) - 1] * a;
     }
   }
 }
@@ -594,21 +592,21 @@ void control_3dof::control_3dof_xaxpy_fh(int32_T n, real_T a, const real_T x[3],
   int32_T ix0, real_T y[9], int32_T iy0)
 {
   if ((n >= 1) && (!(a == 0.0))) {
-    control_3dof_B.scalarLB_j = (n / 2) << 1;
-    control_3dof_B.vectorUB_f = control_3dof_B.scalarLB_j - 2;
-    for (control_3dof_B.k = 0; control_3dof_B.k <= control_3dof_B.vectorUB_f;
+    control_3dof_B.scalarLB_b = (n / 2) << 1;
+    control_3dof_B.vectorUB_d = control_3dof_B.scalarLB_b - 2;
+    for (control_3dof_B.k = 0; control_3dof_B.k <= control_3dof_B.vectorUB_d;
          control_3dof_B.k += 2) {
       __m128d tmp;
-      control_3dof_B.i2 = (iy0 + control_3dof_B.k) - 1;
-      tmp = _mm_loadu_pd(&y[control_3dof_B.i2]);
-      _mm_storeu_pd(&y[control_3dof_B.i2], _mm_add_pd(_mm_mul_pd(_mm_loadu_pd
+      control_3dof_B.i3 = (iy0 + control_3dof_B.k) - 1;
+      tmp = _mm_loadu_pd(&y[control_3dof_B.i3]);
+      _mm_storeu_pd(&y[control_3dof_B.i3], _mm_add_pd(_mm_mul_pd(_mm_loadu_pd
         (&x[(ix0 + control_3dof_B.k) - 1]), _mm_set1_pd(a)), tmp));
     }
 
-    for (control_3dof_B.k = control_3dof_B.scalarLB_j; control_3dof_B.k < n;
+    for (control_3dof_B.k = control_3dof_B.scalarLB_b; control_3dof_B.k < n;
          control_3dof_B.k++) {
-      control_3dof_B.i2 = (iy0 + control_3dof_B.k) - 1;
-      y[control_3dof_B.i2] += x[(ix0 + control_3dof_B.k) - 1] * a;
+      control_3dof_B.i3 = (iy0 + control_3dof_B.k) - 1;
+      y[control_3dof_B.i3] += x[(ix0 + control_3dof_B.k) - 1] * a;
     }
   }
 }
@@ -636,23 +634,23 @@ void control_3dof::control_3dof_xzlascl_l(real_T cfrom, real_T cto, int32_T m,
       control_3dof_B.notdone = false;
     }
 
-    for (control_3dof_B.j_b = 0; control_3dof_B.j_b < n; control_3dof_B.j_b++) {
-      control_3dof_B.offset = (control_3dof_B.j_b * lda + iA0) - 2;
+    for (control_3dof_B.j_l = 0; control_3dof_B.j_l < n; control_3dof_B.j_l++) {
+      control_3dof_B.offset = (control_3dof_B.j_l * lda + iA0) - 2;
       control_3dof_B.scalarLB = (m / 2) << 1;
-      control_3dof_B.vectorUB_b = control_3dof_B.scalarLB - 2;
-      for (control_3dof_B.b_i_n = 0; control_3dof_B.b_i_n <=
-           control_3dof_B.vectorUB_b; control_3dof_B.b_i_n += 2) {
+      control_3dof_B.vectorUB_o = control_3dof_B.scalarLB - 2;
+      for (control_3dof_B.b_i = 0; control_3dof_B.b_i <=
+           control_3dof_B.vectorUB_o; control_3dof_B.b_i += 2) {
         __m128d tmp;
-        control_3dof_B.i_ln = (control_3dof_B.b_i_n + control_3dof_B.offset) + 1;
-        tmp = _mm_loadu_pd(&A[control_3dof_B.i_ln]);
-        _mm_storeu_pd(&A[control_3dof_B.i_ln], _mm_mul_pd(tmp, _mm_set1_pd
+        control_3dof_B.i1 = (control_3dof_B.b_i + control_3dof_B.offset) + 1;
+        tmp = _mm_loadu_pd(&A[control_3dof_B.i1]);
+        _mm_storeu_pd(&A[control_3dof_B.i1], _mm_mul_pd(tmp, _mm_set1_pd
           (control_3dof_B.mul)));
       }
 
-      for (control_3dof_B.b_i_n = control_3dof_B.scalarLB; control_3dof_B.b_i_n <
-           m; control_3dof_B.b_i_n++) {
-        control_3dof_B.i_ln = (control_3dof_B.b_i_n + control_3dof_B.offset) + 1;
-        A[control_3dof_B.i_ln] *= control_3dof_B.mul;
+      for (control_3dof_B.b_i = control_3dof_B.scalarLB; control_3dof_B.b_i < m;
+           control_3dof_B.b_i++) {
+        control_3dof_B.i1 = (control_3dof_B.b_i + control_3dof_B.offset) + 1;
+        A[control_3dof_B.i1] *= control_3dof_B.mul;
       }
     }
   }
@@ -1137,17 +1135,17 @@ void control_3dof::control_3dof_svd(const real_T A[9], real_T U[9], real_T s[3],
         (control_3dof_B.b_s[control_3dof_B.qq])), std::abs
         (control_3dof_B.e[control_3dof_B.qq]));
       tmp = _mm_set1_pd(control_3dof_B.r);
-      _mm_storeu_pd(&control_3dof_B.dv3[0], _mm_div_pd(_mm_set_pd
+      _mm_storeu_pd(&control_3dof_B.dv2[0], _mm_div_pd(_mm_set_pd
         (control_3dof_B.b_s[control_3dof_B.m], control_3dof_B.rt), tmp));
-      control_3dof_B.rt = control_3dof_B.dv3[0];
-      control_3dof_B.smm1 = control_3dof_B.dv3[1];
-      _mm_storeu_pd(&control_3dof_B.dv3[0], _mm_div_pd(_mm_set_pd
+      control_3dof_B.rt = control_3dof_B.dv2[0];
+      control_3dof_B.smm1 = control_3dof_B.dv2[1];
+      _mm_storeu_pd(&control_3dof_B.dv2[0], _mm_div_pd(_mm_set_pd
         (control_3dof_B.b_s[control_3dof_B.qq],
          control_3dof_B.e[control_3dof_B.m]), tmp));
       control_3dof_B.smm1 = ((control_3dof_B.smm1 + control_3dof_B.rt) *
-        (control_3dof_B.smm1 - control_3dof_B.rt) + control_3dof_B.dv3[0] *
-        control_3dof_B.dv3[0]) / 2.0;
-      control_3dof_B.c = control_3dof_B.rt * control_3dof_B.dv3[0];
+        (control_3dof_B.smm1 - control_3dof_B.rt) + control_3dof_B.dv2[0] *
+        control_3dof_B.dv2[0]) / 2.0;
+      control_3dof_B.c = control_3dof_B.rt * control_3dof_B.dv2[0];
       control_3dof_B.c *= control_3dof_B.c;
       if ((control_3dof_B.smm1 != 0.0) || (control_3dof_B.c != 0.0)) {
         control_3dof_B.shift = std::sqrt(control_3dof_B.smm1 *
@@ -1162,10 +1160,10 @@ void control_3dof::control_3dof_svd(const real_T A[9], real_T U[9], real_T s[3],
         control_3dof_B.shift = 0.0;
       }
 
-      control_3dof_B.rt = (control_3dof_B.dv3[1] + control_3dof_B.rt) *
-        (control_3dof_B.dv3[1] - control_3dof_B.rt) + control_3dof_B.shift;
+      control_3dof_B.rt = (control_3dof_B.dv2[1] + control_3dof_B.rt) *
+        (control_3dof_B.dv2[1] - control_3dof_B.rt) + control_3dof_B.shift;
       control_3dof_B.r = control_3dof_B.e[control_3dof_B.qq] / control_3dof_B.r *
-        control_3dof_B.dv3[1];
+        control_3dof_B.dv2[1];
       for (control_3dof_B.qq_tmp = control_3dof_B.qq + 1; control_3dof_B.qq_tmp <=
            control_3dof_B.m + 1; control_3dof_B.qq_tmp++) {
         control_3dof_xrotg(&control_3dof_B.rt, &control_3dof_B.r,
@@ -1276,10 +1274,10 @@ void control_3dof::control_3dof_pinv(const real_T A[9], real_T X[9])
   __m128d tmp_0;
   boolean_T exitg1;
   control_3dof_B.p = true;
-  for (control_3dof_B.r_o = 0; control_3dof_B.r_o < 9; control_3dof_B.r_o++) {
-    X[control_3dof_B.r_o] = 0.0;
+  for (control_3dof_B.r_d = 0; control_3dof_B.r_d < 9; control_3dof_B.r_d++) {
+    X[control_3dof_B.r_d] = 0.0;
     if (control_3dof_B.p) {
-      control_3dof_B.absx = A[control_3dof_B.r_o];
+      control_3dof_B.absx = A[control_3dof_B.r_d];
       if (std::isinf(control_3dof_B.absx) || std::isnan(control_3dof_B.absx)) {
         control_3dof_B.p = false;
       }
@@ -1287,8 +1285,8 @@ void control_3dof::control_3dof_pinv(const real_T A[9], real_T X[9])
   }
 
   if (!control_3dof_B.p) {
-    for (control_3dof_B.r_o = 0; control_3dof_B.r_o < 9; control_3dof_B.r_o++) {
-      X[control_3dof_B.r_o] = (rtNaN);
+    for (control_3dof_B.r_d = 0; control_3dof_B.r_d < 9; control_3dof_B.r_d++) {
+      X[control_3dof_B.r_d] = (rtNaN);
     }
   } else {
     control_3dof_svd(A, control_3dof_B.U, control_3dof_B.s, control_3dof_B.V);
@@ -1303,29 +1301,29 @@ void control_3dof::control_3dof_pinv(const real_T A[9], real_T X[9])
     }
 
     control_3dof_B.absx *= 3.0;
-    control_3dof_B.r_o = 0;
+    control_3dof_B.r_d = 0;
     exitg1 = false;
-    while ((!exitg1) && (control_3dof_B.r_o < 3)) {
-      if (std::isinf(control_3dof_B.s[control_3dof_B.r_o]) || std::isnan
-          (control_3dof_B.s[control_3dof_B.r_o])) {
+    while ((!exitg1) && (control_3dof_B.r_d < 3)) {
+      if (std::isinf(control_3dof_B.s[control_3dof_B.r_d]) || std::isnan
+          (control_3dof_B.s[control_3dof_B.r_d])) {
         control_3dof_B.absx = 1.7976931348623157E+308;
         exitg1 = true;
       } else {
-        control_3dof_B.r_o++;
+        control_3dof_B.r_d++;
       }
     }
 
-    control_3dof_B.r_o = -1;
+    control_3dof_B.r_d = -1;
     control_3dof_B.exponent = 0;
     while ((control_3dof_B.exponent < 3) &&
            (control_3dof_B.s[control_3dof_B.exponent] > control_3dof_B.absx)) {
-      control_3dof_B.r_o++;
+      control_3dof_B.r_d++;
       control_3dof_B.exponent++;
     }
 
-    if (control_3dof_B.r_o + 1 > 0) {
+    if (control_3dof_B.r_d + 1 > 0) {
       control_3dof_B.vcol = 1;
-      for (control_3dof_B.j = 0; control_3dof_B.j <= control_3dof_B.r_o;
+      for (control_3dof_B.j = 0; control_3dof_B.j <= control_3dof_B.r_d;
            control_3dof_B.j++) {
         control_3dof_B.absx = 1.0 / control_3dof_B.s[control_3dof_B.j];
         control_3dof_B.exponent = 2 + control_3dof_B.vcol;
@@ -1358,7 +1356,7 @@ void control_3dof::control_3dof_pinv(const real_T A[9], real_T X[9])
       for (control_3dof_B.j = 0; control_3dof_B.j <= 6; control_3dof_B.j += 3) {
         control_3dof_B.ar = -1;
         control_3dof_B.vcol++;
-        control_3dof_B.b = 3 * control_3dof_B.r_o + control_3dof_B.vcol;
+        control_3dof_B.b = 3 * control_3dof_B.r_d + control_3dof_B.vcol;
         for (control_3dof_B.ib = control_3dof_B.vcol; control_3dof_B.ib <=
              control_3dof_B.b; control_3dof_B.ib += 3) {
           control_3dof_B.exponent = control_3dof_B.j + 3;
@@ -1387,136 +1385,20 @@ void control_3dof::control_3dof_pinv(const real_T A[9], real_T X[9])
   }
 }
 
-// Function for MATLAB Function: '<S4>/Force Saturation && Disturbution'
-void control_3dof::control_3dof_TCISolver(const real_T F_sp[3], const real_T
-  F_fixed[3], const real_T Q[9], real_T b_min_tension, real_T b_max_tension,
-  real_T result[3], real_T F_actual[3])
-{
-  __m128d tmp;
-  __m128d tmp_0;
-  __m128d tmp_1;
-  int32_T exitg1;
-  boolean_T exitg2;
-  control_3dof_B.found[0] = false;
-  result[0] = 0.0;
-  control_3dof_B.F_d_idx_0 = F_sp[0];
-  control_3dof_B.found[1] = false;
-  result[1] = 0.0;
-  control_3dof_B.F_d_idx_1 = F_sp[1];
-  control_3dof_B.found[2] = false;
-  result[2] = 0.0;
-  control_3dof_B.F_d_idx_2 = F_sp[2];
-  std::memcpy(&control_3dof_B.Q_new_m[0], &Q[0], 9U * sizeof(real_T));
-  do {
-    exitg1 = 0;
-    control_3dof_pinv(control_3dof_B.Q_new_m, control_3dof_B.dv);
-    for (control_3dof_B.i_l = 0; control_3dof_B.i_l <= 0; control_3dof_B.i_l +=
-         2) {
-      tmp = _mm_loadu_pd(&control_3dof_B.dv[control_3dof_B.i_l + 3]);
-      tmp_0 = _mm_loadu_pd(&control_3dof_B.dv[control_3dof_B.i_l]);
-      tmp_1 = _mm_loadu_pd(&control_3dof_B.dv[control_3dof_B.i_l + 6]);
-      _mm_storeu_pd(&control_3dof_B.vu_c[control_3dof_B.i_l], _mm_add_pd
-                    (_mm_add_pd(_mm_mul_pd(tmp, _mm_set1_pd
-        (control_3dof_B.F_d_idx_1)), _mm_mul_pd(tmp_0, _mm_set1_pd
-        (control_3dof_B.F_d_idx_0))), _mm_mul_pd(tmp_1, _mm_set1_pd
-        (control_3dof_B.F_d_idx_2))));
-    }
-
-    for (control_3dof_B.i_l = 2; control_3dof_B.i_l < 3; control_3dof_B.i_l++) {
-      control_3dof_B.vu_c[control_3dof_B.i_l] =
-        (control_3dof_B.dv[control_3dof_B.i_l + 3] * control_3dof_B.F_d_idx_1 +
-         control_3dof_B.dv[control_3dof_B.i_l] * control_3dof_B.F_d_idx_0) +
-        control_3dof_B.dv[control_3dof_B.i_l + 6] * control_3dof_B.F_d_idx_2;
-    }
-
-    control_3dof_B.is_valid = true;
-    control_3dof_B.i_l = 0;
-    control_3dof_B.b_i = 0;
-    exitg2 = false;
-    while ((!exitg2) && (control_3dof_B.b_i < 3)) {
-      control_3dof_B.i_l = control_3dof_B.b_i;
-      if (control_3dof_B.found[control_3dof_B.b_i]) {
-        control_3dof_B.b_i++;
-      } else if (-control_3dof_B.vu_c[control_3dof_B.b_i] < b_min_tension -
-                 1.0E-5) {
-        control_3dof_B.vu_c[control_3dof_B.b_i] = -b_min_tension;
-        control_3dof_B.is_valid = false;
-        exitg2 = true;
-      } else if (-control_3dof_B.vu_c[control_3dof_B.b_i] > b_max_tension +
-                 1.0E-5) {
-        control_3dof_B.vu_c[control_3dof_B.b_i] = -b_max_tension;
-        control_3dof_B.is_valid = false;
-        exitg2 = true;
-      } else {
-        control_3dof_B.b_i++;
-      }
-    }
-
-    if (control_3dof_B.is_valid) {
-      exitg1 = 1;
-    } else {
-      control_3dof_B.found[control_3dof_B.i_l] = true;
-      result[control_3dof_B.i_l] = control_3dof_B.vu_c[control_3dof_B.i_l];
-      control_3dof_B.F_d_idx_0 = F_fixed[0];
-      control_3dof_B.F_d_idx_1 = F_fixed[1];
-      control_3dof_B.F_d_idx_2 = F_fixed[2];
-      for (control_3dof_B.b_i = 0; control_3dof_B.b_i < 3; control_3dof_B.b_i++)
-      {
-        if (control_3dof_B.found[control_3dof_B.b_i]) {
-          control_3dof_B.result = result[control_3dof_B.b_i];
-          _mm_storeu_pd(&control_3dof_B.dv2[0], _mm_sub_pd(_mm_set_pd
-            (control_3dof_B.F_d_idx_1, control_3dof_B.F_d_idx_0), _mm_mul_pd
-            (_mm_loadu_pd(&Q[3 * control_3dof_B.b_i]), _mm_set1_pd
-             (control_3dof_B.result))));
-          control_3dof_B.F_d_idx_0 = control_3dof_B.dv2[0];
-          control_3dof_B.F_d_idx_1 = control_3dof_B.dv2[1];
-          control_3dof_B.F_d_idx_2 -= Q[3 * control_3dof_B.b_i + 2] *
-            control_3dof_B.result;
-        }
-
-        control_3dof_B.Q_new_m[control_3dof_B.b_i + 3 * control_3dof_B.i_l] =
-          -(F_sp[control_3dof_B.b_i] - F_fixed[control_3dof_B.b_i]);
-      }
-    }
-  } while (exitg1 == 0);
-
-  if (!control_3dof_B.found[0]) {
-    result[0] = control_3dof_B.vu_c[0];
-  }
-
-  if (!control_3dof_B.found[1]) {
-    result[1] = control_3dof_B.vu_c[1];
-  }
-
-  if (!control_3dof_B.found[2]) {
-    result[2] = control_3dof_B.vu_c[2];
-  }
-
-  control_3dof_B.result = result[1];
-  control_3dof_B.F_d_idx_0 = result[0];
-  control_3dof_B.F_d_idx_1 = result[2];
-  for (control_3dof_B.i_l = 0; control_3dof_B.i_l <= 0; control_3dof_B.i_l += 2)
-  {
-    _mm_storeu_pd(&F_actual[control_3dof_B.i_l], _mm_add_pd(_mm_add_pd
-      (_mm_mul_pd(_mm_loadu_pd(&Q[control_3dof_B.i_l + 3]), _mm_set1_pd
-                  (control_3dof_B.result)), _mm_mul_pd(_mm_loadu_pd
-      (&Q[control_3dof_B.i_l]), _mm_set1_pd(control_3dof_B.F_d_idx_0))),
-      _mm_mul_pd(_mm_loadu_pd(&Q[control_3dof_B.i_l + 6]), _mm_set1_pd
-                 (control_3dof_B.F_d_idx_1))));
-  }
-
-  for (control_3dof_B.i_l = 2; control_3dof_B.i_l < 3; control_3dof_B.i_l++) {
-    F_actual[control_3dof_B.i_l] = (Q[control_3dof_B.i_l + 3] *
-      control_3dof_B.result + Q[control_3dof_B.i_l] * control_3dof_B.F_d_idx_0)
-      + Q[control_3dof_B.i_l + 6] * control_3dof_B.F_d_idx_1;
-  }
-}
-
 // Model step function
 void control_3dof::step()
 {
+  static const real_T b[3]{ 0.0, 0.0, -9.8 };
+
   __m128d tmp;
   __m128d tmp_0;
+  __m128d tmp_1;
+  __m128d tmp_2;
+  static const int8_T a[18]{ 1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 1, 0, 0,
+    -1 };
+
+  static const real_T b_0[3]{ 0.0, 0.0, -9.8 };
+
   boolean_T exitg1;
 
   // SignalConversion generated from: '<S20>/Vector Concatenate' incorporates:
@@ -1647,14 +1529,14 @@ void control_3dof::step()
   //   MATLABSystem: '<S4>/Position 2nd ESO'
   //   Sum: '<S19>/Sum'
   //
-  control_3dof_B.u0 = (control_3dof_U.Traj_sp.pos_sp[0] -
-                       control_3dof_U.Payload_Out.pL[0]) * CONTROL_PARAM.KP;
+  control_3dof_B.upper = (control_3dof_U.Traj_sp.pos_sp[0] -
+    control_3dof_U.Payload_Out.pL[0]) * CONTROL_PARAM.KP;
 
   // Saturate: '<S19>/vel_limit'
-  if (control_3dof_B.u0 > 5.0) {
-    control_3dof_B.u0 = 5.0;
-  } else if (control_3dof_B.u0 < -5.0) {
-    control_3dof_B.u0 = -5.0;
+  if (control_3dof_B.upper > 5.0) {
+    control_3dof_B.upper = 5.0;
+  } else if (control_3dof_B.upper < -5.0) {
+    control_3dof_B.upper = -5.0;
   }
 
   // Sum: '<S19>/Sum1' incorporates:
@@ -1666,15 +1548,17 @@ void control_3dof::step()
   //   Sum: '<S19>/Sum2'
   //   Sum: '<S19>/Sum3'
   //
-  control_3dof_B.u0 = ((control_3dof_B.u0 + control_3dof_U.Traj_sp.vel_sp[0]) -
-                       control_3dof_U.Payload_Out.vL[0]) * CONTROL_PARAM.KV +
+  control_3dof_B.upper = ((control_3dof_B.upper + control_3dof_U.Traj_sp.vel_sp
+    [0]) - control_3dof_U.Payload_Out.vL[0]) * CONTROL_PARAM.KV +
     control_3dof_U.Traj_sp.acc_ff[0];
 
   // Saturate: '<S19>/acc_limit'
-  if (control_3dof_B.u0 > 3.0) {
-    control_3dof_B.u0 = 3.0;
-  } else if (control_3dof_B.u0 < -3.0) {
-    control_3dof_B.u0 = -3.0;
+  if (control_3dof_B.upper > 3.0) {
+    control_3dof_B.acc_limit[0] = 3.0;
+  } else if (control_3dof_B.upper < -3.0) {
+    control_3dof_B.acc_limit[0] = -3.0;
+  } else {
+    control_3dof_B.acc_limit[0] = control_3dof_B.upper;
   }
 
   // Start for MATLABSystem: '<S4>/Position 2nd ESO' incorporates:
@@ -1692,17 +1576,17 @@ void control_3dof::step()
   //   Inport: '<Root>/Payload_Out'
   //   UnitDelay: '<S4>/Unit Delay'
   //
-  control_3dof_B.e_2_b = control_3dof_U.Payload_Out.vL[1] -
+  control_3dof_B.e_2_c = control_3dof_U.Payload_Out.vL[1] -
     control_3dof_DW.obj.Z_2[1];
   control_3dof_DW.obj.Z_1[1] += (control_3dof_DW.obj.K_p[0] *
     control_3dof_B.dv1[1] + control_3dof_DW.obj.Z_2[1]) * 0.02;
   control_3dof_DW.obj.Z_2[1] += (((control_3dof_DW.UnitDelay_DSTATE[1] +
     control_3dof_DW.obj.Z_3[1]) + control_3dof_DW.obj.K_p[1] *
-    control_3dof_B.dv1[1]) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_b) *
+    control_3dof_B.dv1[1]) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_c) *
     0.02;
   control_3dof_DW.obj.Z_3[1] += (control_3dof_B.dv1[1] *
     control_3dof_DW.obj.K_p[2] + control_3dof_DW.obj.K_v[2] *
-    control_3dof_B.e_2_b) * 0.02;
+    control_3dof_B.e_2_c) * 0.02;
 
   // Gain: '<S19>/KP' incorporates:
   //   Inport: '<Root>/Payload_Out'
@@ -1710,14 +1594,14 @@ void control_3dof::step()
   //   MATLABSystem: '<S4>/Position 2nd ESO'
   //   Sum: '<S19>/Sum'
   //
-  control_3dof_B.u0_p = (control_3dof_U.Traj_sp.pos_sp[1] -
+  control_3dof_B.lower = (control_3dof_U.Traj_sp.pos_sp[1] -
     control_3dof_U.Payload_Out.pL[1]) * CONTROL_PARAM.KP;
 
   // Saturate: '<S19>/vel_limit'
-  if (control_3dof_B.u0_p > 5.0) {
-    control_3dof_B.u0_p = 5.0;
-  } else if (control_3dof_B.u0_p < -5.0) {
-    control_3dof_B.u0_p = -5.0;
+  if (control_3dof_B.lower > 5.0) {
+    control_3dof_B.lower = 5.0;
+  } else if (control_3dof_B.lower < -5.0) {
+    control_3dof_B.lower = -5.0;
   }
 
   // Sum: '<S19>/Sum1' incorporates:
@@ -1729,15 +1613,17 @@ void control_3dof::step()
   //   Sum: '<S19>/Sum2'
   //   Sum: '<S19>/Sum3'
   //
-  control_3dof_B.u0_p = ((control_3dof_B.u0_p + control_3dof_U.Traj_sp.vel_sp[1])
-    - control_3dof_U.Payload_Out.vL[1]) * CONTROL_PARAM.KV +
+  control_3dof_B.lower = ((control_3dof_B.lower + control_3dof_U.Traj_sp.vel_sp
+    [1]) - control_3dof_U.Payload_Out.vL[1]) * CONTROL_PARAM.KV +
     control_3dof_U.Traj_sp.acc_ff[1];
 
   // Saturate: '<S19>/acc_limit'
-  if (control_3dof_B.u0_p > 3.0) {
-    control_3dof_B.u0_p = 3.0;
-  } else if (control_3dof_B.u0_p < -3.0) {
-    control_3dof_B.u0_p = -3.0;
+  if (control_3dof_B.lower > 3.0) {
+    control_3dof_B.acc_limit[1] = 3.0;
+  } else if (control_3dof_B.lower < -3.0) {
+    control_3dof_B.acc_limit[1] = -3.0;
+  } else {
+    control_3dof_B.acc_limit[1] = control_3dof_B.lower;
   }
 
   // Start for MATLABSystem: '<S4>/Position 2nd ESO' incorporates:
@@ -1755,17 +1641,17 @@ void control_3dof::step()
   //   Inport: '<Root>/Payload_Out'
   //   UnitDelay: '<S4>/Unit Delay'
   //
-  control_3dof_B.e_2_b = control_3dof_U.Payload_Out.vL[2] -
+  control_3dof_B.e_2_c = control_3dof_U.Payload_Out.vL[2] -
     control_3dof_DW.obj.Z_2[2];
   control_3dof_DW.obj.Z_1[2] += (control_3dof_DW.obj.K_p[0] *
     control_3dof_B.dv1[1] + control_3dof_DW.obj.Z_2[2]) * 0.02;
   control_3dof_DW.obj.Z_2[2] += ((((control_3dof_DW.UnitDelay_DSTATE[2] +
     control_3dof_DW.obj.Z_3[2]) + 9.8) + control_3dof_DW.obj.K_p[1] *
-    control_3dof_B.dv1[1]) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_b) *
+    control_3dof_B.dv1[1]) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_c) *
     0.02;
   control_3dof_DW.obj.Z_3[2] += (control_3dof_B.dv1[1] *
     control_3dof_DW.obj.K_p[2] + control_3dof_DW.obj.K_v[2] *
-    control_3dof_B.e_2_b) * 0.02;
+    control_3dof_B.e_2_c) * 0.02;
 
   // Gain: '<S19>/KP' incorporates:
   //   Inport: '<Root>/Payload_Out'
@@ -1773,14 +1659,14 @@ void control_3dof::step()
   //   MATLABSystem: '<S4>/Position 2nd ESO'
   //   Sum: '<S19>/Sum'
   //
-  control_3dof_B.e_2_b = (control_3dof_U.Traj_sp.pos_sp[2] -
-    control_3dof_U.Payload_Out.pL[2]) * CONTROL_PARAM.KP;
+  control_3dof_B.u0 = (control_3dof_U.Traj_sp.pos_sp[2] -
+                       control_3dof_U.Payload_Out.pL[2]) * CONTROL_PARAM.KP;
 
   // Saturate: '<S19>/vel_limit'
-  if (control_3dof_B.e_2_b > 5.0) {
-    control_3dof_B.e_2_b = 5.0;
-  } else if (control_3dof_B.e_2_b < -5.0) {
-    control_3dof_B.e_2_b = -5.0;
+  if (control_3dof_B.u0 > 5.0) {
+    control_3dof_B.u0 = 5.0;
+  } else if (control_3dof_B.u0 < -5.0) {
+    control_3dof_B.u0 = -5.0;
   }
 
   // Sum: '<S19>/Sum1' incorporates:
@@ -1792,15 +1678,17 @@ void control_3dof::step()
   //   Sum: '<S19>/Sum2'
   //   Sum: '<S19>/Sum3'
   //
-  control_3dof_B.e_2_b = ((control_3dof_B.e_2_b + control_3dof_U.Traj_sp.vel_sp
-    [2]) - control_3dof_U.Payload_Out.vL[2]) * CONTROL_PARAM.KV +
+  control_3dof_B.u0 = ((control_3dof_B.u0 + control_3dof_U.Traj_sp.vel_sp[2]) -
+                       control_3dof_U.Payload_Out.vL[2]) * CONTROL_PARAM.KV +
     control_3dof_U.Traj_sp.acc_ff[2];
 
   // Saturate: '<S19>/acc_limit'
-  if (control_3dof_B.e_2_b > 3.0) {
-    control_3dof_B.e_2_b = 3.0;
-  } else if (control_3dof_B.e_2_b < -3.0) {
-    control_3dof_B.e_2_b = -3.0;
+  if (control_3dof_B.u0 > 3.0) {
+    control_3dof_B.acc_limit[2] = 3.0;
+  } else if (control_3dof_B.u0 < -3.0) {
+    control_3dof_B.acc_limit[2] = -3.0;
+  } else {
+    control_3dof_B.acc_limit[2] = control_3dof_B.u0;
   }
 
   // MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
@@ -1810,15 +1698,14 @@ void control_3dof::step()
   //
   control_3dof_B.e_1[2] = control_3dof_U.Payload_Out.pL[2] -
     control_3dof_U.Payload_Out.p_1[2];
-  control_3dof_B.UnitDelay_DSTATE_tmp = control_3dof_norm(control_3dof_B.e_1);
-  control_3dof_B.e_1[0] /= control_3dof_B.UnitDelay_DSTATE_tmp;
-  control_3dof_B.vu[0] = (control_3dof_U.Payload_Out.vL[0] -
+  control_3dof_B.F_trim_g = control_3dof_norm(control_3dof_B.e_1);
+  control_3dof_B.e_1[0] /= control_3dof_B.F_trim_g;
+  control_3dof_B.F_var[0] = (control_3dof_U.Payload_Out.vL[0] -
     control_3dof_U.Payload_Out.v_1[0]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.q_2[0] = control_3dof_U.Payload_Out.pL[0] -
     control_3dof_U.Payload_Out.p_2[0];
-  control_3dof_B.e_1[1] = control_3dof_B.dv1[0] /
-    control_3dof_B.UnitDelay_DSTATE_tmp;
-  control_3dof_B.vu[1] = (control_3dof_U.Payload_Out.vL[1] -
+  control_3dof_B.e_1[1] = control_3dof_B.dv1[0] / control_3dof_B.F_trim_g;
+  control_3dof_B.F_var[1] = (control_3dof_U.Payload_Out.vL[1] -
     control_3dof_U.Payload_Out.v_1[1]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.q_2[1] = control_3dof_U.Payload_Out.pL[1] -
     control_3dof_U.Payload_Out.p_2[1];
@@ -1832,7 +1719,65 @@ void control_3dof::step()
     (control_3dof_U.Payload_Out.vL[2], control_3dof_U.Payload_Out.pL[2]),
     _mm_set_pd(control_3dof_U.Payload_Out.v_1[2],
                control_3dof_U.Payload_Out.p_1[2])), _mm_set_pd
-    (CONTROL_PARAM.CABLE_LEN, control_3dof_B.UnitDelay_DSTATE_tmp)));
+    (CONTROL_PARAM.CABLE_LEN, control_3dof_B.F_trim_g)));
+
+  // MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
+  //   BusCreator generated from: '<S4>/Force Saturation && Disturbution'
+  //   Constant: '<S4>/-g'
+  //   Inport: '<Root>/Payload_Out'
+  //   MATLABSystem: '<S4>/Position 2nd ESO'
+  //   Sum: '<S4>/Sum'
+  //
+  control_3dof_B.e_1[2] = control_3dof_B.dv1[0];
+  control_3dof_B.q_2[2] = control_3dof_U.Payload_Out.pL[2] -
+    control_3dof_U.Payload_Out.p_2[2];
+  _mm_storeu_pd(&control_3dof_B.e_2[0], _mm_sub_pd(_mm_mul_pd(_mm_set_pd
+    (control_3dof_B.F_var[0], control_3dof_B.e_1[1]), _mm_set_pd
+    (control_3dof_B.dv1[0], control_3dof_B.dv1[1])), _mm_mul_pd(_mm_set_pd
+    (control_3dof_B.e_1[0], control_3dof_B.F_var[1]), _mm_set_pd
+    (control_3dof_B.dv1[1], control_3dof_B.dv1[0]))));
+  control_3dof_B.e_2[2] = control_3dof_B.e_1[0] * control_3dof_B.F_var[1] -
+    control_3dof_B.F_var[0] * control_3dof_B.e_1[1];
+  control_3dof_B.F_trim_g = control_3dof_norm(control_3dof_B.q_2);
+  control_3dof_B.q_2[0] /= control_3dof_B.F_trim_g;
+  control_3dof_B.F_var[0] = (control_3dof_U.Payload_Out.vL[0] -
+    control_3dof_U.Payload_Out.v_2[0]) / CONTROL_PARAM.CABLE_LEN;
+  control_3dof_B.q_3[0] = control_3dof_U.Payload_Out.pL[0] -
+    control_3dof_U.Payload_Out.p_3[0];
+  control_3dof_B.q_2[1] /= control_3dof_B.F_trim_g;
+  control_3dof_B.F_var[1] = (control_3dof_U.Payload_Out.vL[1] -
+    control_3dof_U.Payload_Out.v_2[1]) / CONTROL_PARAM.CABLE_LEN;
+  control_3dof_B.q_3[1] = control_3dof_U.Payload_Out.pL[1] -
+    control_3dof_U.Payload_Out.p_3[1];
+  control_3dof_B.q_2[2] /= control_3dof_B.F_trim_g;
+  control_3dof_B.F_var[2] = (control_3dof_U.Payload_Out.vL[2] -
+    control_3dof_U.Payload_Out.v_2[2]) / CONTROL_PARAM.CABLE_LEN;
+  control_3dof_B.q_3[2] = control_3dof_U.Payload_Out.pL[2] -
+    control_3dof_U.Payload_Out.p_3[2];
+  _mm_storeu_pd(&control_3dof_B.rtb_control_in2_w[0], _mm_sub_pd(_mm_mul_pd
+    (_mm_set_pd(control_3dof_B.F_var[0], control_3dof_B.q_2[1]), _mm_set_pd
+     (control_3dof_B.q_2[2], control_3dof_B.F_var[2])), _mm_mul_pd(_mm_set_pd
+    (control_3dof_B.q_2[0], control_3dof_B.F_var[1]), _mm_set_pd
+    (control_3dof_B.F_var[2], control_3dof_B.q_2[2]))));
+  control_3dof_B.rtb_control_in2_w[2] = control_3dof_B.q_2[0] *
+    control_3dof_B.F_var[1] - control_3dof_B.F_var[0] * control_3dof_B.q_2[1];
+  control_3dof_B.F_trim_g = control_3dof_norm(control_3dof_B.q_3);
+  control_3dof_B.e_2_c = control_3dof_B.q_3[0] / control_3dof_B.F_trim_g;
+  control_3dof_B.q_3[0] = control_3dof_B.e_2_c;
+  control_3dof_B.F_var[0] = (control_3dof_U.Payload_Out.vL[0] -
+    control_3dof_U.Payload_Out.v_3[0]) / CONTROL_PARAM.CABLE_LEN;
+  control_3dof_B.Q_new[0] = control_3dof_B.e_1[0];
+  control_3dof_B.Q_new[3] = control_3dof_B.q_2[0];
+  control_3dof_B.Q_new[6] = control_3dof_B.e_2_c;
+  control_3dof_B.F_trim[0] = (0.0 - control_3dof_DW.obj.Z_3[0]) *
+    CONTROL_PARAM.MASS_LOAD;
+
+  // Saturate: '<S19>/acc_limit'
+  if (control_3dof_B.upper > 3.0) {
+    control_3dof_B.upper = 3.0;
+  } else if (control_3dof_B.upper < -3.0) {
+    control_3dof_B.upper = -3.0;
+  }
 
   // MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
   //   BusCreator generated from: '<S4>/Force Saturation && Disturbution'
@@ -1841,260 +1786,270 @@ void control_3dof::step()
   //   MATLABSystem: '<S4>/Position 2nd ESO'
   //   Saturate: '<S19>/acc_limit'
   //   Sum: '<S4>/Sum'
-  //   UnitDelay: '<S4>/Unit Delay'
   //
-  control_3dof_B.e_1[2] = control_3dof_B.dv1[0];
-  control_3dof_B.q_2[2] = control_3dof_U.Payload_Out.pL[2] -
-    control_3dof_U.Payload_Out.p_2[2];
-  _mm_storeu_pd(&control_3dof_B.e_2[0], _mm_sub_pd(_mm_mul_pd(_mm_set_pd
-    (control_3dof_B.vu[0], control_3dof_B.e_1[1]), _mm_set_pd
-    (control_3dof_B.dv1[0], control_3dof_B.dv1[1])), _mm_mul_pd(_mm_set_pd
-    (control_3dof_B.e_1[0], control_3dof_B.vu[1]), _mm_set_pd
-    (control_3dof_B.dv1[1], control_3dof_B.dv1[0]))));
-  control_3dof_B.e_2[2] = control_3dof_B.e_1[0] * control_3dof_B.vu[1] -
-    control_3dof_B.vu[0] * control_3dof_B.e_1[1];
-  control_3dof_B.UnitDelay_DSTATE_tmp = control_3dof_norm(control_3dof_B.q_2);
-  control_3dof_B.q_2[0] /= control_3dof_B.UnitDelay_DSTATE_tmp;
-  control_3dof_B.vu[0] = (control_3dof_U.Payload_Out.vL[0] -
-    control_3dof_U.Payload_Out.v_2[0]) / CONTROL_PARAM.CABLE_LEN;
-  control_3dof_B.q_3[0] = control_3dof_U.Payload_Out.pL[0] -
-    control_3dof_U.Payload_Out.p_3[0];
-  control_3dof_B.q_2[1] /= control_3dof_B.UnitDelay_DSTATE_tmp;
-  control_3dof_B.vu[1] = (control_3dof_U.Payload_Out.vL[1] -
-    control_3dof_U.Payload_Out.v_2[1]) / CONTROL_PARAM.CABLE_LEN;
-  control_3dof_B.q_3[1] = control_3dof_U.Payload_Out.pL[1] -
-    control_3dof_U.Payload_Out.p_3[1];
-  control_3dof_B.q_2[2] /= control_3dof_B.UnitDelay_DSTATE_tmp;
-  control_3dof_B.vu[2] = (control_3dof_U.Payload_Out.vL[2] -
-    control_3dof_U.Payload_Out.v_2[2]) / CONTROL_PARAM.CABLE_LEN;
-  control_3dof_B.q_3[2] = control_3dof_U.Payload_Out.pL[2] -
-    control_3dof_U.Payload_Out.p_3[2];
-  _mm_storeu_pd(&control_3dof_B.rtb_control_in2_w[0], _mm_sub_pd(_mm_mul_pd
-    (_mm_set_pd(control_3dof_B.vu[0], control_3dof_B.q_2[1]), _mm_set_pd
-     (control_3dof_B.q_2[2], control_3dof_B.vu[2])), _mm_mul_pd(_mm_set_pd
-    (control_3dof_B.q_2[0], control_3dof_B.vu[1]), _mm_set_pd(control_3dof_B.vu
-    [2], control_3dof_B.q_2[2]))));
-  control_3dof_B.rtb_control_in2_w[2] = control_3dof_B.q_2[0] *
-    control_3dof_B.vu[1] - control_3dof_B.vu[0] * control_3dof_B.q_2[1];
-  control_3dof_B.UnitDelay_DSTATE_tmp = control_3dof_norm(control_3dof_B.q_3);
-  control_3dof_B.q_3_k = control_3dof_B.q_3[0] /
-    control_3dof_B.UnitDelay_DSTATE_tmp;
-  control_3dof_B.q_3[0] = control_3dof_B.q_3_k;
-  control_3dof_B.vu[0] = (control_3dof_U.Payload_Out.vL[0] -
-    control_3dof_U.Payload_Out.v_3[0]) / CONTROL_PARAM.CABLE_LEN;
-  control_3dof_B.Q_new[0] = control_3dof_B.e_1[0];
-  control_3dof_B.Q_new[3] = control_3dof_B.q_2[0];
-  control_3dof_B.Q_new[6] = control_3dof_B.q_3_k;
-  control_3dof_B.F_trim_c = (0.0 - control_3dof_DW.obj.Z_3[0]) *
-    CONTROL_PARAM.MASS_LOAD;
-  control_3dof_B.F_trim[0] = control_3dof_B.F_trim_c;
-  control_3dof_B.q_3_k = CONTROL_PARAM.MASS_LOAD * control_3dof_B.u0;
-  control_3dof_B.F_way[0] = control_3dof_B.q_3_k;
-  control_3dof_B.UnitDelay_DSTATE_tmp_g = control_3dof_B.F_trim_c +
-    control_3dof_B.q_3_k;
-  control_3dof_DW.UnitDelay_DSTATE[0] = control_3dof_B.UnitDelay_DSTATE_tmp_g;
-  control_3dof_B.q_3_k = control_3dof_B.q_3[1] /
-    control_3dof_B.UnitDelay_DSTATE_tmp;
-  control_3dof_B.q_3[1] = control_3dof_B.q_3_k;
-  control_3dof_B.vu[1] = (control_3dof_U.Payload_Out.vL[1] -
+  control_3dof_B.F_way[0] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.upper;
+  control_3dof_B.e_2_c = control_3dof_B.q_3[1] / control_3dof_B.F_trim_g;
+  control_3dof_B.q_3[1] = control_3dof_B.e_2_c;
+  control_3dof_B.F_var[1] = (control_3dof_U.Payload_Out.vL[1] -
     control_3dof_U.Payload_Out.v_3[1]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.Q_new[1] = control_3dof_B.e_1[1];
   control_3dof_B.Q_new[4] = control_3dof_B.q_2[1];
-  control_3dof_B.Q_new[7] = control_3dof_B.q_3_k;
-  control_3dof_B.F_trim_c = (0.0 - control_3dof_DW.obj.Z_3[1]) *
+  control_3dof_B.Q_new[7] = control_3dof_B.e_2_c;
+  control_3dof_B.F_trim[1] = (0.0 - control_3dof_DW.obj.Z_3[1]) *
     CONTROL_PARAM.MASS_LOAD;
-  control_3dof_B.F_trim[1] = control_3dof_B.F_trim_c;
-  control_3dof_B.q_3_k = CONTROL_PARAM.MASS_LOAD * control_3dof_B.u0_p;
-  control_3dof_B.F_way[1] = control_3dof_B.q_3_k;
-  control_3dof_B.UnitDelay_DSTATE_tmp_m = control_3dof_B.F_trim_c +
-    control_3dof_B.q_3_k;
-  control_3dof_DW.UnitDelay_DSTATE[1] = control_3dof_B.UnitDelay_DSTATE_tmp_m;
-  control_3dof_B.q_3_k = control_3dof_B.q_3[2] /
-    control_3dof_B.UnitDelay_DSTATE_tmp;
-  control_3dof_B.q_3[2] = control_3dof_B.q_3_k;
-  control_3dof_B.vu[2] = (control_3dof_U.Payload_Out.vL[2] -
+
+  // Saturate: '<S19>/acc_limit'
+  if (control_3dof_B.lower > 3.0) {
+    control_3dof_B.lower = 3.0;
+  } else if (control_3dof_B.lower < -3.0) {
+    control_3dof_B.lower = -3.0;
+  }
+
+  // MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
+  //   BusCreator generated from: '<S4>/Force Saturation && Disturbution'
+  //   Constant: '<S4>/-g'
+  //   Inport: '<Root>/Payload_Out'
+  //   MATLABSystem: '<S4>/Position 2nd ESO'
+  //   Saturate: '<S19>/acc_limit'
+  //   Sum: '<S4>/Sum'
+  //
+  control_3dof_B.F_way[1] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.lower;
+  control_3dof_B.e_2_c = control_3dof_B.q_3[2] / control_3dof_B.F_trim_g;
+  control_3dof_B.q_3[2] = control_3dof_B.e_2_c;
+  control_3dof_B.F_var[2] = (control_3dof_U.Payload_Out.vL[2] -
     control_3dof_U.Payload_Out.v_3[2]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.Q_new[2] = control_3dof_B.dv1[0];
   control_3dof_B.Q_new[5] = control_3dof_B.q_2[2];
-  control_3dof_B.Q_new[8] = control_3dof_B.q_3_k;
-  control_3dof_B.F_trim_c = (-9.8 - control_3dof_DW.obj.Z_3[2]) *
+  control_3dof_B.Q_new[8] = control_3dof_B.e_2_c;
+  control_3dof_B.F_trim[2] = (-9.8 - control_3dof_DW.obj.Z_3[2]) *
     CONTROL_PARAM.MASS_LOAD;
-  control_3dof_B.F_trim[2] = control_3dof_B.F_trim_c;
-  control_3dof_B.UnitDelay_DSTATE_tmp = CONTROL_PARAM.MASS_LOAD *
-    control_3dof_B.e_2_b + control_3dof_B.F_trim_c;
-  control_3dof_DW.UnitDelay_DSTATE[2] = control_3dof_B.UnitDelay_DSTATE_tmp;
-  _mm_storeu_pd(&control_3dof_B.rtb_control_in3_w[0], _mm_sub_pd(_mm_mul_pd
-    (_mm_set_pd(control_3dof_B.vu[0], control_3dof_B.q_3[1]), _mm_set_pd
-     (control_3dof_B.q_3_k, control_3dof_B.vu[2])), _mm_mul_pd(_mm_set_pd
-    (control_3dof_B.q_3[0], control_3dof_B.vu[1]), _mm_set_pd(control_3dof_B.vu
-    [2], control_3dof_B.q_3_k))));
-  control_3dof_B.rtb_control_in3_w[2] = control_3dof_B.q_3[0] *
-    control_3dof_B.vu[1] - control_3dof_B.vu[0] * control_3dof_B.q_3[1];
-  control_3dof_pinv(control_3dof_B.Q_new, control_3dof_B.rtb_vu_tmp);
-  control_3dof_B.UnitDelay_DSTATE = control_3dof_DW.UnitDelay_DSTATE[1];
-  control_3dof_B.UnitDelay_DSTATE_c = control_3dof_DW.UnitDelay_DSTATE[0];
-  control_3dof_B.UnitDelay_DSTATE_f = control_3dof_DW.UnitDelay_DSTATE[2];
-  for (control_3dof_B.i = 0; control_3dof_B.i < 3; control_3dof_B.i++) {
-    control_3dof_B.rtb_vu_tmp_g = (control_3dof_B.rtb_vu_tmp[control_3dof_B.i +
-      3] * control_3dof_B.UnitDelay_DSTATE +
-      control_3dof_B.rtb_vu_tmp[control_3dof_B.i] *
-      control_3dof_B.UnitDelay_DSTATE_c) +
-      control_3dof_B.rtb_vu_tmp[control_3dof_B.i + 6] *
-      control_3dof_B.UnitDelay_DSTATE_f;
-    control_3dof_B.vu[control_3dof_B.i] = control_3dof_B.rtb_vu_tmp_g;
-    control_3dof_B.f_vertical[control_3dof_B.i] = -control_3dof_B.rtb_vu_tmp_g;
-    control_3dof_B.x[control_3dof_B.i] = (-control_3dof_B.rtb_vu_tmp_g <
-      CONTROL_PARAM.TENSION_MIN - 1.0E-5);
+
+  // Saturate: '<S19>/acc_limit'
+  if (control_3dof_B.u0 > 3.0) {
+    control_3dof_B.u0 = 3.0;
+  } else if (control_3dof_B.u0 < -3.0) {
+    control_3dof_B.u0 = -3.0;
   }
 
-  control_3dof_B.FixPtRelationalOperator = false;
+  // MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
+  //   Saturate: '<S19>/acc_limit'
+  //   UnitDelay: '<S4>/Unit Delay'
+
+  control_3dof_B.F_way[2] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.u0;
+  _mm_storeu_pd(&control_3dof_B.rtb_control_in3_w[0], _mm_sub_pd(_mm_mul_pd
+    (_mm_set_pd(control_3dof_B.F_var[0], control_3dof_B.q_3[1]), _mm_set_pd
+     (control_3dof_B.e_2_c, control_3dof_B.F_var[2])), _mm_mul_pd(_mm_set_pd
+    (control_3dof_B.q_3[0], control_3dof_B.F_var[1]), _mm_set_pd
+    (control_3dof_B.F_var[2], control_3dof_B.e_2_c))));
+  control_3dof_B.rtb_control_in3_w[2] = control_3dof_B.q_3[0] *
+    control_3dof_B.F_var[1] - control_3dof_B.F_var[0] * control_3dof_B.q_3[1];
+  for (control_3dof_B.i = 0; control_3dof_B.i <= 6; control_3dof_B.i += 2) {
+    tmp_2 = _mm_loadu_pd(&control_3dof_B.Q_new[control_3dof_B.i]);
+    _mm_storeu_pd(&control_3dof_B.rtb_Q_new_m[control_3dof_B.i], _mm_mul_pd
+                  (tmp_2, _mm_set1_pd(-1.0)));
+  }
+
+  for (control_3dof_B.i = 8; control_3dof_B.i < 9; control_3dof_B.i++) {
+    control_3dof_B.rtb_Q_new_m[control_3dof_B.i] =
+      -control_3dof_B.Q_new[control_3dof_B.i];
+  }
+
+  control_3dof_pinv(control_3dof_B.rtb_Q_new_m, control_3dof_B.dv);
+  for (control_3dof_B.i = 0; control_3dof_B.i < 6; control_3dof_B.i++) {
+    control_3dof_B.a = a[control_3dof_B.i + 6];
+    control_3dof_B.a_j = a[control_3dof_B.i];
+    control_3dof_B.a_o = a[control_3dof_B.i + 12];
+    for (control_3dof_B.i_d = 0; control_3dof_B.i_d < 3; control_3dof_B.i_d++) {
+      control_3dof_B.A_wrench[control_3dof_B.i + 6 * control_3dof_B.i_d] =
+        (control_3dof_B.dv[3 * control_3dof_B.i_d + 1] * static_cast<real_T>
+         (control_3dof_B.a) + control_3dof_B.dv[3 * control_3dof_B.i_d] *
+         static_cast<real_T>(control_3dof_B.a_j)) + control_3dof_B.dv[3 *
+        control_3dof_B.i_d + 2] * static_cast<real_T>(control_3dof_B.a_o);
+    }
+  }
+
+  control_3dof_B.b_wrench[0] = CONTROL_PARAM.TENSION_MAX;
+  control_3dof_B.b_wrench[3] = -CONTROL_PARAM.TENSION_MIN;
+  control_3dof_B.b_wrench[1] = CONTROL_PARAM.TENSION_MAX;
+  control_3dof_B.b_wrench[4] = -CONTROL_PARAM.TENSION_MIN;
+  control_3dof_B.b_wrench[2] = CONTROL_PARAM.TENSION_MAX;
+  control_3dof_B.b_wrench[5] = -CONTROL_PARAM.TENSION_MIN;
+  control_3dof_B.F_trim_g = control_3dof_B.F_trim[1];
+  control_3dof_B.upper = control_3dof_B.F_trim[0];
+  control_3dof_B.lower = control_3dof_B.F_trim[2];
+  for (control_3dof_B.i = 0; control_3dof_B.i <= 4; control_3dof_B.i += 2) {
+    tmp_2 = _mm_loadu_pd(&control_3dof_B.A_wrench[control_3dof_B.i + 6]);
+    tmp_0 = _mm_loadu_pd(&control_3dof_B.A_wrench[control_3dof_B.i]);
+    tmp_1 = _mm_loadu_pd(&control_3dof_B.A_wrench[control_3dof_B.i + 12]);
+    _mm_storeu_pd(&control_3dof_B.A[control_3dof_B.i], _mm_add_pd(_mm_add_pd
+      (_mm_mul_pd(tmp_2, _mm_set1_pd(control_3dof_B.F_trim_g)), _mm_mul_pd(tmp_0,
+      _mm_set1_pd(control_3dof_B.upper))), _mm_mul_pd(tmp_1, _mm_set1_pd
+      (control_3dof_B.lower))));
+  }
+
+  control_3dof_B.FixPtRelationalOperator = true;
   control_3dof_B.i = 0;
   exitg1 = false;
-  while ((!exitg1) && (control_3dof_B.i < 3)) {
-    if (control_3dof_B.x[control_3dof_B.i]) {
-      control_3dof_B.FixPtRelationalOperator = true;
+  while ((!exitg1) && (control_3dof_B.i < 6)) {
+    if (!(control_3dof_B.A[control_3dof_B.i] <=
+          control_3dof_B.b_wrench[control_3dof_B.i])) {
+      control_3dof_B.FixPtRelationalOperator = false;
       exitg1 = true;
     } else {
       control_3dof_B.i++;
     }
   }
 
-  if (!control_3dof_B.FixPtRelationalOperator) {
-    control_3dof_B.x[0] = (control_3dof_B.f_vertical[0] >
-      CONTROL_PARAM.TENSION_MAX + 1.0E-5);
-    control_3dof_B.x[1] = (control_3dof_B.f_vertical[1] >
-      CONTROL_PARAM.TENSION_MAX + 1.0E-5);
-    control_3dof_B.x[2] = (control_3dof_B.f_vertical[2] >
-      CONTROL_PARAM.TENSION_MAX + 1.0E-5);
-    control_3dof_B.FixPtRelationalOperator = false;
-    control_3dof_B.i = 0;
-    exitg1 = false;
-    while ((!exitg1) && (control_3dof_B.i < 3)) {
-      if (control_3dof_B.x[control_3dof_B.i]) {
-        control_3dof_B.FixPtRelationalOperator = true;
-        exitg1 = true;
-      } else {
-        control_3dof_B.i++;
-      }
-    }
-
-    control_3dof_B.FixPtRelationalOperator =
-      !control_3dof_B.FixPtRelationalOperator;
+  if (control_3dof_B.FixPtRelationalOperator) {
+    control_3dof_DW.UnitDelay_DSTATE[0] = control_3dof_B.F_trim[0];
+    control_3dof_B.F_var[0] = control_3dof_B.F_way[0];
+    control_3dof_DW.UnitDelay_DSTATE[1] = control_3dof_B.F_trim[1];
+    control_3dof_B.F_var[1] = control_3dof_B.F_way[1];
+    control_3dof_DW.UnitDelay_DSTATE[2] = control_3dof_B.F_trim[2];
+    control_3dof_B.F_var[2] = control_3dof_B.F_way[2];
   } else {
-    control_3dof_B.FixPtRelationalOperator = false;
-  }
-
-  if (!control_3dof_B.FixPtRelationalOperator) {
-    control_3dof_B.UnitDelay_DSTATE = control_3dof_B.F_trim[1];
-    control_3dof_B.UnitDelay_DSTATE_c = control_3dof_B.F_trim[0];
-    for (control_3dof_B.i = 0; control_3dof_B.i < 3; control_3dof_B.i++) {
-      control_3dof_B.rtb_vu_tmp_g = (control_3dof_B.rtb_vu_tmp[control_3dof_B.i
-        + 3] * control_3dof_B.UnitDelay_DSTATE +
-        control_3dof_B.rtb_vu_tmp[control_3dof_B.i] *
-        control_3dof_B.UnitDelay_DSTATE_c) +
-        control_3dof_B.rtb_vu_tmp[control_3dof_B.i + 6] *
-        control_3dof_B.F_trim_c;
-      control_3dof_B.vu[control_3dof_B.i] = control_3dof_B.rtb_vu_tmp_g;
-      control_3dof_B.x[control_3dof_B.i] = (-control_3dof_B.rtb_vu_tmp_g <
-        CONTROL_PARAM.TENSION_MIN - 1.0E-5);
+    control_3dof_B.F_var[0] = 0.0;
+    control_3dof_B.F_var[1] = 0.0;
+    control_3dof_B.F_var[2] = control_3dof_B.F_trim[2];
+    for (control_3dof_B.i = 0; control_3dof_B.i <= 4; control_3dof_B.i += 2) {
+      tmp_2 = _mm_loadu_pd(&control_3dof_B.A_wrench[control_3dof_B.i + 6]);
+      tmp_0 = _mm_set1_pd(0.0);
+      tmp_1 = _mm_loadu_pd(&control_3dof_B.A_wrench[control_3dof_B.i]);
+      tmp = _mm_loadu_pd(&control_3dof_B.A_wrench[control_3dof_B.i + 12]);
+      _mm_storeu_pd(&control_3dof_B.A[control_3dof_B.i], _mm_add_pd(_mm_add_pd
+        (_mm_mul_pd(tmp_2, tmp_0), _mm_mul_pd(tmp_1, tmp_0)), _mm_mul_pd(tmp,
+        _mm_set1_pd(control_3dof_B.F_var[2]))));
     }
 
-    control_3dof_B.FixPtRelationalOperator = false;
+    control_3dof_B.FixPtRelationalOperator = true;
     control_3dof_B.i = 0;
     exitg1 = false;
-    while ((!exitg1) && (control_3dof_B.i < 3)) {
-      if (control_3dof_B.x[control_3dof_B.i]) {
-        control_3dof_B.FixPtRelationalOperator = true;
+    while ((!exitg1) && (control_3dof_B.i < 6)) {
+      if (!(control_3dof_B.A[control_3dof_B.i] <=
+            control_3dof_B.b_wrench[control_3dof_B.i])) {
+        control_3dof_B.FixPtRelationalOperator = false;
         exitg1 = true;
       } else {
         control_3dof_B.i++;
       }
-    }
-
-    if (!control_3dof_B.FixPtRelationalOperator) {
-      control_3dof_B.x[0] = (-control_3dof_B.vu[0] > CONTROL_PARAM.TENSION_MAX +
-        1.0E-5);
-      control_3dof_B.x[1] = (-control_3dof_B.vu[1] > CONTROL_PARAM.TENSION_MAX +
-        1.0E-5);
-      control_3dof_B.x[2] = (-control_3dof_B.vu[2] > CONTROL_PARAM.TENSION_MAX +
-        1.0E-5);
-      control_3dof_B.FixPtRelationalOperator = false;
-      control_3dof_B.i = 0;
-      exitg1 = false;
-      while ((!exitg1) && (control_3dof_B.i < 3)) {
-        if (control_3dof_B.x[control_3dof_B.i]) {
-          control_3dof_B.FixPtRelationalOperator = true;
-          exitg1 = true;
-        } else {
-          control_3dof_B.i++;
-        }
-      }
-
-      control_3dof_B.FixPtRelationalOperator =
-        !control_3dof_B.FixPtRelationalOperator;
-    } else {
-      control_3dof_B.FixPtRelationalOperator = false;
     }
 
     if (control_3dof_B.FixPtRelationalOperator) {
-      tmp = _mm_add_pd(_mm_loadu_pd(&control_3dof_B.F_trim[0]), _mm_loadu_pd
-                       (&control_3dof_B.F_way[0]));
-      _mm_storeu_pd(&control_3dof_B.f_vertical[0], tmp);
-      control_3dof_B.f_vertical[2] = control_3dof_B.UnitDelay_DSTATE_tmp;
-      control_3dof_TCISolver(control_3dof_B.f_vertical, control_3dof_B.F_trim,
-        control_3dof_B.Q_new, CONTROL_PARAM.TENSION_MIN,
-        CONTROL_PARAM.TENSION_MAX, control_3dof_B.vu,
-        control_3dof_DW.UnitDelay_DSTATE);
+      control_3dof_DW.UnitDelay_DSTATE[0] = 0.0;
+      control_3dof_DW.UnitDelay_DSTATE[1] = 0.0;
+      control_3dof_DW.UnitDelay_DSTATE[2] = control_3dof_B.F_trim[2];
+      control_3dof_B.F_var[0] = control_3dof_B.F_trim[0];
+      control_3dof_B.F_var[1] = control_3dof_B.F_trim[1];
+      control_3dof_B.F_var[2] = 0.0;
     } else {
-      control_3dof_B.f_vertical[0] = 0.0;
-      control_3dof_B.f_vertical[1] = 0.0;
-      control_3dof_B.f_vertical[2] = control_3dof_B.F_trim_c;
-      control_3dof_TCISolver(control_3dof_B.F_trim, control_3dof_B.f_vertical,
-        control_3dof_B.Q_new, CONTROL_PARAM.TENSION_MIN,
-        CONTROL_PARAM.TENSION_MAX, control_3dof_B.vu,
-        control_3dof_DW.UnitDelay_DSTATE);
+      control_3dof_DW.UnitDelay_DSTATE[0] = 0.0;
+      control_3dof_DW.UnitDelay_DSTATE[1] = 0.0;
+      control_3dof_DW.UnitDelay_DSTATE[2] = 0.0;
     }
   }
 
-  control_3dof_B.F_trim[0] = control_3dof_B.u0 -
-    (control_3dof_B.UnitDelay_DSTATE_tmp_g - control_3dof_DW.UnitDelay_DSTATE[0])
-    / CONTROL_PARAM.MASS_LOAD;
+  control_3dof_B.upper = 1.0;
+  control_3dof_B.lower = 0.0;
+  control_3dof_B.u0 = control_3dof_B.F_var[0];
+  control_3dof_B.F_var_b = control_3dof_B.F_var[1];
+  control_3dof_B.F_var_p = control_3dof_B.F_var[2];
+  control_3dof_B.UnitDelay_DSTATE = control_3dof_DW.UnitDelay_DSTATE[0];
+  control_3dof_B.UnitDelay_DSTATE_c = control_3dof_DW.UnitDelay_DSTATE[1];
+  control_3dof_B.UnitDelay_DSTATE_f = control_3dof_DW.UnitDelay_DSTATE[2];
+  for (control_3dof_B.i = 0; control_3dof_B.i < 6; control_3dof_B.i++) {
+    control_3dof_B.A_wrench_k = control_3dof_B.A_wrench[control_3dof_B.i];
+    control_3dof_B.A_c = control_3dof_B.A_wrench_k * control_3dof_B.u0;
+    control_3dof_B.F_trim_g = control_3dof_B.A_wrench_k *
+      control_3dof_B.UnitDelay_DSTATE;
+    control_3dof_B.A_wrench_k = control_3dof_B.A_wrench[control_3dof_B.i + 6];
+    control_3dof_B.A_c += control_3dof_B.A_wrench_k * control_3dof_B.F_var_b;
+    control_3dof_B.F_trim_g += control_3dof_B.A_wrench_k *
+      control_3dof_B.UnitDelay_DSTATE_c;
+    control_3dof_B.A_wrench_k = control_3dof_B.A_wrench[control_3dof_B.i + 12];
+    control_3dof_B.A_c += control_3dof_B.A_wrench_k * control_3dof_B.F_var_p;
+    control_3dof_B.F_trim_g = control_3dof_B.b_wrench[control_3dof_B.i] -
+      (control_3dof_B.A_wrench_k * control_3dof_B.UnitDelay_DSTATE_f +
+       control_3dof_B.F_trim_g);
+    if (control_3dof_B.A_c > 0.0) {
+      control_3dof_B.upper = std::fmin(control_3dof_B.upper,
+        control_3dof_B.F_trim_g / control_3dof_B.A_c);
+    } else if (control_3dof_B.A_c < 0.0) {
+      control_3dof_B.lower = std::fmax(control_3dof_B.lower,
+        control_3dof_B.F_trim_g / control_3dof_B.A_c);
+    }
+  }
+
+  if (!(control_3dof_B.lower > control_3dof_B.upper)) {
+    control_3dof_B.alpha = control_3dof_B.upper;
+  }
+
+  tmp_2 = _mm_add_pd(_mm_mul_pd(_mm_set1_pd(control_3dof_B.alpha), _mm_loadu_pd(
+    &control_3dof_B.F_var[0])), _mm_loadu_pd(&control_3dof_DW.UnitDelay_DSTATE[0]));
+  _mm_storeu_pd(&control_3dof_DW.UnitDelay_DSTATE[0], tmp_2);
+  control_3dof_DW.UnitDelay_DSTATE[2] += control_3dof_B.alpha *
+    control_3dof_B.F_var[2];
+  control_3dof_pinv(control_3dof_B.Q_new, control_3dof_B.dv);
+  for (control_3dof_B.i = 0; control_3dof_B.i <= 0; control_3dof_B.i += 2) {
+    tmp_2 = _mm_loadu_pd(&control_3dof_B.dv[control_3dof_B.i + 3]);
+    tmp_0 = _mm_loadu_pd(&control_3dof_B.dv[control_3dof_B.i]);
+    tmp_1 = _mm_loadu_pd(&control_3dof_B.dv[control_3dof_B.i + 6]);
+    _mm_storeu_pd(&control_3dof_B.F_var[control_3dof_B.i], _mm_add_pd(_mm_add_pd
+      (_mm_mul_pd(tmp_2, _mm_set1_pd(control_3dof_DW.UnitDelay_DSTATE[1])),
+       _mm_mul_pd(tmp_0, _mm_set1_pd(control_3dof_DW.UnitDelay_DSTATE[0]))),
+      _mm_mul_pd(tmp_1, _mm_set1_pd(control_3dof_DW.UnitDelay_DSTATE[2]))));
+    tmp_2 = _mm_loadu_pd(&control_3dof_B.acc_limit[control_3dof_B.i]);
+    tmp_0 = _mm_loadu_pd(&control_3dof_B.F_trim[control_3dof_B.i]);
+    tmp_1 = _mm_loadu_pd(&control_3dof_B.F_way[control_3dof_B.i]);
+    tmp = _mm_loadu_pd(&control_3dof_DW.UnitDelay_DSTATE[control_3dof_B.i]);
+    _mm_storeu_pd(&control_3dof_B.F_trim[control_3dof_B.i], _mm_sub_pd
+                  (_mm_add_pd(_mm_loadu_pd(&b[control_3dof_B.i]), tmp_2),
+                   _mm_div_pd(_mm_sub_pd(_mm_add_pd(tmp_0, tmp_1), tmp),
+      _mm_set1_pd(CONTROL_PARAM.MASS_LOAD))));
+  }
+
+  for (control_3dof_B.i = 2; control_3dof_B.i < 3; control_3dof_B.i++) {
+    control_3dof_B.F_var[control_3dof_B.i] = (control_3dof_B.dv[control_3dof_B.i
+      + 3] * control_3dof_DW.UnitDelay_DSTATE[1] +
+      control_3dof_B.dv[control_3dof_B.i] * control_3dof_DW.UnitDelay_DSTATE[0])
+      + control_3dof_B.dv[control_3dof_B.i + 6] *
+      control_3dof_DW.UnitDelay_DSTATE[2];
+    control_3dof_B.F_trim[control_3dof_B.i] = (b_0[control_3dof_B.i] +
+      control_3dof_B.acc_limit[control_3dof_B.i]) -
+      ((control_3dof_B.F_trim[control_3dof_B.i] +
+        control_3dof_B.F_way[control_3dof_B.i]) -
+       control_3dof_DW.UnitDelay_DSTATE[control_3dof_B.i]) /
+      CONTROL_PARAM.MASS_LOAD;
+  }
+
   control_3dof_DW.UnitDelay_DSTATE[0] /= CONTROL_PARAM.MASS_LOAD;
   _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_mul_pd(_mm_set_pd
-    (control_3dof_B.q_2[0], control_3dof_B.vu[0]), _mm_set_pd(control_3dof_B.vu
-    [1], control_3dof_B.e_1[0])));
+    (control_3dof_B.q_2[0], control_3dof_B.F_var[0]), _mm_set_pd
+    (control_3dof_B.F_var[1], control_3dof_B.e_1[0])));
   control_3dof_B.acc_limit[0] = control_3dof_B.dv1[0];
   control_3dof_B.F_way[0] = control_3dof_B.dv1[1];
-  control_3dof_B.F_trim[1] = control_3dof_B.u0_p -
-    (control_3dof_B.UnitDelay_DSTATE_tmp_m - control_3dof_DW.UnitDelay_DSTATE[1])
-    / CONTROL_PARAM.MASS_LOAD;
   control_3dof_DW.UnitDelay_DSTATE[1] /= CONTROL_PARAM.MASS_LOAD;
-  tmp = _mm_mul_pd(_mm_loadu_pd(&control_3dof_B.vu[0]), _mm_set_pd
-                   (control_3dof_B.q_2[1], control_3dof_B.e_1[1]));
-  _mm_storeu_pd(&control_3dof_B.dv1[0], tmp);
+  tmp_2 = _mm_mul_pd(_mm_loadu_pd(&control_3dof_B.F_var[0]), _mm_set_pd
+                     (control_3dof_B.q_2[1], control_3dof_B.e_1[1]));
+  _mm_storeu_pd(&control_3dof_B.dv1[0], tmp_2);
 
   // MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
-  //   Saturate: '<S19>/acc_limit'
   //   UnitDelay: '<S4>/Unit Delay'
 
   control_3dof_B.acc_limit[1] = control_3dof_B.dv1[0];
   control_3dof_B.F_way[1] = control_3dof_B.dv1[1];
-  control_3dof_B.F_trim[2] = (control_3dof_B.e_2_b - 9.8) -
-    (control_3dof_B.UnitDelay_DSTATE_tmp - control_3dof_DW.UnitDelay_DSTATE[2]) /
-    CONTROL_PARAM.MASS_LOAD;
   control_3dof_DW.UnitDelay_DSTATE[2] /= CONTROL_PARAM.MASS_LOAD;
-  tmp = _mm_mul_pd(_mm_loadu_pd(&control_3dof_B.vu[0]), _mm_set_pd
-                   (control_3dof_B.q_2[2], control_3dof_B.e_1[2]));
-  _mm_storeu_pd(&control_3dof_B.dv1[0], tmp);
+  tmp_2 = _mm_mul_pd(_mm_loadu_pd(&control_3dof_B.F_var[0]), _mm_set_pd
+                     (control_3dof_B.q_2[2], control_3dof_B.e_1[2]));
+  _mm_storeu_pd(&control_3dof_B.dv1[0], tmp_2);
 
   // MATLAB Function: '<S4>/Force Saturation && Disturbution'
   control_3dof_B.acc_limit[2] = control_3dof_B.dv1[0];
   control_3dof_B.F_way[2] = control_3dof_B.dv1[1];
-  control_3dof_B.u0 = control_3dof_B.vu[2];
-  tmp = _mm_mul_pd(_mm_set1_pd(control_3dof_B.u0), _mm_loadu_pd
-                   (&control_3dof_B.q_3[0]));
-  _mm_storeu_pd(&control_3dof_B.vu[0], tmp);
-  control_3dof_B.vu[2] = control_3dof_B.u0 * control_3dof_B.q_3_k;
+  control_3dof_B.u0 = control_3dof_B.F_var[2];
+  tmp_2 = _mm_mul_pd(_mm_set1_pd(control_3dof_B.u0), _mm_loadu_pd
+                     (&control_3dof_B.q_3[0]));
+  _mm_storeu_pd(&control_3dof_B.F_var[0], tmp_2);
+  control_3dof_B.F_var[2] = control_3dof_B.u0 * control_3dof_B.e_2_c;
 
   // MATLAB Function: '<S7>/Vertical Control' incorporates:
   //   MATLAB Function: '<S4>/Force Saturation && Disturbution'
@@ -2130,9 +2085,9 @@ void control_3dof::step()
   //   MATLAB Function: '<S4>/Force Saturation && Disturbution'
 
   control_3dof_ParallelControl(control_3dof_B.q_3,
-    control_3dof_B.rtb_control_in3_w, control_3dof_B.vu, control_3dof_B.F_trim,
-    control_3dof_Y.force_sp3, CONTROL_PARAM.CABLE_LEN, CONTROL_PARAM.MASS_UAV,
-    &control_3dof_B.sf_ParallelControl_p);
+    control_3dof_B.rtb_control_in3_w, control_3dof_B.F_var,
+    control_3dof_B.F_trim, control_3dof_Y.force_sp3, CONTROL_PARAM.CABLE_LEN,
+    CONTROL_PARAM.MASS_UAV, &control_3dof_B.sf_ParallelControl_p);
 
   // Sum: '<S15>/Sum' incorporates:
   //   DiscreteIntegrator: '<S11>/Discrete-Time Integrator'
@@ -2140,15 +2095,15 @@ void control_3dof::step()
   //   DiscreteIntegrator: '<S7>/Discrete-Time Integrator'
   //   Sum: '<S3>/Sum1'
 
-  tmp = _mm_add_pd(_mm_add_pd(_mm_loadu_pd(&control_3dof_Y.force_sp2[0]),
+  tmp_2 = _mm_add_pd(_mm_add_pd(_mm_loadu_pd(&control_3dof_Y.force_sp2[0]),
     _mm_loadu_pd(&control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0])),
-                   _mm_loadu_pd(&control_3dof_Y.force_sp3[0]));
+                     _mm_loadu_pd(&control_3dof_Y.force_sp3[0]));
 
   // DiscreteIntegrator: '<S11>/Discrete-Time Integrator' incorporates:
   //   Outport: '<Root>/force_sp3'
   //   Sum: '<S3>/Sum1'
 
-  _mm_storeu_pd(&control_3dof_Y.force_sp3[0], tmp);
+  _mm_storeu_pd(&control_3dof_Y.force_sp3[0], tmp_2);
 
   // Outport: '<Root>/force_sp3' incorporates:
   //   DiscreteIntegrator: '<S11>/Discrete-Time Integrator'
@@ -2173,15 +2128,15 @@ void control_3dof::step()
   //   DiscreteIntegrator: '<S7>/Discrete-Time Integrator'
   //   Sum: '<S2>/Sum1'
 
-  tmp = _mm_add_pd(_mm_add_pd(_mm_loadu_pd(&control_3dof_Y.force_sp1[0]),
+  tmp_2 = _mm_add_pd(_mm_add_pd(_mm_loadu_pd(&control_3dof_Y.force_sp1[0]),
     _mm_loadu_pd(&control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[0])),
-                   _mm_loadu_pd(&control_3dof_Y.force_sp2[0]));
+                     _mm_loadu_pd(&control_3dof_Y.force_sp2[0]));
 
   // DiscreteIntegrator: '<S7>/Discrete-Time Integrator' incorporates:
   //   Outport: '<Root>/force_sp2'
   //   Sum: '<S2>/Sum1'
 
-  _mm_storeu_pd(&control_3dof_Y.force_sp2[0], tmp);
+  _mm_storeu_pd(&control_3dof_Y.force_sp2[0], tmp_2);
 
   // Outport: '<Root>/force_sp2' incorporates:
   //   DiscreteIntegrator: '<S11>/Discrete-Time Integrator'
@@ -2234,7 +2189,7 @@ void control_3dof::step()
   control_3dof_Y.state.dL[0] = control_3dof_DW.obj.Z_3[0];
 
   // Update for DiscreteIntegrator: '<S15>/Discrete-Time Integrator'
-  tmp = _mm_set1_pd(0.02);
+  tmp_2 = _mm_set1_pd(0.02);
 
   // Gain: '<S15>/Gain'
   tmp_0 = _mm_set1_pd(CONTROL_PARAM.KQI);
@@ -2245,7 +2200,7 @@ void control_3dof::step()
   //   Gain: '<S15>/Gain'
 
   _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_add_pd(_mm_mul_pd(_mm_mul_pd(tmp_0,
-    _mm_set_pd(control_3dof_B.dot_err_c[0], control_3dof_B.dot_err[0])), tmp),
+    _mm_set_pd(control_3dof_B.dot_err_c[0], control_3dof_B.dot_err[0])), tmp_2),
     _mm_set_pd(control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[0],
                control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0])));
 
@@ -2282,7 +2237,7 @@ void control_3dof::step()
   //   Gain: '<S15>/Gain'
 
   _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_add_pd(_mm_mul_pd(_mm_mul_pd(tmp_0,
-    _mm_set_pd(control_3dof_B.dot_err_c[1], control_3dof_B.dot_err[1])), tmp),
+    _mm_set_pd(control_3dof_B.dot_err_c[1], control_3dof_B.dot_err[1])), tmp_2),
     _mm_set_pd(control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[1],
                control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1])));
 
@@ -2319,7 +2274,7 @@ void control_3dof::step()
   //   Gain: '<S15>/Gain'
 
   _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_add_pd(_mm_mul_pd(_mm_mul_pd(tmp_0,
-    _mm_set_pd(control_3dof_B.dot_err_c[2], control_3dof_B.dot_err[2])), tmp),
+    _mm_set_pd(control_3dof_B.dot_err_c[2], control_3dof_B.dot_err[2])), tmp_2),
     _mm_set_pd(control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[2],
                control_3dof_DW.DiscreteTimeIntegrator_DSTATE[2])));
 
