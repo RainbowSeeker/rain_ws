@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'control_3dof'.
  *
- * Model version                  : 1.753
+ * Model version                  : 1.755
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Sun Jan 12 19:04:21 2025
+ * C/C++ source code generated on : Sun Jan 12 21:07:36 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -133,6 +133,15 @@ typedef struct {
   real_T KW;
   real_T KQI;
 } struct_SXZiMrrc3I4047EGQQvBKH;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_struct_s1X7MNNw1KKuxbD9HCjUEH_
+#define DEFINED_TYPEDEF_FOR_struct_s1X7MNNw1KKuxbD9HCjUEH_
+
+typedef struct {
+  int32_T period;
+} struct_s1X7MNNw1KKuxbD9HCjUEH;
 
 #endif
 
@@ -370,7 +379,7 @@ typedef struct {
   real_T DiscreteTimeIntegrator_DSTATE_p[3];/* '<S6>/Discrete-Time Integrator' */
   real_T UnitDelay_DSTATE_f[3];        /* '<S1>/Unit Delay' */
   uint64_T DelayInput1_DSTATE;         /* '<S22>/Delay Input1' */
-  uint64_T DiscreteTimeIntegrator_DSTAT_ps;/* '<S21>/Discrete-Time Integrator' */
+  uint64_T Accumulator_DSTATE;         /* '<S21>/Accumulator' */
   boolean_T icLoad;                    /* '<S20>/Delay' */
   DW_MATLABSystem_control_3dof_T MATLABSystem_a;/* '<S1>/MATLAB System' */
   DW_MATLABSystem_control_3dof_T MATLABSystem_g;/* '<S1>/MATLAB System' */
@@ -442,6 +451,9 @@ extern struct_SXZiMrrc3I4047EGQQvBKH CONTROL_PARAM;/* Variable: CONTROL_PARAM
                                                     *   '<S18>/KP'
                                                     *   '<S18>/KV'
                                                     */
+extern struct_s1X7MNNw1KKuxbD9HCjUEH CONTROL_EXPORT;/* Variable: CONTROL_EXPORT
+                                                     * Referenced by: '<S21>/Period [ms]'
+                                                     */
 
 /* Model entry point functions */
 extern void control_3dof_initialize(void);

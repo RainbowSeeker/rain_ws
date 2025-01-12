@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'control_3dof'.
  *
- * Model version                  : 1.753
+ * Model version                  : 1.755
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Sun Jan 12 19:04:21 2025
+ * C/C++ source code generated on : Sun Jan 12 21:07:36 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -22,6 +22,44 @@
 #include <emmintrin.h>
 #include <math.h>
 #include "math.h"
+#ifndef UCHAR_MAX
+#include <limits.h>
+#endif
+
+#if ( UCHAR_MAX != (0xFFU) ) || ( SCHAR_MAX != (0x7F) )
+#error Code was generated for compiler with different sized uchar/char. \
+Consider adjusting Test hardware word size settings on the \
+Hardware Implementation pane to match your compiler word sizes as \
+defined in limits.h of the compiler. Alternatively, you can \
+select the Test hardware is the same as production hardware option and \
+select the Enable portable word sizes option on the Code Generation > \
+Verification pane for ERT based targets, which will disable the \
+preprocessor word size checks.
+#endif
+
+#if ( USHRT_MAX != (0xFFFFU) ) || ( SHRT_MAX != (0x7FFF) )
+#error Code was generated for compiler with different sized ushort/short. \
+Consider adjusting Test hardware word size settings on the \
+Hardware Implementation pane to match your compiler word sizes as \
+defined in limits.h of the compiler. Alternatively, you can \
+select the Test hardware is the same as production hardware option and \
+select the Enable portable word sizes option on the Code Generation > \
+Verification pane for ERT based targets, which will disable the \
+preprocessor word size checks.
+#endif
+
+#if ( UINT_MAX != (0xFFFFFFFFU) ) || ( INT_MAX != (0x7FFFFFFF) )
+#error Code was generated for compiler with different sized uint/int. \
+Consider adjusting Test hardware word size settings on the \
+Hardware Implementation pane to match your compiler word sizes as \
+defined in limits.h of the compiler. Alternatively, you can \
+select the Test hardware is the same as production hardware option and \
+select the Enable portable word sizes option on the Code Generation > \
+Verification pane for ERT based targets, which will disable the \
+preprocessor word size checks.
+#endif
+
+/* Skipping ulong/long check: insufficient preprocessor integer range. */
 
 /* Exported block parameters */
 struct_SXZiMrrc3I4047EGQQvBKH CONTROL_PARAM = {
@@ -67,6 +105,12 @@ struct_SXZiMrrc3I4047EGQQvBKH CONTROL_PARAM = {
                                         *   '<S14>/Gain'
                                         *   '<S18>/KP'
                                         *   '<S18>/KV'
+                                        */
+
+struct_s1X7MNNw1KKuxbD9HCjUEH CONTROL_EXPORT = {
+  100
+} ;                                    /* Variable: CONTROL_EXPORT
+                                        * Referenced by: '<S21>/Period [ms]'
                                         */
 
 /* Block signals (default storage) */
@@ -299,10 +343,10 @@ static void control_3dof_MATLABSystem(const real_T rtu_0[3], const real_T rtu_1
 
   /* MATLABSystem: '<S1>/MATLAB System' */
   localDW->obj.Z_1[0] += (localDW->obj.K_p[0] * tmp[0] + localDW->obj.Z_2[0]) *
-    0.02;
+    0.1;
   localDW->obj.Z_2[0] += (((rtu_0[0] + localDW->obj.Z_3[0]) + tmp[0] *
-    localDW->obj.K_p[1]) + localDW->obj.K_v[1] * tmp[1]) * 0.02;
-  obj_Z_3 = (tmp[0] * localDW->obj.K_p[2] + tmp[1] * localDW->obj.K_v[2]) * 0.02
+    localDW->obj.K_p[1]) + localDW->obj.K_v[1] * tmp[1]) * 0.1;
+  obj_Z_3 = (tmp[0] * localDW->obj.K_p[2] + tmp[1] * localDW->obj.K_v[2]) * 0.1
     + localDW->obj.Z_3[0];
   localDW->obj.Z_3[0] = obj_Z_3;
 
@@ -315,10 +359,10 @@ static void control_3dof_MATLABSystem(const real_T rtu_0[3], const real_T rtu_1
 
   /* MATLABSystem: '<S1>/MATLAB System' */
   localDW->obj.Z_1[1] += (localDW->obj.K_p[0] * tmp[0] + localDW->obj.Z_2[1]) *
-    0.02;
+    0.1;
   localDW->obj.Z_2[1] += (((rtu_0[1] + localDW->obj.Z_3[1]) + tmp[0] *
-    localDW->obj.K_p[1]) + localDW->obj.K_v[1] * tmp[1]) * 0.02;
-  obj_Z_3 = (tmp[0] * localDW->obj.K_p[2] + tmp[1] * localDW->obj.K_v[2]) * 0.02
+    localDW->obj.K_p[1]) + localDW->obj.K_v[1] * tmp[1]) * 0.1;
+  obj_Z_3 = (tmp[0] * localDW->obj.K_p[2] + tmp[1] * localDW->obj.K_v[2]) * 0.1
     + localDW->obj.Z_3[1];
   localDW->obj.Z_3[1] = obj_Z_3;
 
@@ -331,10 +375,10 @@ static void control_3dof_MATLABSystem(const real_T rtu_0[3], const real_T rtu_1
 
   /* MATLABSystem: '<S1>/MATLAB System' */
   localDW->obj.Z_1[2] += (localDW->obj.K_p[0] * tmp[0] + localDW->obj.Z_2[2]) *
-    0.02;
+    0.1;
   localDW->obj.Z_2[2] += ((((rtu_0[2] + localDW->obj.Z_3[2]) + 9.8) + tmp[0] *
-    localDW->obj.K_p[1]) + localDW->obj.K_v[1] * tmp[1]) * 0.02;
-  obj_Z_3 = (tmp[0] * localDW->obj.K_p[2] + tmp[1] * localDW->obj.K_v[2]) * 0.02
+    localDW->obj.K_p[1]) + localDW->obj.K_v[1] * tmp[1]) * 0.1;
+  obj_Z_3 = (tmp[0] * localDW->obj.K_p[2] + tmp[1] * localDW->obj.K_v[2]) * 0.1
     + localDW->obj.Z_3[2];
   localDW->obj.Z_3[2] = obj_Z_3;
 
@@ -1789,14 +1833,14 @@ void control_3dof_step(void)
    *  UnitDelay: '<S4>/Unit Delay'
    * */
   control_3dof_DW.obj.Z_1[0] += (control_3dof_DW.obj.K_p[0] *
-    control_3dof_B.dv1[0] + control_3dof_DW.obj.Z_2[0]) * 0.02;
+    control_3dof_B.dv1[0] + control_3dof_DW.obj.Z_2[0]) * 0.1;
   control_3dof_DW.obj.Z_2[0] += (((control_3dof_DW.UnitDelay_DSTATE[0] +
     control_3dof_DW.obj.Z_3[0]) + control_3dof_B.dv1[0] *
     control_3dof_DW.obj.K_p[1]) + control_3dof_DW.obj.K_v[1] *
-    control_3dof_B.dv1[1]) * 0.02;
+    control_3dof_B.dv1[1]) * 0.1;
   control_3dof_DW.obj.Z_3[0] += (control_3dof_B.dv1[0] *
     control_3dof_DW.obj.K_p[2] + control_3dof_B.dv1[1] *
-    control_3dof_DW.obj.K_v[2]) * 0.02;
+    control_3dof_DW.obj.K_v[2]) * 0.1;
 
   /* Start for MATLABSystem: '<S4>/Position 2nd ESO' incorporates:
    *  BusCreator generated from: '<S4>/Force Saturation && Disturbution'
@@ -1816,14 +1860,14 @@ void control_3dof_step(void)
   control_3dof_B.e_2_c = control_3dof_U.Payload_Out.vL[1] -
     control_3dof_DW.obj.Z_2[1];
   control_3dof_DW.obj.Z_1[1] += (control_3dof_DW.obj.K_p[0] *
-    control_3dof_B.dv1[1] + control_3dof_DW.obj.Z_2[1]) * 0.02;
+    control_3dof_B.dv1[1] + control_3dof_DW.obj.Z_2[1]) * 0.1;
   control_3dof_DW.obj.Z_2[1] += (((control_3dof_DW.UnitDelay_DSTATE[1] +
     control_3dof_DW.obj.Z_3[1]) + control_3dof_DW.obj.K_p[1] *
     control_3dof_B.dv1[1]) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_c) *
-    0.02;
+    0.1;
   control_3dof_DW.obj.Z_3[1] += (control_3dof_B.dv1[1] *
     control_3dof_DW.obj.K_p[2] + control_3dof_DW.obj.K_v[2] *
-    control_3dof_B.e_2_c) * 0.02;
+    control_3dof_B.e_2_c) * 0.1;
 
   /* Start for MATLABSystem: '<S4>/Position 2nd ESO' incorporates:
    *  BusCreator generated from: '<S4>/Force Saturation && Disturbution'
@@ -1843,14 +1887,14 @@ void control_3dof_step(void)
   control_3dof_B.e_2_c = control_3dof_U.Payload_Out.vL[2] -
     control_3dof_DW.obj.Z_2[2];
   control_3dof_DW.obj.Z_1[2] += (control_3dof_DW.obj.K_p[0] *
-    control_3dof_B.dv1[1] + control_3dof_DW.obj.Z_2[2]) * 0.02;
+    control_3dof_B.dv1[1] + control_3dof_DW.obj.Z_2[2]) * 0.1;
   control_3dof_DW.obj.Z_2[2] += ((((control_3dof_DW.UnitDelay_DSTATE[2] +
     control_3dof_DW.obj.Z_3[2]) + 9.8) + control_3dof_DW.obj.K_p[1] *
     control_3dof_B.dv1[1]) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_c) *
-    0.02;
+    0.1;
   control_3dof_DW.obj.Z_3[2] += (control_3dof_B.dv1[1] *
     control_3dof_DW.obj.K_p[2] + control_3dof_DW.obj.K_v[2] *
-    control_3dof_B.e_2_c) * 0.02;
+    control_3dof_B.e_2_c) * 0.1;
 
   /* MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
    *  BusCreator generated from: '<S4>/Force Saturation && Disturbution'
@@ -2599,23 +2643,10 @@ void control_3dof_step(void)
     &control_3dof_B.sf_ParallelControl);
 
   /* BusCreator generated from: '<Root>/state' incorporates:
-   *  DiscreteIntegrator: '<S21>/Discrete-Time Integrator'
+   *  DiscreteIntegrator: '<S21>/Accumulator'
    *  Outport: '<Root>/state'
    */
-  control_3dof_Y.state.timestamp =
-    control_3dof_DW.DiscreteTimeIntegrator_DSTAT_ps;
-
-  /* Update for UnitDelay: '<S22>/Delay Input1' incorporates:
-   *  Inport: '<Root>/Dir_sp'
-   *
-   * Block description for '<S22>/Delay Input1':
-   *
-   *  Store in Global RAM
-   */
-  control_3dof_DW.DelayInput1_DSTATE = control_3dof_U.Dir_sp.timestamp;
-
-  /* Update for Delay: '<S20>/Delay' */
-  control_3dof_DW.icLoad = false;
+  control_3dof_Y.state.timestamp = control_3dof_DW.Accumulator_DSTATE;
 
   /* Sum: '<S1>/Sum1' incorporates:
    *  DiscreteIntegrator: '<S6>/Discrete-Time Integrator'
@@ -2643,34 +2674,6 @@ void control_3dof_step(void)
    * */
   control_3dof_Y.state.dL[0] = control_3dof_DW.obj.Z_3[0];
 
-  /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' */
-  tmp_1 = _mm_set1_pd(0.02);
-
-  /* Gain: '<S14>/Gain' */
-  tmp = _mm_set1_pd(CONTROL_PARAM.KQI);
-
-  /* Gain: '<S10>/Gain' incorporates:
-   *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
-   *  DiscreteIntegrator: '<S14>/Discrete-Time Integrator'
-   *  Gain: '<S14>/Gain'
-   */
-  _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_add_pd(_mm_mul_pd(_mm_mul_pd(tmp,
-    _mm_set_pd(control_3dof_B.dot_err_c[0], control_3dof_B.dot_err[0])), tmp_1),
-    _mm_set_pd(control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[0],
-               control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0])));
-
-  /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0] = control_3dof_B.dv1[0];
-
-  /* Update for DiscreteIntegrator: '<S10>/Discrete-Time Integrator' */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[0] = control_3dof_B.dv1[1];
-
-  /* Update for DiscreteIntegrator: '<S6>/Discrete-Time Integrator' incorporates:
-   *  Gain: '<S6>/Gain'
-   */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[0] += CONTROL_PARAM.KQI *
-    control_3dof_B.dot_err_g[0] * 0.02;
-
   /* Sum: '<S1>/Sum1' incorporates:
    *  DiscreteIntegrator: '<S6>/Discrete-Time Integrator'
    *  Gain: '<S1>/Gain'
@@ -2697,28 +2700,6 @@ void control_3dof_step(void)
    * */
   control_3dof_Y.state.dL[1] = control_3dof_DW.obj.Z_3[1];
 
-  /* Gain: '<S10>/Gain' incorporates:
-   *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
-   *  DiscreteIntegrator: '<S14>/Discrete-Time Integrator'
-   *  Gain: '<S14>/Gain'
-   */
-  _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_add_pd(_mm_mul_pd(_mm_mul_pd(tmp,
-    _mm_set_pd(control_3dof_B.dot_err_c[1], control_3dof_B.dot_err[1])), tmp_1),
-    _mm_set_pd(control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[1],
-               control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1])));
-
-  /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1] = control_3dof_B.dv1[0];
-
-  /* Update for DiscreteIntegrator: '<S10>/Discrete-Time Integrator' */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[1] = control_3dof_B.dv1[1];
-
-  /* Update for DiscreteIntegrator: '<S6>/Discrete-Time Integrator' incorporates:
-   *  Gain: '<S6>/Gain'
-   */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[1] += CONTROL_PARAM.KQI *
-    control_3dof_B.dot_err_g[1] * 0.02;
-
   /* Sum: '<S1>/Sum1' incorporates:
    *  DiscreteIntegrator: '<S6>/Discrete-Time Integrator'
    *  Gain: '<S1>/Gain'
@@ -2737,13 +2718,79 @@ void control_3dof_step(void)
    *  UnitDelay: '<S1>/Unit Delay'
    */
   control_3dof_DW.UnitDelay_DSTATE_f[2] = (control_3dof_B.q_3_k -
-    control_3dof_B.xv[2]) * control_3dof_B.e_2_c;
+    control_3dof_B.dv1[0]) * control_3dof_B.e_2_c;
 
   /* BusCreator generated from: '<Root>/state' incorporates:
    *  MATLABSystem: '<S4>/Position 2nd ESO'
    *  Outport: '<Root>/state'
    * */
   control_3dof_Y.state.dL[2] = control_3dof_DW.obj.Z_3[2];
+
+  /* Update for UnitDelay: '<S22>/Delay Input1' incorporates:
+   *  Inport: '<Root>/Dir_sp'
+   *
+   * Block description for '<S22>/Delay Input1':
+   *
+   *  Store in Global RAM
+   */
+  control_3dof_DW.DelayInput1_DSTATE = control_3dof_U.Dir_sp.timestamp;
+
+  /* Update for Delay: '<S20>/Delay' */
+  control_3dof_DW.icLoad = false;
+
+  /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' */
+  tmp_1 = _mm_set1_pd(0.1);
+
+  /* Gain: '<S14>/Gain' */
+  tmp = _mm_set1_pd(CONTROL_PARAM.KQI);
+
+  /* Gain: '<S10>/Gain' incorporates:
+   *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
+   *  DiscreteIntegrator: '<S14>/Discrete-Time Integrator'
+   *  Gain: '<S14>/Gain'
+   */
+  _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_add_pd(_mm_mul_pd(_mm_mul_pd(tmp,
+    _mm_set_pd(control_3dof_B.dot_err_c[0], control_3dof_B.dot_err[0])), tmp_1),
+    _mm_set_pd(control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[0],
+               control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0])));
+
+  /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0] = control_3dof_B.dv1[0];
+
+  /* Update for DiscreteIntegrator: '<S10>/Discrete-Time Integrator' */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[0] = control_3dof_B.dv1[1];
+
+  /* Gain: '<S14>/Gain' incorporates:
+   *  DiscreteIntegrator: '<S14>/Discrete-Time Integrator'
+   *  DiscreteIntegrator: '<S6>/Discrete-Time Integrator'
+   *  Gain: '<S6>/Gain'
+   */
+  _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_add_pd(_mm_mul_pd(_mm_mul_pd(tmp,
+    _mm_set_pd(control_3dof_B.dot_err[1], control_3dof_B.dot_err_g[0])), tmp_1),
+    _mm_set_pd(control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1],
+               control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[0])));
+
+  /* Update for DiscreteIntegrator: '<S6>/Discrete-Time Integrator' */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[0] = control_3dof_B.dv1[0];
+
+  /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1] = control_3dof_B.dv1[1];
+
+  /* Gain: '<S6>/Gain' incorporates:
+   *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
+   *  DiscreteIntegrator: '<S6>/Discrete-Time Integrator'
+   *  Gain: '<S10>/Gain'
+   */
+  _mm_storeu_pd(&control_3dof_B.dv1[0], _mm_add_pd(_mm_mul_pd(_mm_mul_pd(tmp,
+    _mm_set_pd(control_3dof_B.dot_err_g[1], control_3dof_B.dot_err_c[1])), tmp_1),
+    _mm_set_pd(control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[1],
+               control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[1])));
+
+  /* Update for DiscreteIntegrator: '<S10>/Discrete-Time Integrator' */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[1] = control_3dof_B.dv1[0];
+
+  /* Update for DiscreteIntegrator: '<S6>/Discrete-Time Integrator' */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[1] = control_3dof_B.dv1[1];
 
   /* Gain: '<S10>/Gain' incorporates:
    *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
@@ -2765,7 +2812,26 @@ void control_3dof_step(void)
    *  Gain: '<S6>/Gain'
    */
   control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[2] += CONTROL_PARAM.KQI *
-    control_3dof_B.dot_err_g[2] * 0.02;
+    control_3dof_B.dot_err_g[2] * 0.1;
+
+  /* Switch: '<S21>/Switch' incorporates:
+   *  Constant: '<S21>/Period [ms]'
+   *  SampleTimeMath: '<S21>/Ts [ms]'
+   *
+   * About '<S21>/Ts [ms]':
+   *  y = K where K = ( w * Ts )
+   *   */
+  if (CONTROL_EXPORT.period > 0) {
+    control_3dof_B.i = CONTROL_EXPORT.period;
+  } else {
+    control_3dof_B.i = 100;
+  }
+
+  /* Update for DiscreteIntegrator: '<S21>/Accumulator' incorporates:
+   *  DataTypeConversion: '<S21>/Data Type Conversion'
+   *  Switch: '<S21>/Switch'
+   */
+  control_3dof_DW.Accumulator_DSTATE += (uint64_T)control_3dof_B.i;
 }
 
 /* Model initialize function */

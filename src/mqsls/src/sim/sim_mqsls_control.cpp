@@ -57,7 +57,7 @@ static std::shared_ptr<EventHandler> make_event_handler(rclcpp::Node *node, cons
 static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std::string &traj_type)
 {
     if (traj_type == "line") {
-        return std::make_shared<LineTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(100, 0, -10), 2.0);
+        return std::make_shared<LineTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(50, 0, -10), 2.0);
     } else if (traj_type == "circle") {
         return std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), 10, deg2rad(6));
     } else if (traj_type == "rectangle") {
@@ -240,7 +240,15 @@ private:
         }
 
         // running
-        _controller.step(_control_input);
+        {
+            static int counter = CONTROL_EXPORT.period;
+            if (counter >= CONTROL_EXPORT.period)
+            {
+                counter -= CONTROL_EXPORT.period;
+                _controller.step(_control_input);
+            }
+            counter += 20;
+        }
 
         output = _controller.getOutput();
 
@@ -258,14 +266,9 @@ private:
                 -_disturbance_filter.getState()[2] - 9.8
             };
 
-            bool need_request = false;
-            for (int i = 0; i < 3; i++) {
-                if (std::abs(expected_trim_acc[i] - last_trim_acc[i]) > _margin_acc * 0.6) {
-                    need_request = true;
-                }
-            }
+            bool need_request = output.state.margin < _margin * 0.2; // 20% threshold
 
-            if (_running_time - last_request_time > 5_s && need_request) 
+            if (need_request && _running_time - last_request_time > 5_s) 
             {
                 RCLCPP_INFO(this->get_logger(), "Expected: [%f %f %f], last: [%f %f %f]", 
                         expected_trim_acc[0], expected_trim_acc[1], expected_trim_acc[2], 
@@ -421,7 +424,7 @@ private:
                 _cable_dir_sp[1][i] = response->q_2[i];
                 _cable_dir_sp[2][i] = response->q_3[i];
             }
-            _margin_acc = response->radius / _load_mass;
+            _margin = response->radius;
             _cable_dir_timestamp++;
             RCLCPP_INFO(this->get_logger(), "Force optimization response:\nRadius: %f\nQ1: [%f %f %f]\nQ2: [%f %f %f]\nQ3: [%f %f %f]", 
                     response->radius, response->q_1[0], response->q_1[1], response->q_1[2], 
@@ -449,7 +452,7 @@ private:
         {0.25, -0.443, 0.866}
     };
     uint64_t _cable_dir_timestamp = 0;
-    double _margin_acc = 2; // m/s^2
+    double _margin = 2; // N
     mqsls::msg::FollowerSend _follower_msg[3]; // 0: leader, 1: follower 2, 2: follower 3
     std::shared_ptr<InputSource> _input_source;
     std::shared_ptr<OutputActuator> _output_actuator;
