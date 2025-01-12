@@ -361,7 +361,7 @@ private:
         this->declare_parameter("uav_mass", 1.5);
         this->declare_parameter("eso_enable", true);
         this->declare_parameter("eso_pl", std::vector<double>{3.0, 5.0, 10.0});
-        this->declare_parameter("eso_vl", std::vector<double>{0.0, 20.0, 20.0});
+        this->declare_parameter("eso_vl", std::vector<double>{0.0, 20.0, 30.0});
         this->declare_parameter("min_tension", 0.0); // N
         this->declare_parameter("max_tension", 7.0); // N
         this->declare_parameter("kq", 1.0);
@@ -385,7 +385,7 @@ private:
     {
         // Mutable control parameters
         CONTROL_PARAM.KP = 0.5;
-        CONTROL_PARAM.KV = 1.5;
+        CONTROL_PARAM.KV = 1.0;
         CONTROL_PARAM.KQ = this->get_parameter("kq").as_double();
         CONTROL_PARAM.KW = this->get_parameter("kw").as_double();
         CONTROL_PARAM.KQI = 0.0;
@@ -398,6 +398,8 @@ private:
         for (int i = 0; i < 3; i++) {
             CONTROL_PARAM.ESO_PL[i] = eso_enable ? eso_pl[i] : 0;
             CONTROL_PARAM.ESO_VL[i] = eso_enable ? eso_vl[i] : 0;
+            CONTROL_PARAM.ESO_PI[i] = eso_enable ? eso_pl[i] : 0;
+            CONTROL_PARAM.ESO_VI[i] = eso_enable ? eso_vl[i] : 0;
         }
     }
 
