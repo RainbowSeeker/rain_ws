@@ -175,7 +175,11 @@ private:
             const Eigen::Vector3d q_sp = _cable_dir_sp[index];
             const double safety_len = _cable_len * 0.9; // 90% of cable length
             const Eigen::Vector3d position_sp = -q_sp * safety_len;
-            const Eigen::Vector3d position_now = {-_follower_msg[index].delta_position[0], -_follower_msg[index].delta_position[1], -_follower_msg[index].delta_position[2]};
+            const Eigen::Vector3d position_now = {
+                _follower_msg[index].position_uav[0] - _follower_msg[index].position_load[0],
+                _follower_msg[index].position_uav[1] - _follower_msg[index].position_load[1],
+                _follower_msg[index].position_uav[2] - _follower_msg[index].position_load[2],
+            };
             const Eigen::Vector3d velocity_now = {_follower_msg[index].velocity_uav[0], _follower_msg[index].velocity_uav[1], _follower_msg[index].velocity_uav[2]};
 
             position_err = position_sp - position_now;
@@ -217,11 +221,11 @@ private:
         _traj_gen->update(20_ms, traj_out);
 
         for (int i = 0; i < 3; i++) {
-            _control_input.Payload_Out.pL[i] = _follower_msg[0].position_uav[i] + _follower_msg[0].delta_position[i];
-            _control_input.Payload_Out.vL[i] = _follower_msg[0].velocity_uav[i] + _follower_msg[0].delta_velocity[i];
-            _control_input.Payload_Out.p_1[i] = _control_input.Payload_Out.pL[i] - _follower_msg[0].delta_position[i];
-            _control_input.Payload_Out.p_2[i] = _control_input.Payload_Out.pL[i] - _follower_msg[1].delta_position[i];
-            _control_input.Payload_Out.p_3[i] = _control_input.Payload_Out.pL[i] - _follower_msg[2].delta_position[i];
+            _control_input.Payload_Out.pL[i] = _follower_msg[0].position_load[i];
+            _control_input.Payload_Out.vL[i] = _follower_msg[0].velocity_load[i];
+            _control_input.Payload_Out.p_1[i] = _control_input.Payload_Out.pL[i] + _follower_msg[0].position_uav[i] - _follower_msg[0].position_load[i];
+            _control_input.Payload_Out.p_2[i] = _control_input.Payload_Out.pL[i] + _follower_msg[1].position_uav[i] - _follower_msg[1].position_load[i];
+            _control_input.Payload_Out.p_3[i] = _control_input.Payload_Out.pL[i] + _follower_msg[2].position_uav[i] - _follower_msg[2].position_load[i];
             _control_input.Payload_Out.v_1[i] = _follower_msg[0].velocity_uav[i];
             _control_input.Payload_Out.v_2[i] = _follower_msg[1].velocity_uav[i];
             _control_input.Payload_Out.v_3[i] = _follower_msg[2].velocity_uav[i];

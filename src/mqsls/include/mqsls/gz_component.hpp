@@ -54,12 +54,12 @@ private:
         // _data.msg.delta_position[0] = _cable_direction[0] * 2;
         // _data.msg.delta_position[1] = _cable_direction[1] * 2;
         // _data.msg.delta_position[2] = _cable_direction[2] * 2;
-        _data.msg.delta_position[0] = _load_position.x() - _uav_position.x();
-        _data.msg.delta_position[1] = _load_position.y() - _uav_position.y();
-        _data.msg.delta_position[2] = _load_position.z() - _uav_position.z();
-        _data.msg.delta_velocity[0] = _load_velocity.x() - _uav_velocity.x();
-        _data.msg.delta_velocity[1] = _load_velocity.y() - _uav_velocity.y();
-        _data.msg.delta_velocity[2] = _load_velocity.z() - _uav_velocity.z();
+        _data.msg.position_load[0] = _load_position.x();
+        _data.msg.position_load[1] = _load_position.y();
+        _data.msg.position_load[2] = _load_position.z();
+        _data.msg.velocity_load[0] = _load_velocity.x();
+        _data.msg.velocity_load[1] = _load_velocity.y();
+        _data.msg.velocity_load[2] = _load_velocity.z();
 
         return _data;
     }
