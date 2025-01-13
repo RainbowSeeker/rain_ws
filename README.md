@@ -1,11 +1,28 @@
 # Rain's Workspace with ROS2
+## Requirement
+Operate system: Ubuntu 22.04
+ROS2: Humble
+PX4: v1.14.3
+Gazebo: Gz-garden
+```
+cd ~
+# ROS2
+wget http://fishros.com/install -O fishros && . fishros
+# PX4 + Gazebo
+git clone https://github.com/PX4/PX4-Autopilot.git -b v1.14.3 --recursive
+bash PX4-Autopilot/Tools/setup/ubuntu.sh
+# Utils
+sudo apt install ros-humble-control-toolbox
+# Workspace
+git clone https://github.com/RainbowSeeker/rain_ws.git --recursive
+```
 ## How to use
 ### Multi-quadrotor sil simulation
 ```
 source /opt/ros/humble/setup.bash
 colcon build
 source $PWD/install/setup.bash
-ros2 launch formation mc_formation_launch.py
+ros2 launch mqsls x500_3dof_mqsls_launch.py
 ```
 ### Multi-quadrotor actual test
 Each onboard computer:
