@@ -1,19 +1,35 @@
 # Rain's Workspace with ROS2
 ## Requirement
 Operate system: Ubuntu 22.04
+
 ROS2: Humble
+
 PX4: v1.14.3
+
 Gazebo: Gz-garden
 ```
 cd ~
+
 # ROS2
 wget http://fishros.com/install -O fishros && . fishros
+
 # PX4 + Gazebo
 git clone https://github.com/PX4/PX4-Autopilot.git -b v1.14.3 --recursive
 bash PX4-Autopilot/Tools/setup/ubuntu.sh
+
 # Utils
 sudo apt install ros-humble-control-toolbox
+git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+cd Micro-XRCE-DDS-Agent
+mkdir build
+cd build
+cmake ..
+make
+sudo make install
+sudo ldconfig /usr/local/lib/
+
 # Workspace
+cd ~
 git clone https://github.com/RainbowSeeker/rain_ws.git --recursive
 ```
 ## How to use
@@ -29,7 +45,7 @@ Each onboard computer:
 1. connect wifi hotspots
 ```
 sudo nmcli dev wifi list                    # look for nearby wifi 
-sudo nmcli dev wifi connect 'wifi_name' password 'your_password'
+sudo nmcli dev wifi connect 'wifi_name' --ask
 sudo nmcli connection down 'wifi_name'      # stop connection
 sudo nmcli connection modify 'wifi_name' ipv4.addresses 192.168.1.11/24 # addresses format: 192.168.1.1x, from 1 to 3. 10 is reserved for gcs.
 sudo nmcli connection modify 'wifi_name' ipv4.method manual
