@@ -3,8 +3,6 @@
 #include <Eigen/Eigen>
 #include <Eigen/Geometry>
 
-#include "component.hpp"
-
 namespace mqsls {
 
 struct MqslsDataFrame {

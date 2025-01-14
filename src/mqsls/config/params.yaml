@@ -1,0 +1,5 @@
+/**:  # global parameters
+  ros__parameters:
+    dds_baudrate: 2000000
+    gcs_ip: 192.168.1.10  # 127.0.0.1 or 192.168.1.10
+    lasting_time: 30

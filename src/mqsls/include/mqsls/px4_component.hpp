@@ -1,9 +1,6 @@
 #ifndef PX4_COMPONENT_HPP
 #define PX4_COMPONENT_HPP
 
-#ifndef COMPONENT_HPP
-#error "Include component.hpp instead of px4_component.hpp"
-#endif
 #include "component.hpp"
 
 #include <px4_msgs/msg/vehicle_status.hpp>

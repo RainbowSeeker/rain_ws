@@ -35,8 +35,5 @@ public:
 };
 } // namespace mqsls
 
-#include "gz_component.hpp"
-#include "px4_component.hpp"
-
 #endif // !COMPONENT_HPP
 

@@ -1,12 +1,10 @@
 #include <control_toolbox/pid.hpp>
-
 #include "formation/data_recorder.hpp"
 #include "formation/utils.hpp"
 #include "../model/interface.hpp"
 #include "mqsls/mqsls.hpp"
-#include "mqsls/gz_component.hpp"
-#include "mqsls/px4_component.hpp"
 #include "mqsls/AlphaFilter.hpp"
+#include "mqsls/px4_component.hpp"
 #include "mqsls/trajectory_generator.hpp"
 
 #include <mqsls/srv/force_opt.hpp>
@@ -17,49 +15,10 @@ namespace mqsls {
 
 #define CONTROL_PERIOD      (CONTROL_EXPORT.period * 1_ms)
 
-static gz::transport::Node &get_default_gz_node()
-{
-    static gz::transport::Node node;
-    return node;
-}
-
-static std::shared_ptr<InputSource> make_input_source(rclcpp::Node *node, int node_index, const std::string &input_source, const std::string &world_name)
-{
-    if (input_source == "gz") {
-        return std::make_shared<GzInputSource>(&get_default_gz_node(), node_index, world_name);
-    } else if (input_source == "px4") {
-        return std::make_shared<PX4InputSource>();
-    } else {
-        throw std::runtime_error("Invalid input source");
-    }
-}
-
-static std::shared_ptr<OutputActuator> make_output_actuator(rclcpp::Node *node, int node_index, const std::string &output_actuator, const std::string &world_name)
-{
-    if (output_actuator == "gz") {
-        return std::make_shared<GzOutputActuator>(&get_default_gz_node(), node_index, world_name);
-    } else if (output_actuator == "px4") {
-        return std::make_shared<PX4OutputActuator>(node, node_index);
-    } else {
-        throw std::runtime_error("Invalid output actuator");
-    }
-}
-
-static std::shared_ptr<EventHandler> make_event_handler(rclcpp::Node *node, const std::string &event_handler, const std::string &world_name)
-{
-    if (event_handler == "gz") {
-        return std::make_shared<GzEventHandler>(&get_default_gz_node(), world_name);
-    } else if (event_handler == "px4") {
-        return std::make_shared<PX4EventHandler>(node);
-    } else {
-        throw std::runtime_error("Invalid event handler");
-    }
-}
-
-#define deg2rad(x) ((x) * M_PI / 180)
-
 static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std::string &traj_type)
 {
+    #define deg2rad(x) ((x) * M_PI / 180)
+
     if (traj_type == "line") {
         return std::make_shared<LineTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(50, 0, -10), 2.0);
     } else if (traj_type == "circle") {
@@ -74,43 +33,27 @@ static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std:
 class MqslsLeader : public rclcpp::Node
 {
 public:
-    MqslsLeader(int node_index) : rclcpp::Node("amc_" + std::to_string(node_index))
+    MqslsLeader() : rclcpp::Node("amc_leader")
     {
         parameter_declare();
 
-        const std::string world_name = this->get_parameter("world_name").as_string();
-        const std::string input_source = this->get_parameter("input_source").as_string();
-        const std::string output_actuator = this->get_parameter("output_actuator").as_string();
-        const std::string event_handler = this->get_parameter("event_handler").as_string();
         const std::string traj_type = this->get_parameter("traj_type").as_string();
-        const double boot_wait = this->get_parameter("boot_wait").as_double();
-
-        RCLCPP_INFO(this->get_logger(), "Node %d boot wait: %f", node_index, boot_wait);
-        std::this_thread::sleep_for(std::chrono::microseconds(static_cast<int>(boot_wait * 1e6)));
         
-        _input_source = make_input_source(this, node_index, input_source, world_name);
-        _output_actuator = make_output_actuator(this, node_index, output_actuator, world_name); // zero-hold actuator
-        _event_handler = make_event_handler(this, event_handler, world_name);
+        _event_handler = std::make_shared<PX4EventHandler>(this);
         _traj_gen = make_trajectory_generator(traj_type);
 
         rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
         auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, 5), qos_profile);
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 3; i++) {
             _leader_recv_sub[i] = this->create_subscription<mqsls::msg::FollowerSend>(
-                "follower_send" + std::to_string(i + 2), qos,
+                "follower_send" + std::to_string(i + 1), qos,
                 [this, i](const mqsls::msg::FollowerSend::SharedPtr msg) {
-                    _follower_msg[i + 1] = *msg;
+                    _follower_msg[i] = *msg;
                 });
+            
+            _output_actuator[i] = std::make_shared<PX4OutputActuator>(this, i + 1);
         }
-
-        for (int i = 0; i < 2; i++) {
-            _leader_send_pub[i] = this->create_publisher<mqsls::msg::FollowerRecv>("follower_recv" + std::to_string(i + 2), 10);
-        }
-
-        _input_source->register_update_callback([this](const InputSource::InputData &data) {
-            _follower_msg[0] = data.msg;
-        });
 
         _force_opt_client = this->create_client<mqsls::srv::ForceOpt>("force_opt");
         while (!_force_opt_client->wait_for_service(1s)) {
@@ -318,27 +261,21 @@ private:
 
         state_machine_flow(output);
         
-        // publish leader id == 1
-        auto data = OutputActuator::OutputData();
-        data.msg.timestamp = _running_time;
-        data.msg.force[0] = output.force_sp1[0];
-        data.msg.force[1] = output.force_sp1[1];
-        data.msg.force[2] = output.force_sp1[2];
-        _output_actuator->apply(data); // zero-hold actuator
+        #define FILL_OUTPUT_ACTUATOR(i) \
+        { \
+            auto data = OutputActuator::OutputData(); \
+            data.msg.timestamp = _running_time; \
+            data.msg.force[0] = output.force_sp##i[0]; \
+            data.msg.force[1] = output.force_sp##i[1]; \
+            data.msg.force[2] = output.force_sp##i[2]; \
+            _output_actuator[i - 1]->apply(data); \
+        }
 
-        // publish follower id == 2
-        mqsls::msg::FollowerRecv msg;
-        msg.timestamp = _running_time;
-        msg.force[0] = output.force_sp2[0];
-        msg.force[1] = output.force_sp2[1];
-        msg.force[2] = output.force_sp2[2];
-        _leader_send_pub[0]->publish(msg);
+        FILL_OUTPUT_ACTUATOR(1);
+        FILL_OUTPUT_ACTUATOR(2);
+        FILL_OUTPUT_ACTUATOR(3);
 
-        // publish follower id == 3
-        msg.force[0] = output.force_sp3[0];
-        msg.force[1] = output.force_sp3[1];
-        msg.force[2] = output.force_sp3[2];
-        _leader_send_pub[1]->publish(msg);
+        #undef FILL_OUTPUT_ACTUATOR
 
         record();
         
@@ -351,11 +288,6 @@ private:
     // parameters
     void parameter_declare()
     {
-        this->declare_parameter("world_name", "mqsls");
-        this->declare_parameter("input_source", "gz"); // gz or px4
-        this->declare_parameter("output_actuator", "gz"); // gz or px4
-        this->declare_parameter("event_handler", "gz"); // gz or px4
-        this->declare_parameter("boot_wait", 0.0); // boot wait time
         this->declare_parameter("traj_type", "line"); // line or circle
 
         // controller parameters
@@ -435,10 +367,7 @@ private:
     }
     
     // Subscriber
-    rclcpp::Subscription<mqsls::msg::FollowerSend>::SharedPtr _leader_recv_sub[2];
-
-    // Publisher
-    rclcpp::Publisher<mqsls::msg::FollowerRecv>::SharedPtr _leader_send_pub[2];
+    rclcpp::Subscription<mqsls::msg::FollowerSend>::SharedPtr _leader_recv_sub[3];
 
     // client for force optimization
     rclcpp::Client<mqsls::srv::ForceOpt>::SharedPtr _force_opt_client;
@@ -454,7 +383,7 @@ private:
     double _margin = 2; // N
     mqsls::msg::FollowerSend _follower_msg[3]; // 0: leader, 1: follower 2, 2: follower 3
     std::shared_ptr<InputSource> _input_source;
-    std::shared_ptr<OutputActuator> _output_actuator;
+    std::shared_ptr<OutputActuator> _output_actuator[3]; // 0: leader, 1: follower 2, 2: follower 3
     std::shared_ptr<EventHandler> _event_handler;
 
     // Inmutable parameters
@@ -486,57 +415,6 @@ private:
     }
     DataRecorder<MqslsDataFrame> _recorder{"install/" + utils::nowstr() + ".csv", 10};
 };
-
-class MqslsFollower : public rclcpp::Node
-{
-public:
-    MqslsFollower(int node_index) : rclcpp::Node("amc_" + std::to_string(node_index))
-    {
-        parameter_declare();
-
-        const std::string world_name = this->get_parameter("world_name").as_string();
-        const std::string input_source = this->get_parameter("input_source").as_string();
-        const std::string output_actuator = this->get_parameter("output_actuator").as_string();
-        _input_source = make_input_source(this, node_index, input_source, world_name);
-        _output_actuator = make_output_actuator(this, node_index, output_actuator, world_name); // zero-hold actuator
-
-        rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
-        auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, 5), qos_profile);
-
-        _follower_recv_sub = this->create_subscription<mqsls::msg::FollowerRecv>(
-            "follower_recv" + std::to_string(node_index), qos,
-            [this](const mqsls::msg::FollowerRecv::SharedPtr msg) {
-                auto data = OutputActuator::OutputData();
-                data.msg = *msg;
-                _output_actuator->apply(data); // zero-hold actuator
-                RCLCPP_DEBUG(this->get_logger(), "Received force: %f %f %f", msg->force[0], msg->force[1], msg->force[2]);
-            });
-        
-        _follower_send_pub = this->create_publisher<mqsls::msg::FollowerSend>("follower_send" + std::to_string(node_index), 10);
-
-        _input_source->register_update_callback([this](const InputSource::InputData &data) {            
-            _follower_send_pub->publish(data.msg);
-        });
-    }
-    ~MqslsFollower() = default;
-private:
-    // parameters
-    void parameter_declare()
-    {
-        this->declare_parameter("world_name", "mqsls");
-        this->declare_parameter("input_source", "gz"); // gz or px4
-        this->declare_parameter("output_actuator", "gz"); // gz or px4
-    }
-    // Subscriber
-    rclcpp::Subscription<mqsls::msg::FollowerRecv>::SharedPtr _follower_recv_sub;
-
-    // Publisher
-    rclcpp::Publisher<mqsls::msg::FollowerSend>::SharedPtr _follower_send_pub;
-
-    // detail
-    std::shared_ptr<InputSource> _input_source;
-    std::shared_ptr<OutputActuator> _output_actuator;
-};
 } // namespace mqsls
 
 
@@ -544,25 +422,7 @@ int main(int argc, const char** argv)
 {
     rclcpp::init(argc, argv);
 
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <node_index>" << std::endl;
-        return -1;
-    }
-    
-    int index = std::stoi(argv[1]);
-    // choose leader or follower instance to run
-    switch (index)
-    {
-    case 1:
-        rclcpp::spin(std::make_shared<mqsls::MqslsLeader>(index));
-        break;
-    case 2:
-    case 3:
-        rclcpp::spin(std::make_shared<mqsls::MqslsFollower>(index));
-        break;
-    default:
-        throw std::runtime_error("Invalid node index");
-    }
+    rclcpp::spin(std::make_shared<mqsls::MqslsLeader>());
 
     rclcpp::shutdown();
     

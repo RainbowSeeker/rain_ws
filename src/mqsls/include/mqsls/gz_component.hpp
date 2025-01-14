@@ -1,9 +1,6 @@
 #ifndef GZ_COMPONENT_HPP
 #define GZ_COMPONENT_HPP
 
-#ifndef COMPONENT_HPP
-#error "Include component.hpp instead of gz_component.hpp"
-#endif
 #include "component.hpp"
 #include "gz/msgs.hh"
 #include "gz/transport.hh"

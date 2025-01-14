@@ -46,6 +46,7 @@ find_package(px4_msgs REQUIRED)
 find_package(px4_ros_com REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(formation REQUIRED)
+find_package(control_toolbox REQUIRED)
 
 include_directories(
   include

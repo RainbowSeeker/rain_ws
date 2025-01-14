@@ -1,4 +1,3 @@
-find_package(control_toolbox REQUIRED)
 find_package(gz-transport NAMES gz-transport12)
 
 if(gz-transport_FOUND)

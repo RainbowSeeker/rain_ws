@@ -39,8 +39,8 @@ every_run() {
 }
 
 editor() {
-    vim $workdir/src/formation/config/params.yaml
-    colcon build --packages-select formation
+    vim $workdir/src/mqsls/config/params.yaml
+    colcon build --packages-select mqsls
 }
 
 sync() {
@@ -48,11 +48,11 @@ sync() {
 }
 
 prelaunch() {
-    every_run "prelaunch" true "$source_cmd; ros2 launch formation mc_single_prelaunch.py amc_id:=\$amc_id"
+    every_run "prelaunch" true "$source_cmd; ros2 launch mqsls x500_3dof_mqsls_prelaunch.py"
 }
 
 launch() {
-    every_run "launch" true "$source_cmd; ros2 launch formation mc_single_launch.py amc_id:=\$amc_id"
+    every_run "launch" true "$source_cmd; ros2 launch mqsls x500_3dof_mqsls_launch.py"
 }
 
 kill() {
