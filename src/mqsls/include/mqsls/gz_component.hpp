@@ -302,7 +302,6 @@ private:
     };
     std::vector<cb_body> _periodic_callbacks; 
     uint64_t _gz_sim_time {0}; // [us]
-    uint64_t _control_interval {20_ms}; // [us]
     bool    _is_paused {true};
 };
 

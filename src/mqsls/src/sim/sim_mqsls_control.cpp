@@ -13,6 +13,8 @@ using namespace std::chrono_literals;
 
 namespace mqsls {
 
+#define CONTROL_PERIOD      (CONTROL_EXPORT.period * 1_ms)
+
 static gz::transport::Node &get_default_gz_node()
 {
     static gz::transport::Node node;
@@ -122,7 +124,7 @@ public:
         async_request_force_opt({0, 0, -_load_mass * 9.8});
 
         // start
-        _event_handler->register_periodic_callback(std::bind(&MqslsLeader::run, this, std::placeholders::_1), 20_ms);
+        _event_handler->register_periodic_callback(std::bind(&MqslsLeader::run, this, std::placeholders::_1), CONTROL_PERIOD);
     }
     ~MqslsLeader() = default;
 private:
@@ -218,7 +220,7 @@ private:
     {
         // trajectory generator
         TrajectoryGenerator::traj_out traj_out;
-        _traj_gen->update(20_ms, traj_out);
+        _traj_gen->update(CONTROL_PERIOD, traj_out);
 
         for (int i = 0; i < 3; i++) {
             _control_input.Payload_Out.pL[i] = _follower_msg[0].position_load[i];
@@ -244,15 +246,7 @@ private:
         }
 
         // running
-        {
-            static int counter = CONTROL_EXPORT.period;
-            if (counter >= CONTROL_EXPORT.period)
-            {
-                counter -= CONTROL_EXPORT.period;
-                _controller.step(_control_input);
-            }
-            counter += 20;
-        }
+        _controller.step(_control_input);
 
         output = _controller.getOutput();
 
@@ -292,7 +286,7 @@ private:
                     _control_input.Payload_Out.p_3[0], _control_input.Payload_Out.p_3[1], _control_input.Payload_Out.p_3[2], 
                     _control_input.Payload_Out.v_3[0], _control_input.Payload_Out.v_3[1], _control_input.Payload_Out.v_3[2]);
 
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "\nDisturbance: [%f %f %f]\nFilter: [%f %f %f]",
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "\nDisturbance: [%f %f %f] \tFilter: [%f %f %f]",
                     output.state.dL[0], output.state.dL[1], output.state.dL[2],
                     _disturbance_filter.getState()[0], _disturbance_filter.getState()[1], _disturbance_filter.getState()[2]);
     }
@@ -384,8 +378,7 @@ private:
         CONTROL_PARAM.MASS_UAV = _uav_mass;
 
         // disturbance filter
-        // sample freq: 50Hz, cutoff freq: 0.5Hz
-        _disturbance_filter.setCutoffFreq(1_s / 20_ms, 0.1);
+        _disturbance_filter.setCutoffFreq(1_s / CONTROL_PERIOD, 0.1);
     }
 
     void parameter_update()
