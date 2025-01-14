@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <Eigen/Eigen>
 #include <geometry_msgs/PoseStamped.h>
 
 #include <boost/asio.hpp>
@@ -41,19 +42,48 @@ public:
     }
 
 private:
+    void rotateQuaternion(Eigen::Quaterniond &q_FRD_to_NED, const Eigen::Quaterniond q_FLU_to_ENU)
+    {
+        // FLU (ROS) to FRD (PX4) static rotation
+        static const auto q_FLU_to_FRD = Eigen::Quaterniond(0, 1, 0, 0);
+
+        /**
+         * @brief Quaternion for rotation between ENU and NED frames
+         *
+         * NED to ENU: +PI/2 rotation about Z (Down) followed by a +PI rotation around X (old North/new East)
+         * ENU to NED: +PI/2 rotation about Z (Up) followed by a +PI rotation about X (old East/new North)
+         * This rotation is symmetric, so q_ENU_to_NED == q_NED_to_ENU.
+         */
+        static const auto q_ENU_to_NED = Eigen::Quaterniond(0, 0.70711, 0.70711, 0);
+
+        // final rotation composition
+        q_FRD_to_NED = q_ENU_to_NED * q_FLU_to_ENU * q_FLU_to_FRD.inverse();
+    }
+
     void pose_callback(const geometry_msgs::PoseStamped::ConstPtr& msg, int id)
     {
         MocapData data;
         data.id = id;
         // data.timestamp = ros::Time::now().toNSec() / 1000;
         data.timestamp = msg->header.stamp.toNSec() / 1000;
-        data.position[0] = msg->pose.position.x;
-        data.position[1] = msg->pose.position.y;
-        data.position[2] = msg->pose.position.z;
-        data.q[0] = msg->pose.orientation.w;
-        data.q[1] = msg->pose.orientation.x;
-        data.q[2] = msg->pose.orientation.y;
-        data.q[3] = msg->pose.orientation.z;
+
+        // ENU -> NED
+        // TODO: Check the rotation
+        data.position[0] = msg->pose.position.y;
+        data.position[1] = msg->pose.position.x;
+        data.position[2] = -msg->pose.position.z;
+        Eigen::Quaterniond q_gr = Eigen::Quaterniond(
+                                    msg->pose.orientation.w, 
+                                    msg->pose.orientation.x,
+                                    msg->pose.orientation.y,
+                                    msg->pose.orientation.z);
+        Eigen::Quaterniond q_nb;
+        rotateQuaternion(q_nb, q_gr);
+
+        data.q[0] = q_nb.w();
+        data.q[1] = q_nb.x();
+        data.q[2] = q_nb.y();
+        data.q[3] = q_nb.z();
 
         _socket.send_to(buffer(&data, sizeof(data)), _remote_endpoint);
 
