@@ -21,8 +21,9 @@ Compile ros1_ws with docker:
 
 ```
 # create our own image
-sudo docker build -t vm_ros1 $PWD/src/mqsls/src/utils/
+sudo docker pull ros:melodic
+sudo docker build -t vm_melodic $PWD/src/mqsls/src/utils/
 
 # run with folder mapping
-sudo docker run -it -v $PWD/src/mqsls/src/utils/ros1_ws:/root/ros1_ws vm_ros1
+sudo docker run -it -v $PWD/src/mqsls/src/utils/ros1_ws:/root/ros1_ws vm_melodic
 ```

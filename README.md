@@ -1,12 +1,18 @@
 # Rain's Workspace with ROS2
+
+Hi~, This is my ROS2 workspace!
+```
+git clone https://github.com/RainbowSeeker/rain_ws.git --recursive --depth 1
+```
 ## Requirement
+### Local Installation
+If you have Ubuntu 22.04, you can try this way:
 | Software        | Version    |
 |-----------------|------------|
 | Operating System| Ubuntu 22.04|
 | ROS2            | Humble    |
 | PX4             | v1.14.3   |
 | Gazebo          | gz-garden |
-### Installation
 ```
 cd ~
 
@@ -14,15 +20,13 @@ cd ~
 wget http://fishros.com/install -O fishros && . fishros
 
 # PX4 + Gazebo
-git clone https://github.com/PX4/PX4-Autopilot.git -b v1.14.3 --recursive
+git clone https://github.com/PX4/PX4-Autopilot.git -b v1.14.3 --recursive --depth 1
 bash PX4-Autopilot/Tools/setup/ubuntu.sh
 
-# Workspace
-git clone https://github.com/RainbowSeeker/rain_ws.git --recursive
-
 # Utils
-sudo apt install ros-humble-control-toolbox
-git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git
+sudo apt install python3-pip libboost-system-dev libboost-filesystem-dev libeigen3-dev ros-humble-control-toolbox
+pip3 install future
+git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git --depth 1
 cd Micro-XRCE-DDS-Agent
 mkdir build
 cd build
@@ -52,8 +56,8 @@ sudo nmcli connection up 'wifi_name'        # start connection
 ```
 2. start ros2 node
 ```
-ros2 launch mqsls x500_3dof_mqsls_prelaunch.py &
-ros2 launch mqsls x500_3dof_mqsls_launch.py
+ros2 launch mqsls actual_3dof_mqsls_prelaunch.py &
+ros2 launch mqsls actual_3dof_mqsls_launch.py
 ```
 or Using `form_tools.sh`:
 ```
