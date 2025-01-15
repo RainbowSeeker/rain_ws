@@ -13,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Eigen3 REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -116,6 +116,7 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
+  ${EIGEN3_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
 )
 
@@ -168,6 +169,11 @@ target_link_libraries(${PROJECT_NAME}_node
 # install(TARGETS ${PROJECT_NAME}_node
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
+
+# Copy executable to workspace
+install(TARGETS ${PROJECT_NAME}_node
+  RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/../../bin
+)
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
