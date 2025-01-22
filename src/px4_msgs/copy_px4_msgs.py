@@ -49,4 +49,6 @@ if __name__ == '__main__':
 
     yaml_file = os.path.join(os.path.dirname(__file__), 'dds_topics.yaml')
     dst_dir = os.path.join(os.path.dirname(__file__), 'msg')
+    if not os.path.exists(dst_dir):
+        os.makedirs(dst_dir)
     copy_px4_msgs(px4_home, yaml_file, dst_dir)
