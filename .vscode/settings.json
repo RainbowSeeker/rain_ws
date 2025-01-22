@@ -108,12 +108,15 @@
     "cSpell.words": [
         "baudrate",
         "Fixedwing",
+        "mocap",
         "mqsls",
         "Multicopter",
         "nowstr",
+        "odometry",
         "Offboard",
         "rclcpp",
         "traj",
+        "typesupport",
         "yawspeed"
     ],
     "C_Cpp.errorSquiggles": "disabled",

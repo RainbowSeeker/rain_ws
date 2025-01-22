@@ -128,28 +128,6 @@
     <!-- put your plugin here -->
     <!-- !!! IMPORTANT !!! The force on uav is always in ENU.-->
     <!-- mi = 1.5 mr = ~0 mL = 1 avg = 17.966666666666669-->
-    <plugin
-      filename="virtual_wrench_plugin"
-      name="virtual_wrench_plugin">
-      <!-- <persistent>
-        <entity_name>x500_1</entity_name>
-        <entity_type>model</entity_type>
-        <force>-1.633333333333335 -0.943005439676388 17.966666666666669</force>
-        <torque>0 0 0</torque>
-      </persistent>
-      <persistent>
-        <entity_name>x500_2</entity_name>
-        <entity_type>model</entity_type>
-        <force>0 1.886010879352777 17.966666666666669</force>
-        <torque>0 0 0</torque>
-      </persistent>
-      <persistent>
-        <entity_name>x500_3</entity_name>
-        <entity_type>model</entity_type>
-        <force>1.633333333333335 -0.943005439676388 17.966666666666669</force>
-        <torque>0 0 0</torque>
-      </persistent> -->
-    </plugin>
     <wind>
       <linear_velocity>3 0 0</linear_velocity>
     </wind>

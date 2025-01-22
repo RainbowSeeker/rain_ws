@@ -1,5 +1,3 @@
-add_subdirectory(actual)
+add_subdirectory(plugin)
 add_subdirectory(force_planner)
-add_subdirectory(model)
-add_subdirectory(sim)
-add_subdirectory(utils)
+add_subdirectory(controller)

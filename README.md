@@ -42,7 +42,7 @@ sudo ldconfig /usr/local/lib/
 source /opt/ros/humble/setup.bash
 colcon build
 source $PWD/install/setup.bash
-ros2 launch mqsls x500_3dof_mqsls_launch.py
+ros2 launch mqsls sil_3dof_mqsls_launch.py
 ```
 ### Multi-quadrotor actual test
 Each onboard computer:

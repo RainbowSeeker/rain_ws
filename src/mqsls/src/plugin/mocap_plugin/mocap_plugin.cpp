@@ -18,15 +18,13 @@ struct MocapData
     float q[4];
 };
 
-class Ros2MocapBridge : public rclcpp::Node
+class MocapPlugin : public rclcpp::Node
 {
 public:
-    Ros2MocapBridge() : 
-        Node("mocap_transfer"),
-        _udp_endpoint(ip::udp::v4(), 14555),
-        _udp_socket(_io, _udp_endpoint)
+    MocapPlugin() : rclcpp::Node("mocap_plugin"),
+        _udp_endpoint(ip::udp::v4(), 14555), _udp_socket(_io, _udp_endpoint)
     {
-        RCLCPP_INFO(this->get_logger(), "Ros2MocapBridge node started");
+        RCLCPP_INFO(this->get_logger(), "MocapPlugin node started");
 
         const std::string topic_ns = "/px4_";
 
@@ -44,7 +42,7 @@ public:
         start_connection();
     }
 
-    ~Ros2MocapBridge()
+    ~MocapPlugin()
     {
         _io.stop();
     }
@@ -167,7 +165,7 @@ private:
 int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
-    rclcpp::spin(std::make_shared<Ros2MocapBridge>());
+    rclcpp::spin(std::make_shared<MocapPlugin>());
     rclcpp::shutdown();
     return 0;
 }

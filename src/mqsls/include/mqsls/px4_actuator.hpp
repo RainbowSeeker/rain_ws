@@ -1,8 +1,9 @@
-#ifndef PX4_COMPONENT_HPP
-#define PX4_COMPONENT_HPP
-
-#include "component.hpp"
-
+#ifndef PX4_ACTUATOR_HPP
+#define PX4_ACTUATOR_HPP
+#include <string>
+#include <iostream>
+#include <Eigen/Eigen>
+#include <rclcpp/rclcpp.hpp>
 #include <px4_msgs/msg/vehicle_status.hpp>
 #include <px4_msgs/msg/vehicle_command.hpp>
 #include <px4_msgs/msg/vehicle_attitude.hpp>
@@ -10,30 +11,13 @@
 #include <px4_msgs/msg/offboard_control_mode.hpp>
 #include <px4_msgs/msg/vehicle_local_position.hpp>
 #include <px4_msgs/msg/vehicle_attitude_setpoint.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <Eigen/Eigen>
-#include <iostream>
-#include <string>
+#include <mqsls/msg/follower_recv.hpp>
 
 namespace mqsls {
 
-// Use px4's micro dds to publish 'FollowerSend' msg, 
-// so this is a dummy interface class. It does nothing.
-class PX4InputSource : public InputSource
-{
-public:
-    PX4InputSource()
-    {
-        // do nothing
-    }
-
-    void register_update_callback(std::function<void(const InputData &)> callback) override
-    {
-    }
-};
-
 #define absolute_time() _node->get_clock()->now().nanoseconds() / 1e3
-class PX4OutputActuator : public OutputActuator
+
+class PX4OutputActuator
 {
 public:
     PX4OutputActuator(rclcpp::Node *node, int node_index) : _node(node)
@@ -80,7 +64,7 @@ public:
         if (!_node->has_parameter("uav_mass")) _node->declare_parameter("uav_mass", 1.0);
     }
 
-    void apply(const OutputData &data) override
+    void apply(const mqsls::msg::FollowerRecv &msg)
     {
         if (!preprocess())
             return;
@@ -89,7 +73,7 @@ public:
         const double hover_thrust = _node->get_parameter("hover_thrust").as_double();
         const double uav_mass = _node->get_parameter("uav_mass").as_double();
 
-        Eigen::Vector3d thrust_sp {data.msg.force[0], data.msg.force[1], data.msg.force[2]};
+        Eigen::Vector3d thrust_sp {msg.force[0], msg.force[1], msg.force[2]};
         Eigen::Quaterniond q_d;
         bodyzToAttitude(-thrust_sp, q_d);
         
@@ -240,38 +224,8 @@ private:
     px4_msgs::msg::VehicleAttitude	    _att{};
 };
 
-
-class PX4EventHandler : public EventHandler
-{
-public:
-    PX4EventHandler(rclcpp::Node *node) : _node(node)
-    {
-    }
-
-    void register_periodic_callback(std::function<void(uint64_t)> callback, uint64_t period_us) override
-    {
-        if (_timer)
-        {
-            _timer->cancel();
-            RCLCPP_ERROR(_node->get_logger(), "Timer already exists. Cancel it.");
-        }
-        _callback = callback;
-        _timer = _node->create_wall_timer(std::chrono::microseconds(period_us), std::bind(&PX4EventHandler::timer_callback, this));
-    }
-private:
-    void timer_callback()
-    {
-        _callback(absolute_time());
-    }
-
-    rclcpp::Node *_node;
-
-    // timer
-    rclcpp::TimerBase::SharedPtr _timer;
-    std::function<void(uint64_t)> _callback;
-};
-
+#undef absolute_time
 
 } // namespace mqsls
 
-#endif // !PX4_COMPONENT_HPP
+#endif // !PX4_ACTUATOR_HPP

@@ -52,7 +52,7 @@ prelaunch() {
 }
 
 launch() {
-    every_run "launch" true "$source_cmd; ros2 launch mqsls x500_3dof_mqsls_launch.py"
+    every_run "launch" true "$source_cmd; ros2 launch mqsls sil_3dof_mqsls_launch.py"
 }
 
 kill() {

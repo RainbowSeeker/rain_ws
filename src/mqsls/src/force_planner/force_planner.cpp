@@ -7,7 +7,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <mqsls/srv/force_opt.hpp>
 
-#include "../model/interface.hpp"
+#include "model/force_opt.hpp"
 
 #define deg2rad(x) ((x) * M_PI / 180)
 #define rad2deg(x) ((x) * 180 / M_PI)

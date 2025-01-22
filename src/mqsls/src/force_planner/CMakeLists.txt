@@ -1,3 +1,4 @@
+add_subdirectory(model)
 
 add_executable(force_planner_node
     force_planner.cpp

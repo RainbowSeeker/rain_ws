@@ -1,13 +1,4 @@
-#include <control_toolbox/pid.hpp>
-#include "formation/data_recorder.hpp"
-#include "formation/utils.hpp"
-#include "../model/interface.hpp"
-#include "mqsls/mqsls.hpp"
-#include "mqsls/AlphaFilter.hpp"
-#include "mqsls/px4_component.hpp"
-#include "mqsls/trajectory_generator.hpp"
-
-#include <mqsls/srv/force_opt.hpp>
+#include "3dof_mqsls_controller.hpp"
 
 using namespace std::chrono_literals;
 
@@ -15,38 +6,22 @@ namespace mqsls {
 
 #define CONTROL_PERIOD      (CONTROL_EXPORT.period * 1_ms)
 
-static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std::string &traj_type)
-{
-    #define deg2rad(x) ((x) * M_PI / 180)
-
-    if (traj_type == "line") {
-        return std::make_shared<LineTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(50, 0, -10), 2.0);
-    } else if (traj_type == "circle") {
-        return std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), 10, deg2rad(6));
-    } else if (traj_type == "rectangle") {
-        return std::make_shared<RectangleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(20, 20, -10), 2);
-    } else {
-        throw std::runtime_error("Invalid trajectory type");
-    }
-}
-
-class MqslsLeader : public rclcpp::Node
+class MqslsController : public rclcpp::Node
 {
 public:
-    MqslsLeader() : rclcpp::Node("amc_leader")
+    MqslsController() : rclcpp::Node("MqslsController")
     {
         parameter_declare();
 
         const std::string traj_type = this->get_parameter("traj_type").as_string();
         
-        _event_handler = std::make_shared<PX4EventHandler>(this);
         _traj_gen = make_trajectory_generator(traj_type);
 
         rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
         auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, 5), qos_profile);
 
         for (int i = 0; i < 3; i++) {
-            _leader_recv_sub[i] = this->create_subscription<mqsls::msg::FollowerSend>(
+            _follower_send_sub[i] = this->create_subscription<mqsls::msg::FollowerSend>(
                 "follower_send" + std::to_string(i + 1), qos,
                 [this, i](const mqsls::msg::FollowerSend::SharedPtr msg) {
                     _follower_msg[i] = *msg;
@@ -69,9 +44,9 @@ public:
         async_request_force_opt({0, 0, -_load_mass * 9.8});
 
         // start
-        _event_handler->register_periodic_callback(std::bind(&MqslsLeader::run, this, std::placeholders::_1), CONTROL_PERIOD);
+        _timer = this->create_wall_timer(std::chrono::microseconds(CONTROL_PERIOD), std::bind(&MqslsController::run, this));
     }
-    ~MqslsLeader() = default;
+    ~MqslsController() = default;
 private:
     enum MQSLS_RUNNING_STATE
     {
@@ -231,7 +206,7 @@ private:
                     _control_input.Payload_Out.p_3[0], _control_input.Payload_Out.p_3[1], _control_input.Payload_Out.p_3[2], 
                     _control_input.Payload_Out.v_3[0], _control_input.Payload_Out.v_3[1], _control_input.Payload_Out.v_3[2]);
 
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "\nDisturbance: [%f %f %f] \tFilter: [%f %f %f]",
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "Disturbance: [%f %f %f] \tFilter: [%f %f %f]",
                     output.state.dL[0], output.state.dL[1], output.state.dL[2],
                     _disturbance_filter.getState()[0], _disturbance_filter.getState()[1], _disturbance_filter.getState()[2]);
     }
@@ -246,8 +221,9 @@ private:
         // over
     }
 
-    void run(uint64_t timestamp)
+    void run()
     {
+        const uint64_t timestamp = this->get_clock()->now().nanoseconds() / 1e3;
         if (!_boot_time) {
             _boot_time = timestamp;
         }
@@ -263,12 +239,12 @@ private:
         
         #define FILL_OUTPUT_ACTUATOR(i) \
         { \
-            auto data = OutputActuator::OutputData(); \
-            data.msg.timestamp = _running_time; \
-            data.msg.force[0] = output.force_sp##i[0]; \
-            data.msg.force[1] = output.force_sp##i[1]; \
-            data.msg.force[2] = output.force_sp##i[2]; \
-            _output_actuator[i - 1]->apply(data); \
+            auto msg = mqsls::msg::FollowerRecv(); \
+            msg.timestamp = _running_time; \
+            msg.force[0] = output.force_sp##i[0]; \
+            msg.force[1] = output.force_sp##i[1]; \
+            msg.force[2] = output.force_sp##i[2]; \
+            _output_actuator[i - 1]->apply(msg); \
         }
 
         FILL_OUTPUT_ACTUATOR(1);
@@ -343,7 +319,7 @@ private:
         request->center = {center[0], center[1], center[2]};
         request->tension_max = this->get_parameter("max_tension").as_double();
         request->tension_min = this->get_parameter("min_tension").as_double();
-        auto result = _force_opt_client->async_send_request(request, std::bind(&MqslsLeader::handle_force_opt_response, this, std::placeholders::_1));
+        auto result = _force_opt_client->async_send_request(request, std::bind(&MqslsController::handle_force_opt_response, this, std::placeholders::_1));
     }
 
     void handle_force_opt_response(rclcpp::Client<mqsls::srv::ForceOpt>::SharedFuture future)
@@ -367,10 +343,13 @@ private:
     }
     
     // Subscriber
-    rclcpp::Subscription<mqsls::msg::FollowerSend>::SharedPtr _leader_recv_sub[3];
+    rclcpp::Subscription<mqsls::msg::FollowerSend>::SharedPtr _follower_send_sub[3];
 
     // client for force optimization
     rclcpp::Client<mqsls::srv::ForceOpt>::SharedPtr _force_opt_client;
+
+    // Timer
+    rclcpp::TimerBase::SharedPtr _timer;
 
     // detail
     uint64_t _dt = 0, _running_time = 0, _boot_time = 0;
@@ -382,9 +361,7 @@ private:
     uint64_t _cable_dir_timestamp = 0;
     double _margin = 2; // N
     mqsls::msg::FollowerSend _follower_msg[3]; // 0: leader, 1: follower 2, 2: follower 3
-    std::shared_ptr<InputSource> _input_source;
-    std::shared_ptr<OutputActuator> _output_actuator[3]; // 0: leader, 1: follower 2, 2: follower 3
-    std::shared_ptr<EventHandler> _event_handler;
+    std::shared_ptr<PX4OutputActuator> _output_actuator[3]; // 0: leader, 1: follower 2, 2: follower 3
 
     // Inmutable parameters
     double _load_mass = 1.0; // kg
@@ -422,7 +399,7 @@ int main(int argc, const char** argv)
 {
     rclcpp::init(argc, argv);
 
-    rclcpp::spin(std::make_shared<mqsls::MqslsLeader>());
+    rclcpp::spin(std::make_shared<mqsls::MqslsController>());
 
     rclcpp::shutdown();
     
