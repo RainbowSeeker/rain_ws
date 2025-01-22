@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <cmath>
 #include <cstdint>
+#include <Eigen/Eigen>
 
 #ifndef MATH_PI
 #define MATH_PI		3.141592653589793238462643383280
@@ -55,6 +56,62 @@ std::string nowstr()
     ss << std::put_time(std::localtime(&now), "%m-%d %H_%M_%S");
     return ss.str();
 }
+
+// Quaternion
+namespace quaternion
+{
+
+Eigen::Quaterniond quaternion_from_euler(const Eigen::Vector3d &euler)
+{
+	// YPR is ZYX axes
+	return Eigen::Quaterniond(Eigen::AngleAxisd(euler.z(), Eigen::Vector3d::UnitZ()) *
+				  Eigen::AngleAxisd(euler.y(), Eigen::Vector3d::UnitY()) *
+				  Eigen::AngleAxisd(euler.x(), Eigen::Vector3d::UnitX()));
+}
+
+Eigen::Quaterniond quaternion_from_euler(const double roll, const double pitch, const double yaw)
+{
+	return quaternion_from_euler(Eigen::Vector3d(roll, pitch, yaw));
+}
+
+Eigen::Vector3d quaternion_to_euler(const Eigen::Quaterniond &q)
+{
+	// YPR is ZYX axes
+	return q.toRotationMatrix().eulerAngles(2, 1, 0).reverse();
+}
+
+void quaternion_to_euler(const Eigen::Quaterniond &q, double &roll, double &pitch, double &yaw)
+{
+	const auto euler = quaternion_to_euler(q);
+	roll = euler.x();
+	pitch = euler.y();
+	yaw = euler.z();
+}
+
+void eigen_quat_to_array(const Eigen::Quaterniond &q, std::array<float, 4> &qarray)
+{
+	qarray[0] = q.w();
+	qarray[1] = q.x();
+	qarray[2] = q.y();
+	qarray[3] = q.z();
+}
+
+Eigen::Quaterniond array_to_eigen_quat(const std::array<float, 4> &q)
+{
+	return Eigen::Quaterniond(q[0], q[1], q[2], q[3]);
+}
+
+double quaternion_get_yaw(const Eigen::Quaterniond &q)
+{
+	const double &q0 = q.w();
+	const double &q1 = q.x();
+	const double &q2 = q.y();
+	const double &q3 = q.z();
+
+	return std::atan2(2. * (q0 * q3 + q1 * q2), 1. - 2. * (q2 * q2 + q3 * q3));
+}
+
+} // namespace quaternion
 
 }
 

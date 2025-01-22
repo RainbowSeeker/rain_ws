@@ -5,9 +5,6 @@
 #include <string>
 #include <chrono>
 #include <Eigen/Eigen>
-#include <Eigen/Geometry>
-#include <Eigen/Dense> 
-#include <px4_ros_com/frame_transforms.h>
 #include <px4_msgs/msg/vehicle_local_position.hpp>
 #include <px4_msgs/msg/airspeed_validated.hpp>
 #include <px4_msgs/msg/vehicle_attitude.hpp>

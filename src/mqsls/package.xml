@@ -12,7 +12,6 @@
 
   <depend>rclcpp</depend>
   <depend>px4_msgs</depend>
-  <depend>px4_ros_com</depend>
   <depend>formation</depend>
 
   <exec_depend>ros2launch</exec_depend>

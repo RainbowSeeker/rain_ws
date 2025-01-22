@@ -1,4 +1,5 @@
 #include "fw_formation_control.hpp"
+#include <formation/utils.hpp>
 
 #define M_DEG_TO_RAD 		0.017453292519943295
 #define M_RAD_TO_DEG 		57.295779513082323
@@ -260,7 +261,7 @@ void FixedwingFormationControl::fms_step() {
 	_fms_in.INS_Out.airspeed = _airspeed;
     Eigen::Quaterniond q{_att.q[0], _att.q[1], _att.q[2], _att.q[3]};
     double roll, pitch, yaw;
-    px4_ros_com::frame_transforms::utils::quaternion::quaternion_to_euler(q, roll, pitch, yaw);
+    utils::quaternion::quaternion_to_euler(q, roll, pitch, yaw);
     _fms_in.INS_Out.phi = roll;
     _fms_in.INS_Out.theta = pitch;
     _fms_in.INS_Out.psi = yaw;

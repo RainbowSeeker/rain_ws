@@ -14,18 +14,19 @@ If you have Ubuntu 22.04, you can try this way:
 | PX4             | v1.14.3   |
 | Gazebo          | gz-garden |
 ```
-cd ~
+# Env
+PX4_HOME=~/PX4-Autopilot
+echo "export PX4_HOME=$PX4_HOME" >> ~/.bashrc && source ~/.bashrc
 
 # ROS2
 wget http://fishros.com/install -O fishros && . fishros
 
 # PX4 + Gazebo
-git clone https://github.com/PX4/PX4-Autopilot.git -b v1.14.3 --recursive --depth 1
+git clone https://github.com/PX4/PX4-Autopilot.git $PX4_HOME -b v1.14.3 --recursive --depth 1
 bash PX4-Autopilot/Tools/setup/ubuntu.sh
 
 # Utils
-sudo apt install python3-pip libboost-system-dev libboost-filesystem-dev libeigen3-dev ros-humble-control-toolbox
-pip3 install future
+sudo apt install python3-pip libboost-system-dev libboost-filesystem-dev libeigen3-dev ros-humble-control-toolbox && pip3 install future
 git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git --depth 1
 cd Micro-XRCE-DDS-Agent
 mkdir build

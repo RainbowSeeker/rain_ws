@@ -93,7 +93,6 @@
         "sparse": "cpp",
         "formation": "cpp",
         "px4_msgs": "cpp",
-        "px4_ros_com": "cpp",
         "any": "cpp",
         "coroutine": "cpp",
         "source_location": "cpp",

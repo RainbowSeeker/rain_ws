@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 
 project(px4_msgs)
 
@@ -15,6 +15,11 @@ find_package(rosidl_default_generators REQUIRED)
 # ##############################################################################
 # Generate ROS messages, ROS2 interfaces and IDL files #
 # ##############################################################################
+
+# run shell script to copy msg from PX4
+execute_process(
+	COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/copy_px4_msgs.py
+)
 
 # get all msg files
 set(MSGS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/msg")

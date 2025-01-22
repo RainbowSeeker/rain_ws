@@ -1,6 +1,5 @@
 #include "mc_formation_control.hpp"
 #include "formation/utils.hpp"
-#include "px4_ros_com/frame_transforms.h"
 #include <variant>
 #include <Eigen/Eigen>
 #include <Eigen/Geometry>
@@ -80,9 +79,8 @@ MulticopterFormationControl::MulticopterFormationControl(int node_index, std::ch
     _att_sub = this->create_subscription<VehicleAttitude>(
         topic_ns + "/fmu/out/vehicle_attitude", qos,
         [this](const VehicleAttitude::SharedPtr msg) {
-            using namespace px4_ros_com::frame_transforms::utils::quaternion;
             _att = *msg;
-            _yaw = quaternion_get_yaw(array_to_eigen_quat(_att.q));
+            _yaw = utils::quaternion::quaternion_get_yaw(utils::quaternion::array_to_eigen_quat(_att.q));
         });
 
     _vehicle_status_sub = this->create_subscription<VehicleStatus>(

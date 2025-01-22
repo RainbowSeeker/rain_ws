@@ -16,7 +16,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(px4_msgs REQUIRED)
-find_package(px4_ros_com REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 # ##############################################################################

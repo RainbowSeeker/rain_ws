@@ -6,15 +6,13 @@
         "limitSymbolsToIncludedHeaders": false
       },
       "includePath": [
-        "${workspaceFolder}/install/px4_ros_com/include/**",
         "${workspaceFolder}/install/px4_msgs/include/**",
         "${workspaceFolder}/install/formation/include/**",
         "${workspaceFolder}/install/mqsls/include/**",
-        "/opt/ros/humble/include/**",
         "${workspaceFolder}/src/formation/include/**",
         "${workspaceFolder}/src/formation/model/**",
         "${workspaceFolder}/src/mqsls/include/**",
-        "${workspaceFolder}/src/px4_ros_com/include/**",
+        "/opt/ros/humble/include/**",
         "/usr/include/**"
       ],
       "name": "ROS",
