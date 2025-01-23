@@ -17,9 +17,9 @@ find_package(rosidl_default_generators REQUIRED)
 # ##############################################################################
 
 # run shell script to copy msg from PX4
-execute_process(
-	COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/copy_px4_msgs.py
-)
+# execute_process(
+# 	COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/copy_px4_msgs.py
+# )
 
 # get all msg files
 set(MSGS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/msg")
