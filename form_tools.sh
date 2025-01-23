@@ -9,7 +9,7 @@ help() {
     echo "Options:"
     echo "  -h, --help:                 Display this help message."
     echo "  -s, --sync:                 Sync the install directory in all machines."
-    echo "  -e, --editor:               Edit the params.yaml file."
+    echo "  -u, --upload:               Upload all files to target machines except from .gitignore."
     echo "  -p, --prelaunch:            PreLaunch the formation on all machines."
     echo "  -l, --launch:               Launch the formation on all machines."
     echo "  -k, --kill:                 Kill the formation on all machines."
@@ -21,11 +21,12 @@ every_run() {
     comment=$1
     remote_exec=$2
     upper_cmd=$3
+    amc_id=0
     for line in $(cat machines.txt)
     do
         machine=$(echo $line | awk '{print $1}')
         password=$(echo $line | awk '{print $2}')
-        amc_id=$(echo $machine | awk -F '.' '{print $NF}' | tail -c 2)
+        amc_id=$[amc_id+1]
         run_cmd=$(eval "echo \"$upper_cmd\"")
         echo "Perform [$comment] on machine [$machine]...$run_cmd"
         if [ "$remote_exec" = true ]; then
@@ -38,9 +39,14 @@ every_run() {
     IFS=
 }
 
-editor() {
-    vim $workdir/src/mqsls/config/params.yaml
-    colcon build --packages-select mqsls
+upload() {
+    machine=$(cat machines.txt | awk '{print $1}' | head -n 1)
+    password=$(cat machines.txt | awk '{print $2}' | head -n 1)
+    run_cmd="rsync -az --delete --exclude-from='.gitignore' -e ssh ~/rain_ws $machine:~/"
+    eval sshpass -p "$password" $run_cmd
+    echo "Upload completed."
+    run_cmd="$source_cmd; cd $remote_workdir && colcon build --packages-select mqsls"
+    sshpass -p "$password" ssh $machine "$run_cmd"
 }
 
 sync() {
@@ -48,11 +54,11 @@ sync() {
 }
 
 prelaunch() {
-    every_run "prelaunch" true "$source_cmd; ros2 launch mqsls x500_3dof_mqsls_prelaunch.py"
+    every_run "prelaunch" true "$source_cmd; ros2 launch mqsls actual_3dof_mqsls_prelaunch.py amc_id:=\$amc_id"
 }
 
 launch() {
-    every_run "launch" true "$source_cmd; ros2 launch mqsls sil_3dof_mqsls_launch.py"
+    every_run "launch" true "$source_cmd; ros2 launch mqsls actual_3dof_mqsls_launch.py amc_id:=\$amc_id"
 }
 
 kill() {
@@ -78,7 +84,7 @@ while [ "$1" != "" ]; do
         -s | --sync )           sync
                                 exit
                                 ;;
-        -e | --editor )         editor
+        -u | --upload )         upload
                                 exit
                                 ;;
         -p | --prelaunch )      prelaunch

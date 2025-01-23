@@ -3,6 +3,7 @@
 Hi~, This is my ROS2 workspace!
 ```
 git clone https://github.com/RainbowSeeker/rain_ws.git --recursive --depth 1
+bash setup.sh
 ```
 ## Requirement
 ### Local Installation
@@ -25,26 +26,35 @@ wget http://fishros.com/install -O fishros && . fishros
 git clone https://github.com/PX4/PX4-Autopilot.git $PX4_HOME -b v1.14.3 --recursive --depth 1
 bash PX4-Autopilot/Tools/setup/ubuntu.sh
 
-# Utils
-sudo apt install python3-pip libboost-system-dev libboost-filesystem-dev libeigen3-dev ros-humble-control-toolbox && pip3 install future
+# DDS
 git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git --depth 1
 cd Micro-XRCE-DDS-Agent
-mkdir build
-cd build
-cmake ..
-make
-sudo make install
-sudo ldconfig /usr/local/lib/
+mkdir build && cd build
+cmake .. && make
+sudo make install && sudo ldconfig /usr/local/lib/
 ```
 ## How to use
-### Multi-quadrotor sil simulation
+### SIL simulation
 ```
 source /opt/ros/humble/setup.bash
 colcon build
 source $PWD/install/setup.bash
 ros2 launch mqsls sil_3dof_mqsls_launch.py
 ```
-### Multi-quadrotor actual test
+### HIL simulation
+On host computer:
+```
+ros2 launch mqsls hil_3dof_mqsls_launch.py
+```
+Each onboard computer:
+```
+ros2 launch mqsls actual_3dof_mqsls_launch.py
+```
+or Using `form_tools.sh`:
+```
+./form_tools.sh --launch
+```
+### Actual test
 Each onboard computer:
 1. connect wifi hotspots
 ```

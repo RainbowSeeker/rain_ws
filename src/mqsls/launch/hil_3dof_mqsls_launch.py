@@ -45,35 +45,6 @@ def generate_launch_description():
         name='dds_agent',
     )
     
-    controller = Node(
-        package='mqsls',
-        executable='3dof_mqsls_controller_node',
-        output='screen',
-        shell=True,
-        name='Controller',
-        parameters=[{
-            'boot_wait': 10.0,
-            'cable_len': 2.0,
-            'load_mass': 1.0,
-            'uav_mass': 2.064307692307692,
-            'hover_thrust': 0.74,
-            'eso_enable': True,
-            'kq': 0.5,
-            'kw': 3.0,
-            'min_tension': 0.0,
-            'max_tension': 7.0,
-            'traj_type': 'line',
-        }],
-    )
-
-    force_planner = Node(
-        package='mqsls',
-        executable='force_planner_node',
-        output='screen',
-        shell=True,
-        name='force_planner',
-    )
-    
     px4_client = []
     for i in range(3):
         px4_workdir = os.environ['PX4_HOME']
@@ -108,8 +79,6 @@ def generate_launch_description():
                 *args,
                 gz_sim,
                 gz_plugin,
-                controller,
-                force_planner,
                 *px4_client,
                 dds_agent,
             ])],
