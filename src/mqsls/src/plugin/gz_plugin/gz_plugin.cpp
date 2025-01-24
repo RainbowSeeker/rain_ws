@@ -6,6 +6,7 @@
 #include <rclcpp/rclcpp.hpp>
 #include <Eigen/Eigen>
 #include <mqsls/msg/follower_send.hpp>
+#include <mqsls/noise_generator.hpp>
 
 namespace mqsls {
 
@@ -125,10 +126,10 @@ private:
             mqsls::msg::FollowerSend msg;
             msg.timestamp = _load_state.last_time;
             for (int j = 0; j < 3; j++) {
-                msg.position_load[j] = _load_state.position[j];
-                msg.velocity_load[j] = _load_state.velocity[j];
-                msg.position_uav[j] = _uav_state[i].position[j];
-                msg.velocity_uav[j] = _uav_state[i].velocity[j];
+                msg.position_load[j] = _load_state.position[j] + _noise_position.generate();
+                msg.velocity_load[j] = _load_state.velocity[j] + _noise_velocity.generate();
+                msg.position_uav[j] = _uav_state[i].position[j] + _noise_position.generate();
+                msg.velocity_uav[j] = _uav_state[i].velocity[j] + _noise_velocity.generate();
             }
             _follower_send_pub[i]->publish(msg);
         }
@@ -145,6 +146,8 @@ private:
 
     // detail
     pos_state _load_state, _uav_state[3];
+    NoiseGenerator _noise_position {0.0, 0.01}; // Mean 0, Stddev 0.01
+    NoiseGenerator _noise_velocity {0.0, 0.01}; // Mean 0, Stddev 0.01
 };
 
 } // namespace mqsls

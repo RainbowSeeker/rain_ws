@@ -10,7 +10,5 @@ endif()
 
 if(ENABLE_GAZEBO)
     add_subdirectory(gz_plugin)
-else()
-    # add_subdirectory(mocap_plugin)
 endif()
 add_subdirectory(mocap_plugin)
