@@ -19,6 +19,7 @@ class AlphaFilter
 public:
 	AlphaFilter() = default;
 	explicit AlphaFilter(double alpha) : _alpha(alpha) {}
+	explicit AlphaFilter(double alpha, const T &initial_state) : _alpha(alpha), _filter_state(initial_state) {}
 
 	~AlphaFilter() = default;
 

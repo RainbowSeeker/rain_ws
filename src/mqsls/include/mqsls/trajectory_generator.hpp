@@ -197,7 +197,7 @@ static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std:
     } else if (traj_type == "rectangle") {
         return std::make_shared<RectangleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(20, 20, -10), 2);
     } else if (traj_type == "lissajous") {
-        return std::make_shared<LissajousTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), 3, 3, deg2rad(3), deg2rad(6), deg2rad(90));
+        return std::make_shared<LissajousTrajectoryGenerator>(Eigen::Vector3d(0, 0, -1), 2, 2, deg2rad(6), deg2rad(12), deg2rad(90));
     } else {
         throw std::runtime_error("Invalid trajectory type");
     }

@@ -27,7 +27,6 @@ def generate_launch_description():
         shell=True,
         name='Controller',
         parameters=[{
-            'boot_wait': 10.0,
             'cable_len': 2.0,
             'load_mass': 1.0,
             'uav_mass': 2.064307692307692,

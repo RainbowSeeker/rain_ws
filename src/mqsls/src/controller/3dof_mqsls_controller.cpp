@@ -5,8 +5,25 @@ using namespace std::chrono_literals;
 namespace mqsls {
 
 #define CONTROL_PERIOD      (CONTROL_EXPORT.period * 1_ms)
+#define PERIODIC_RUN(__now, __period, __func) \
+        do { \
+            static auto __last_time = __now; \
+            if (__now - __last_time > __period) { \
+                __func; \
+                __last_time = __now; \
+            } \
+        } while (0)
 
-inline Eigen::Vector3d double3_to_vector3(const double d[3]) {
+#define DELAYED_RUN_IF(__now, __delay, __func, __cond) \
+        do { \
+            static auto __last_time = __now; \
+            if (__now - __last_time > __delay && __cond) { \
+                __func; \
+                __last_time = __now; \
+            } \
+        } while (0)
+
+inline Eigen::Vector3d array_to_vector3(const auto &d) {
     return Eigen::Vector3d(d[0], d[1], d[2]);
 }
 
@@ -16,11 +33,7 @@ public:
     MqslsController() : rclcpp::Node("MqslsController")
     {
         parameter_declare();
-
-        const std::string traj_type = this->get_parameter("traj_type").as_string();
         
-        _traj_gen = make_trajectory_generator(traj_type);
-
         rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
         auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, 5), qos_profile);
 
@@ -70,11 +83,14 @@ private:
             }
             break;
         case STATE_RUNNING:
-            state_running(output);
+            if (state_running(output)) {
+                _state = STATE_STOPPING;
+            }
             break;
         case STATE_STOPPING:
-            state_stopping(output);
-            _state = STATE_OVER;
+            if (state_stopping(output)) {
+                _state = STATE_OVER;
+            }
             break;
         case STATE_OVER:
             state_over(output);
@@ -92,21 +108,16 @@ private:
     bool state_prepare(CodeGenController::OutputBus &output)
     {
         // prepare phase: set uav pose to expected cope end
-        const double KP = 1;
-        const double KD = 1.2;
-        
-        auto cable_end_controller = [&, this](int index, Eigen::Vector3d &position_err, Eigen::Vector3d &acceleration_sp) -> void
+        auto pos_pid_controller = [&, this](int index, Eigen::Vector3d &position_err, Eigen::Vector3d &acceleration_sp) -> void
         {
+            const double KP = 1;
+            const double KD = 1.2;
             // NED frame, payload position is the origin
             const Eigen::Vector3d q_sp = _cable_dir_sp[index];
             const double safety_len = _cable_len * 0.9; // 90% of cable length
             const Eigen::Vector3d position_sp = -q_sp * safety_len;
-            const Eigen::Vector3d position_now = {
-                _follower_msg[index].position_uav[0] - _follower_msg[index].position_load[0],
-                _follower_msg[index].position_uav[1] - _follower_msg[index].position_load[1],
-                _follower_msg[index].position_uav[2] - _follower_msg[index].position_load[2],
-            };
-            const Eigen::Vector3d velocity_now = {_follower_msg[index].velocity_uav[0], _follower_msg[index].velocity_uav[1], _follower_msg[index].velocity_uav[2]};
+            const Eigen::Vector3d position_now = array_to_vector3(_follower_msg[index].position_uav) - array_to_vector3(_follower_msg[index].position_load);
+            const Eigen::Vector3d velocity_now = array_to_vector3(_follower_msg[index].velocity_uav);
 
             position_err = position_sp - position_now;
             acceleration_sp = KP * position_err - KD * velocity_now;
@@ -117,7 +128,7 @@ private:
         Eigen::Vector3d acceleration_sp, position_err[3];
         #define FILL_OUTPUT_FORCE(i) \
         { \
-            cable_end_controller(i - 1, position_err[i - 1], acceleration_sp); \
+            pos_pid_controller(i - 1, position_err[i - 1], acceleration_sp); \
             output.force_sp##i[0] = _uav_mass * acceleration_sp[0]; \
             output.force_sp##i[1] = _uav_mass * acceleration_sp[1]; \
             output.force_sp##i[2] = _uav_mass * acceleration_sp[2] - _uav_mass * 9.81; \
@@ -140,12 +151,107 @@ private:
         return true;
     }
 
-    void state_running(CodeGenController::OutputBus &output)
+    bool state_running(CodeGenController::OutputBus &output)
     {
         // trajectory generator
         TrajectoryGenerator::traj_out traj_out;
         _traj_gen->update(CONTROL_PERIOD, traj_out);
 
+        // controller step
+        output = controller_step(traj_out);
+
+        // ACCS : every 5s, request force optimization
+        auto accs_update = [this, &output]() -> void
+        {
+            static AlphaFilter<Eigen::Vector3d> trim_acc_filter(0.5, {0, 0, -9.8});
+
+            Eigen::Vector3d expected_trim_acc = {
+                -output.state.dL[0],
+                -output.state.dL[1],
+                -output.state.dL[2] - 9.8
+            };
+            trim_acc_filter.update(expected_trim_acc);
+
+            async_request_force_opt(trim_acc_filter.getState() * _load_mass);
+
+            RCLCPP_INFO(this->get_logger(), "Request ForceOpt: [%f %f %f]", trim_acc_filter.getState()[0], trim_acc_filter.getState()[1], trim_acc_filter.getState()[2]);
+        };
+        bool need_accs_update = output.state.margin < _opt_margin * 0.2; // 20% threshold
+        DELAYED_RUN_IF(_running_time, 
+                        5_s, 
+                        accs_update(),
+                        need_accs_update
+        );
+
+        RCLCPP_DEBUG(this->get_logger(), "\nPOS1: %f %f %f VEL1: %f %f %f\nPOS2: %f %f %f VEL2: %f %f %f\nPOS3: %f %f %f VEL3: %f %f %f\n", 
+                    _control_input.Payload_Out.p_1[0], _control_input.Payload_Out.p_1[1], _control_input.Payload_Out.p_1[2], 
+                    _control_input.Payload_Out.v_1[0], _control_input.Payload_Out.v_1[1], _control_input.Payload_Out.v_1[2],
+                    _control_input.Payload_Out.p_2[0], _control_input.Payload_Out.p_2[1], _control_input.Payload_Out.p_2[2], 
+                    _control_input.Payload_Out.v_2[0], _control_input.Payload_Out.v_2[1], _control_input.Payload_Out.v_2[2],
+                    _control_input.Payload_Out.p_3[0], _control_input.Payload_Out.p_3[1], _control_input.Payload_Out.p_3[2], 
+                    _control_input.Payload_Out.v_3[0], _control_input.Payload_Out.v_3[1], _control_input.Payload_Out.v_3[2]);
+
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "Disturbance: [%.2f %.2f %.2f], Margin: %.2f%%",output.state.dL[0], output.state.dL[1], output.state.dL[2], output.state.margin * 100 / _opt_margin);
+    
+        if (_running_time < _lasting_time) {
+            return false;
+        }
+        return true;
+    }
+
+    bool state_stopping(CodeGenController::OutputBus &output)
+    {
+        // stopping
+
+        // move to landing position
+        static const TrajectoryGenerator::traj_out traj_out = {
+            {_follower_msg[0].position_load[0], _follower_msg[0].position_load[1], 0},  // position
+            {0, 0, 0},  // velocity
+            {0, 0, 0}   // acceleration
+        };
+
+        // controller step
+        output = controller_step(traj_out);
+
+        // check if load is in position
+        Eigen::Vector3d position_err = array_to_vector3(_follower_msg[0].position_load) - traj_out.position;
+        if (position_err.norm() > 0.3) {
+            RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 1000, 
+                    "Load not in position, dist: %f", position_err.norm());
+            return false;
+        }
+        return true;
+    }
+
+    void state_over(CodeGenController::OutputBus &output)
+    {
+        // over
+        // uav landing with 0.5 m/s velocity
+        const double KP = 1;
+        const double KD = 1.2;
+        const double landing_speed = 0.5;
+
+        #define FILL_OUTPUT_FORCE(i) \
+        { \
+            static const Eigen::Vector3d position_sp = array_to_vector3(_follower_msg[i - 1].position_uav); \
+            const Eigen::Vector3d position_now = array_to_vector3(_follower_msg[i - 1].position_uav); \
+            const Eigen::Vector3d velocity_now = array_to_vector3(_follower_msg[i - 1].velocity_uav); \
+            const Eigen::Vector3d position_err = (position_sp - position_now).cwiseProduct(Eigen::Vector3d(1, 1, 0)) + landing_speed * Eigen::Vector3d::UnitZ(); \
+            Eigen::Vector3d acceleration_sp = KP * position_err - KD * velocity_now; \
+            output.force_sp##i[0] = _uav_mass * acceleration_sp[0]; \
+            output.force_sp##i[1] = _uav_mass * acceleration_sp[1]; \
+            output.force_sp##i[2] = _uav_mass * acceleration_sp[2] - _uav_mass * 9.81; \
+        }
+        
+        FILL_OUTPUT_FORCE(1); // leader
+        FILL_OUTPUT_FORCE(2); // follower 1
+        FILL_OUTPUT_FORCE(3); // follower 2
+
+        #undef FILL_OUTPUT_FORCE
+    }
+
+    const CodeGenController::OutputBus &controller_step(const TrajectoryGenerator::traj_out &traj_out)
+    {
         for (int i = 0; i < 3; i++) {
             _control_input.Payload_Out.pL[i] = _follower_msg[0].position_load[i];
             _control_input.Payload_Out.vL[i] = _follower_msg[0].velocity_load[i];
@@ -172,57 +278,7 @@ private:
         // running
         _controller.step(_control_input);
 
-        output = _controller.getOutput();
-
-        // test: every 5s, request force optimization
-        if (1)
-        {
-            _disturbance_filter.update({output.state.dL[0], output.state.dL[1], output.state.dL[2]});
-
-            static uint64_t last_request_time = _running_time;
-            static Eigen::Vector3d last_trim_acc = {0, 0, -9.8};
-
-            Eigen::Vector3d expected_trim_acc = {
-                -_disturbance_filter.getState()[0],
-                -_disturbance_filter.getState()[1],
-                -_disturbance_filter.getState()[2] - 9.8
-            };
-
-            bool need_request = output.state.margin < _opt_margin * 0.2; // 20% threshold
-
-            if (need_request && _running_time - last_request_time > 5_s) 
-            {
-                RCLCPP_INFO(this->get_logger(), "Expected: [%f %f %f], last: [%f %f %f]", 
-                        expected_trim_acc[0], expected_trim_acc[1], expected_trim_acc[2], 
-                        last_trim_acc[0], last_trim_acc[1], last_trim_acc[2]);
-
-                async_request_force_opt(expected_trim_acc * _load_mass);
-                last_request_time = _running_time;
-                last_trim_acc = expected_trim_acc;
-            }
-        }
-
-        RCLCPP_DEBUG(this->get_logger(), "\nPOS1: %f %f %f VEL1: %f %f %f\nPOS2: %f %f %f VEL2: %f %f %f\nPOS3: %f %f %f VEL3: %f %f %f\n", 
-                    _control_input.Payload_Out.p_1[0], _control_input.Payload_Out.p_1[1], _control_input.Payload_Out.p_1[2], 
-                    _control_input.Payload_Out.v_1[0], _control_input.Payload_Out.v_1[1], _control_input.Payload_Out.v_1[2],
-                    _control_input.Payload_Out.p_2[0], _control_input.Payload_Out.p_2[1], _control_input.Payload_Out.p_2[2], 
-                    _control_input.Payload_Out.v_2[0], _control_input.Payload_Out.v_2[1], _control_input.Payload_Out.v_2[2],
-                    _control_input.Payload_Out.p_3[0], _control_input.Payload_Out.p_3[1], _control_input.Payload_Out.p_3[2], 
-                    _control_input.Payload_Out.v_3[0], _control_input.Payload_Out.v_3[1], _control_input.Payload_Out.v_3[2]);
-
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "Disturbance: [%f %f %f] \tFilter: [%f %f %f]",
-                    output.state.dL[0], output.state.dL[1], output.state.dL[2],
-                    _disturbance_filter.getState()[0], _disturbance_filter.getState()[1], _disturbance_filter.getState()[2]);
-    }
-
-    void state_stopping(CodeGenController::OutputBus &output)
-    {
-        // stopping
-    }
-
-    void state_over(CodeGenController::OutputBus &output)
-    {
-        // over
+        return _controller.getOutput();
     }
 
     void run()
@@ -268,12 +324,7 @@ private:
     // parameters
     void parameter_declare()
     {
-        this->declare_parameter("traj_type", "line");
-
         // controller parameters
-        this->declare_parameter("cable_len", 1.0);
-        this->declare_parameter("load_mass", 1.0);
-        this->declare_parameter("uav_mass", 1.5);
         this->declare_parameter("eso_enable", true);
         this->declare_parameter("eso_pl", std::vector<double>{3.0, 5.0, 10.0});
         this->declare_parameter("eso_vl", std::vector<double>{0.0, 20.0, 30.0});
@@ -282,17 +333,10 @@ private:
         this->declare_parameter("kq", 1.0);
         this->declare_parameter("kw", 1.0);
 
-        // Inmutable parameters
-        _load_mass = this->get_parameter("load_mass").as_double();
-        _uav_mass = this->get_parameter("uav_mass").as_double();
-        _cable_len = this->get_parameter("cable_len").as_double();
         // Immutable control parameters
         CONTROL_PARAM.CABLE_LEN = _cable_len;
         CONTROL_PARAM.MASS_LOAD = _load_mass;
         CONTROL_PARAM.MASS_UAV = _uav_mass;
-
-        // disturbance filter
-        _disturbance_filter.setCutoffFreq(1_s / CONTROL_PERIOD, 0.1);
     }
 
     void parameter_update()
@@ -355,6 +399,13 @@ private:
     // Timer
     rclcpp::TimerBase::SharedPtr _timer;
 
+    // Inmutable parameters
+    const double _load_mass = this->declare_parameter("load_mass", 1.0); // kg
+    const double _uav_mass = this->declare_parameter("uav_mass", 1.5); // kg
+    const double _cable_len = this->declare_parameter("cable_len", 1.0); // m
+    const std::string _traj_type = this->declare_parameter("traj_type", "line");
+    const uint64_t _lasting_time = this->declare_parameter("lasting_time", 60) * 1_s; // s
+
     // detail
     uint64_t _dt = 0, _running_time = 0, _boot_time = 0;
     Eigen::Vector3d _cable_dir_sp[3] = {
@@ -367,33 +418,27 @@ private:
     mqsls::msg::FollowerSend _follower_msg[3]; // 0: leader, 1: follower 2, 2: follower 3
     std::shared_ptr<PX4OutputActuator> _output_actuator[3]; // 0: leader, 1: follower 2, 2: follower 3
 
-    // Inmutable parameters
-    double _load_mass = 1.0; // kg
-    double _uav_mass = 1.5; // kg
-    double _cable_len = 1.0; // m
-
     // controller
     CodeGenController::InputBus _control_input;
     CodeGenController _controller;
-    std::shared_ptr<TrajectoryGenerator> _traj_gen;
-    AlphaFilter<Eigen::Vector3d> _disturbance_filter;
+    std::shared_ptr<TrajectoryGenerator> _traj_gen {make_trajectory_generator(_traj_type)};
 
     // recorder
     void record()
     {
         MqslsDataFrame frame;
         frame.timestamp = _running_time;
-        frame.load_position = double3_to_vector3(_control_input.Payload_Out.pL);
-        frame.load_velocity = double3_to_vector3(_control_input.Payload_Out.vL);
+        frame.load_position = array_to_vector3(_control_input.Payload_Out.pL);
+        frame.load_velocity = array_to_vector3(_control_input.Payload_Out.vL);
         
-        frame.uav_position[0] = double3_to_vector3(_control_input.Payload_Out.p_1);
-        frame.uav_velocity[0] = double3_to_vector3(_control_input.Payload_Out.v_1);
-        frame.uav_position[1] = double3_to_vector3(_control_input.Payload_Out.p_2);
-        frame.uav_velocity[1] = double3_to_vector3(_control_input.Payload_Out.v_2);
-        frame.uav_position[2] = double3_to_vector3(_control_input.Payload_Out.p_3);
-        frame.uav_velocity[2] = double3_to_vector3(_control_input.Payload_Out.v_3);
+        frame.uav_position[0] = array_to_vector3(_control_input.Payload_Out.p_1);
+        frame.uav_velocity[0] = array_to_vector3(_control_input.Payload_Out.v_1);
+        frame.uav_position[1] = array_to_vector3(_control_input.Payload_Out.p_2);
+        frame.uav_velocity[1] = array_to_vector3(_control_input.Payload_Out.v_2);
+        frame.uav_position[2] = array_to_vector3(_control_input.Payload_Out.p_3);
+        frame.uav_velocity[2] = array_to_vector3(_control_input.Payload_Out.v_3);
         
-        frame.dL = double3_to_vector3(_controller.getOutput().state.dL);
+        frame.dL = array_to_vector3(_controller.getOutput().state.dL);
         frame.margin = _controller.getOutput().state.margin;
         
         _recorder.push(frame);
