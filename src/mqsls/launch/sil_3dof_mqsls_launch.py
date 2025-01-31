@@ -33,6 +33,7 @@ def generate_launch_description():
         name='gz_plugin',
         parameters=[{
             'world_name': LaunchConfiguration('world_name'),
+            'disturbance_enable': True,
         }],
     )
     
@@ -62,7 +63,7 @@ def generate_launch_description():
             'kw': 3.0,
             'min_tension': 0.0,
             'max_tension': 7.0,
-            'traj_type': 'line',
+            'traj_type': 'lissajous', # 'line', 'circle', 'rectangle', 'lissajous'
         }],
     )
 

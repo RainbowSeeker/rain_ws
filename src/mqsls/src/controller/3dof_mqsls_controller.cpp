@@ -6,6 +6,10 @@ namespace mqsls {
 
 #define CONTROL_PERIOD      (CONTROL_EXPORT.period * 1_ms)
 
+inline Eigen::Vector3d double3_to_vector3(const double d[3]) {
+    return Eigen::Vector3d(d[0], d[1], d[2]);
+}
+
 class MqslsController : public rclcpp::Node
 {
 public:
@@ -184,7 +188,7 @@ private:
                 -_disturbance_filter.getState()[2] - 9.8
             };
 
-            bool need_request = output.state.margin < _margin * 0.2; // 20% threshold
+            bool need_request = output.state.margin < _opt_margin * 0.2; // 20% threshold
 
             if (need_request && _running_time - last_request_time > 5_s) 
             {
@@ -264,7 +268,7 @@ private:
     // parameters
     void parameter_declare()
     {
-        this->declare_parameter("traj_type", "line"); // line or circle
+        this->declare_parameter("traj_type", "line");
 
         // controller parameters
         this->declare_parameter("cable_len", 1.0);
@@ -331,7 +335,7 @@ private:
                 _cable_dir_sp[1][i] = response->q_2[i];
                 _cable_dir_sp[2][i] = response->q_3[i];
             }
-            _margin = response->radius;
+            _opt_margin = response->radius;
             _cable_dir_timestamp++;
             RCLCPP_INFO(this->get_logger(), "Force optimization response:\nRadius: %f\nQ1: [%f %f %f]\nQ2: [%f %f %f]\nQ3: [%f %f %f]", 
                     response->radius, response->q_1[0], response->q_1[1], response->q_1[2], 
@@ -359,7 +363,7 @@ private:
         {0.25, -0.443, 0.866}
     };
     uint64_t _cable_dir_timestamp = 0;
-    double _margin = 2; // N
+    double _opt_margin = 2; // N
     mqsls::msg::FollowerSend _follower_msg[3]; // 0: leader, 1: follower 2, 2: follower 3
     std::shared_ptr<PX4OutputActuator> _output_actuator[3]; // 0: leader, 1: follower 2, 2: follower 3
 
@@ -379,15 +383,19 @@ private:
     {
         MqslsDataFrame frame;
         frame.timestamp = _running_time;
-        frame.load_position = {_control_input.Payload_Out.pL[0], _control_input.Payload_Out.pL[1], _control_input.Payload_Out.pL[2]};
-        frame.load_velocity = {_control_input.Payload_Out.vL[0], _control_input.Payload_Out.vL[1], _control_input.Payload_Out.vL[2]};
+        frame.load_position = double3_to_vector3(_control_input.Payload_Out.pL);
+        frame.load_velocity = double3_to_vector3(_control_input.Payload_Out.vL);
         
-        frame.uav_position[0] = {_control_input.Payload_Out.p_1[0], _control_input.Payload_Out.p_1[1], _control_input.Payload_Out.p_1[2]};
-        frame.uav_velocity[0] = {_control_input.Payload_Out.v_1[0], _control_input.Payload_Out.v_1[1], _control_input.Payload_Out.v_1[2]};
-        frame.uav_position[1] = {_control_input.Payload_Out.p_2[0], _control_input.Payload_Out.p_2[1], _control_input.Payload_Out.p_2[2]};
-        frame.uav_velocity[1] = {_control_input.Payload_Out.v_2[0], _control_input.Payload_Out.v_2[1], _control_input.Payload_Out.v_2[2]};
-        frame.uav_position[2] = {_control_input.Payload_Out.p_3[0], _control_input.Payload_Out.p_3[1], _control_input.Payload_Out.p_3[2]};
-        frame.uav_velocity[2] = {_control_input.Payload_Out.v_3[0], _control_input.Payload_Out.v_3[1], _control_input.Payload_Out.v_3[2]};
+        frame.uav_position[0] = double3_to_vector3(_control_input.Payload_Out.p_1);
+        frame.uav_velocity[0] = double3_to_vector3(_control_input.Payload_Out.v_1);
+        frame.uav_position[1] = double3_to_vector3(_control_input.Payload_Out.p_2);
+        frame.uav_velocity[1] = double3_to_vector3(_control_input.Payload_Out.v_2);
+        frame.uav_position[2] = double3_to_vector3(_control_input.Payload_Out.p_3);
+        frame.uav_velocity[2] = double3_to_vector3(_control_input.Payload_Out.v_3);
+        
+        frame.dL = double3_to_vector3(_controller.getOutput().state.dL);
+        frame.margin = _controller.getOutput().state.margin;
+        
         _recorder.push(frame);
     }
     DataRecorder<MqslsDataFrame> _recorder{"install/" + utils::nowstr() + ".csv", 10};

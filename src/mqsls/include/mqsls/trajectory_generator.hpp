@@ -150,6 +150,42 @@ private:
     Eigen::Vector3d _current_velocity;
 };
 
+class LissajousTrajectoryGenerator : public TrajectoryGenerator
+{
+public:
+    /**
+     * @brief Construct a new Lissajous Trajectory Generator object
+     * @param center Center of the Lissajous curve
+     * @param a Amplitude of x-axis
+     * @param b Amplitude of y-axis
+     * @param omega_x Angular frequency of x-axis
+     * @param omega_y Angular frequency of y-axis
+     * @param phi Phase difference
+     */
+    LissajousTrajectoryGenerator(const Eigen::Vector3d &center, const double a, const double b, const double omega_x, const double omega_y, const double phi)
+        : _center(center), _a(a), _b(b), _omega_x(omega_x), _omega_y(omega_y), _phi(phi)
+    {
+    }
+
+    void update(const uint64_t dt, traj_out &out) override
+    {
+        _passed_time += usec2sec(dt);
+        const double x = _a * sin(_omega_x * _passed_time + _phi);
+        const double y = _b * sin(_omega_y * _passed_time);
+        out.position = _center + Eigen::Vector3d(x, y, 0);
+        out.velocity = Eigen::Vector3d(_a * _omega_x * cos(_omega_x * _passed_time + _phi), _b * _omega_y * cos(_omega_y * _passed_time), 0);
+        out.acceleration = Eigen::Vector3d(-_a * _omega_x * _omega_x * sin(_omega_x * _passed_time + _phi), -_b * _omega_y * _omega_y * sin(_omega_y * _passed_time), 0);
+    }
+
+private:
+    const Eigen::Vector3d _center;
+    const double _a, _b;
+    const double _omega_x, _omega_y;
+    const double _phi;
+
+    double _passed_time = 0.0;
+};
+
 static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std::string &traj_type)
 {
     #define deg2rad(x) ((x) * M_PI / 180)
@@ -160,6 +196,8 @@ static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std:
         return std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), 10, deg2rad(6));
     } else if (traj_type == "rectangle") {
         return std::make_shared<RectangleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(20, 20, -10), 2);
+    } else if (traj_type == "lissajous") {
+        return std::make_shared<LissajousTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), 3, 3, deg2rad(3), deg2rad(6), deg2rad(90));
     } else {
         throw std::runtime_error("Invalid trajectory type");
     }

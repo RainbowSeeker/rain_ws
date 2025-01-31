@@ -15,6 +15,8 @@ class GzSensor : public rclcpp::Node
 public:
     GzSensor() : rclcpp::Node("GzSensor")
     {
+        // Parameters
+        _disturbance_enable = this->declare_parameter("disturbance_enable", false);
         const std::string world_name = this->declare_parameter("world_name", "default");
 
         // pose: /world/$WORLD/pose/info
@@ -30,6 +32,8 @@ public:
         }
 
         _timer = this->create_wall_timer(std::chrono::milliseconds(5), std::bind(&GzSensor::run, this));
+
+        RCLCPP_INFO(this->get_logger(), "GzSensor initialized with disturbance_enable: %d", _disturbance_enable);
     }
 
 private:
@@ -126,10 +130,10 @@ private:
             mqsls::msg::FollowerSend msg;
             msg.timestamp = _load_state.last_time;
             for (int j = 0; j < 3; j++) {
-                msg.position_load[j] = _load_state.position[j] + _noise_position.generate();
-                msg.velocity_load[j] = _load_state.velocity[j] + _noise_velocity.generate();
-                msg.position_uav[j] = _uav_state[i].position[j] + _noise_position.generate();
-                msg.velocity_uav[j] = _uav_state[i].velocity[j] + _noise_velocity.generate();
+                msg.position_load[j] = _load_state.position[j] + _noise_position.generate() * _disturbance_enable;
+                msg.velocity_load[j] = _load_state.velocity[j] + _noise_velocity.generate() * _disturbance_enable;
+                msg.position_uav[j] = _uav_state[i].position[j] + _noise_position.generate() * _disturbance_enable;
+                msg.velocity_uav[j] = _uav_state[i].velocity[j] + _noise_velocity.generate() * _disturbance_enable;
             }
             _follower_send_pub[i]->publish(msg);
         }
@@ -146,6 +150,7 @@ private:
 
     // detail
     pos_state _load_state, _uav_state[3];
+    bool _disturbance_enable = false;
     NoiseGenerator _noise_position {0.0, 0.01}; // Mean 0, Stddev 0.01
     NoiseGenerator _noise_velocity {0.0, 0.01}; // Mean 0, Stddev 0.01
 };
