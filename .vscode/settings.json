@@ -114,6 +114,7 @@
         "nowstr",
         "odometry",
         "Offboard",
+        "pwas",
         "rclcpp",
         "traj",
         "typesupport",

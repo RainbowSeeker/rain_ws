@@ -193,7 +193,7 @@ static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std:
     if (traj_type == "line") {
         return std::make_shared<LineTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(50, 0, -10), 2.0);
     } else if (traj_type == "circle") {
-        return std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), 10, deg2rad(6));
+        return std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -1), 2, deg2rad(18));
     } else if (traj_type == "rectangle") {
         return std::make_shared<RectangleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(20, 20, -10), 2);
     } else if (traj_type == "lissajous") {

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'control_3dof'.
  *
- * Model version                  : 1.755
+ * Model version                  : 1.756
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Tue Jan 14 10:43:17 2025
+ * C/C++ source code generated on : Wed Feb 12 10:21:57 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Custom Processor->Custom Processor
@@ -18,9 +18,8 @@
  */
 
 #include "control_3dof.h"
-#include <stdint.h>
+#include "rtwtypes.h"
 #include <math.h>
-#include <stdbool.h>
 #include "math.h"
 #ifndef UCHAR_MAX
 #include <limits.h>
@@ -62,7 +61,7 @@ preprocessor word size checks.
 /* Skipping ulong/long check: insufficient preprocessor integer range. */
 
 /* Exported block parameters */
-struct_SXZiMrrc3I4047EGQQvBKH CONTROL_PARAM = {
+struct_e7GeJ2KaE57MoQuFkrFyOD CONTROL_PARAM = {
   1.0,
   1.5,
   1.0,
@@ -77,6 +76,7 @@ struct_SXZiMrrc3I4047EGQQvBKH CONTROL_PARAM = {
 
   { 0.0, 20.0, 30.0 },
   0.2,
+  0.05,
   1.0,
   0.5,
   3.0,
@@ -103,14 +103,15 @@ struct_SXZiMrrc3I4047EGQQvBKH CONTROL_PARAM = {
                                         *   '<S13>/Parallel Control'
                                         *   '<S14>/Vertical Control'
                                         *   '<S14>/Gain'
-                                        *   '<S18>/KP'
                                         *   '<S18>/KV'
+                                        *   '<S21>/KP'
+                                        *   '<S21>/KPI'
                                         */
 
 struct_s1X7MNNw1KKuxbD9HCjUEH CONTROL_EXPORT = {
   50
 } ;                                    /* Variable: CONTROL_EXPORT
-                                        * Referenced by: '<S21>/Period [ms]'
+                                        * Referenced by: '<S22>/Period [ms]'
                                         */
 
 /* Block signals (default storage) */
@@ -130,96 +131,96 @@ static RT_MODEL_control_3dof_T control_3dof_M_;
 RT_MODEL_control_3dof_T *const control_3dof_M = &control_3dof_M_;
 static void control_3dof_MATLABSystem_Init(DW_MATLABSystem_control_3dof_T
   *localDW);
-static void control_3dof_MATLABSystem(const double rtu_0[3], const double rtu_1
-  [3], const double rtu_2[3], B_MATLABSystem_control_3dof_T *localB,
+static void control_3dof_MATLABSystem(const real_T rtu_0[3], const real_T rtu_1
+  [3], const real_T rtu_2[3], B_MATLABSystem_control_3dof_T *localB,
   DW_MATLABSystem_control_3dof_T *localDW);
-static void control_3dof_ParallelControl(const double rtu_q[3], const double
-  rtu_w[3], const double rtu_vforce[3], const double rtu_ai_sp[3], double
-  rty_f_parallel[3], double rtp_li, double rtp_mi,
+static void control_3dof_ParallelControl(const real_T rtu_q[3], const real_T
+  rtu_w[3], const real_T rtu_vforce[3], const real_T rtu_ai_sp[3], real_T
+  rty_f_parallel[3], real_T rtp_li, real_T rtp_mi,
   B_ParallelControl_control_3do_T *localB);
-static void control_3dof_VerticalControl(const double rtu_q_sp[3], const double
-  rtu_q[3], const double rtu_w[3], const double rtu_ai_sp[3], double
-  rty_f_vertical[3], double rty_dot_err[3], double rty_state[12], double rtp_Kq,
-  double rtp_Kw, double rtp_li, double rtp_mi, B_VerticalControl_control_3do_T
+static void control_3dof_VerticalControl(const real_T rtu_q_sp[3], const real_T
+  rtu_q[3], const real_T rtu_w[3], const real_T rtu_ai_sp[3], real_T
+  rty_f_vertical[3], real_T rty_dot_err[3], real_T rty_state[12], real_T rtp_Kq,
+  real_T rtp_Kw, real_T rtp_li, real_T rtp_mi, B_VerticalControl_control_3do_T
   *localB);
 
 /* Forward declaration for local functions */
-static double control_3dof_norm(const double x[3]);
-static double control_3dof_xzlangeM(const double x[9]);
-static void control_3dof_xzlascl(double cfrom, double cto, int32_t m, int32_t n,
-  double A[9], int32_t iA0, int32_t lda);
-static double control_3dof_xnrm2(int32_t n, const double x[9], int32_t ix0);
-static double control_3dof_xdotc(int32_t n, const double x[9], int32_t ix0,
-  const double y[9], int32_t iy0);
-static void control_3dof_xaxpy(int32_t n, double a, int32_t ix0, double y[9],
-  int32_t iy0);
-static double control_3dof_xnrm2_n(int32_t n, const double x[3], int32_t ix0);
-static void control_3dof_xaxpy_f(int32_t n, double a, const double x[9], int32_t
-  ix0, double y[3], int32_t iy0);
-static void control_3dof_xaxpy_fh(int32_t n, double a, const double x[3],
-  int32_t ix0, double y[9], int32_t iy0);
-static void control_3dof_xzlascl_l(double cfrom, double cto, int32_t m, int32_t
-  n, double A[3], int32_t iA0, int32_t lda);
-static void control_3dof_xswap(double x[9], int32_t ix0, int32_t iy0);
-static void control_3dof_xrotg(double *a, double *b, double *c, double *s);
-static void control_3dof_xrot(double x[9], int32_t ix0, int32_t iy0, double c,
-  double s);
-static void control_3dof_svd(const double A[9], double U[9], double s[3], double
+static real_T control_3dof_norm(const real_T x[3]);
+static real_T control_3dof_xzlangeM(const real_T x[9]);
+static void control_3dof_xzlascl(real_T cfrom, real_T cto, int32_T m, int32_T n,
+  real_T A[9], int32_T iA0, int32_T lda);
+static real_T control_3dof_xnrm2(int32_T n, const real_T x[9], int32_T ix0);
+static real_T control_3dof_xdotc(int32_T n, const real_T x[9], int32_T ix0,
+  const real_T y[9], int32_T iy0);
+static void control_3dof_xaxpy(int32_T n, real_T a, int32_T ix0, real_T y[9],
+  int32_T iy0);
+static real_T control_3dof_xnrm2_n(int32_T n, const real_T x[3], int32_T ix0);
+static void control_3dof_xaxpy_f(int32_T n, real_T a, const real_T x[9], int32_T
+  ix0, real_T y[3], int32_T iy0);
+static void control_3dof_xaxpy_fh(int32_T n, real_T a, const real_T x[3],
+  int32_T ix0, real_T y[9], int32_T iy0);
+static void control_3dof_xzlascl_l(real_T cfrom, real_T cto, int32_T m, int32_T
+  n, real_T A[3], int32_T iA0, int32_T lda);
+static void control_3dof_xswap(real_T x[9], int32_T ix0, int32_T iy0);
+static void control_3dof_xrotg(real_T *a, real_T *b, real_T *c, real_T *s);
+static void control_3dof_xrot(real_T x[9], int32_T ix0, int32_T iy0, real_T c,
+  real_T s);
+static void control_3dof_svd(const real_T A[9], real_T U[9], real_T s[3], real_T
   V[9]);
-static void control_3dof_pinv(const double A[9], double X[9]);
-static double rtGetNaN(void);
-static float rtGetNaNF(void);
-extern double rtInf;
-extern double rtMinusInf;
-extern double rtNaN;
-extern float rtInfF;
-extern float rtMinusInfF;
-extern float rtNaNF;
-static bool rtIsInf(double value);
-static bool rtIsInfF(float value);
-static bool rtIsNaN(double value);
-static bool rtIsNaNF(float value);
-double rtNaN = -(double)NAN;
-double rtInf = (double)INFINITY;
-double rtMinusInf = -(double)INFINITY;
-float rtNaNF = -(float)NAN;
-float rtInfF = (float)INFINITY;
-float rtMinusInfF = -(float)INFINITY;
+static void control_3dof_pinv(const real_T A[9], real_T X[9]);
+static real_T rtGetNaN(void);
+static real32_T rtGetNaNF(void);
+extern real_T rtInf;
+extern real_T rtMinusInf;
+extern real_T rtNaN;
+extern real32_T rtInfF;
+extern real32_T rtMinusInfF;
+extern real32_T rtNaNF;
+static boolean_T rtIsInf(real_T value);
+static boolean_T rtIsInfF(real32_T value);
+static boolean_T rtIsNaN(real_T value);
+static boolean_T rtIsNaNF(real32_T value);
+real_T rtNaN = -(real_T)NAN;
+real_T rtInf = (real_T)INFINITY;
+real_T rtMinusInf = -(real_T)INFINITY;
+real32_T rtNaNF = -(real32_T)NAN;
+real32_T rtInfF = (real32_T)INFINITY;
+real32_T rtMinusInfF = -(real32_T)INFINITY;
 
 /* Return rtNaN needed by the generated code. */
-static double rtGetNaN(void)
+static real_T rtGetNaN(void)
 {
   return rtNaN;
 }
 
 /* Return rtNaNF needed by the generated code. */
-static float rtGetNaNF(void)
+static real32_T rtGetNaNF(void)
 {
   return rtNaNF;
 }
 
 /* Test if value is infinite */
-static bool rtIsInf(double value)
+static boolean_T rtIsInf(real_T value)
 {
-  return (bool)isinf(value);
+  return (boolean_T)isinf(value);
 }
 
 /* Test if single-precision value is infinite */
-static bool rtIsInfF(float value)
+static boolean_T rtIsInfF(real32_T value)
 {
-  return (bool)isinf(value);
+  return (boolean_T)isinf(value);
 }
 
 /* Test if value is not a number */
-static bool rtIsNaN(double value)
+static boolean_T rtIsNaN(real_T value)
 {
-  return (bool)(isnan(value) != 0);
+  return (boolean_T)(isnan(value) != 0);
 }
 
 /* Test if single-precision value is not a number */
-static bool rtIsNaNF(float value)
+static boolean_T rtIsNaNF(real32_T value)
 {
-  return (bool)(isnan(value) != 0);
+  return (boolean_T)(isnan(value) != 0);
 }
 
 /* System initialize for atomic system: */
@@ -274,12 +275,12 @@ static void control_3dof_MATLABSystem_Init(DW_MATLABSystem_control_3dof_T
 }
 
 /* Output and update for atomic system: */
-static void control_3dof_MATLABSystem(const double rtu_0[3], const double rtu_1
-  [3], const double rtu_2[3], B_MATLABSystem_control_3dof_T *localB,
+static void control_3dof_MATLABSystem(const real_T rtu_0[3], const real_T rtu_1
+  [3], const real_T rtu_2[3], B_MATLABSystem_control_3dof_T *localB,
   DW_MATLABSystem_control_3dof_T *localDW)
 {
-  double e_1;
-  double e_2;
+  real_T e_1;
+  real_T e_2;
 
   /* MATLABSystem: '<S1>/MATLAB System' */
   /* 'pos_2nd_eso:13' (3, 1) */
@@ -385,19 +386,19 @@ static void control_3dof_MATLABSystem(const double rtu_0[3], const double rtu_1
  *    '<S9>/Parallel Control'
  *    '<S13>/Parallel Control'
  */
-static void control_3dof_ParallelControl(const double rtu_q[3], const double
-  rtu_w[3], const double rtu_vforce[3], const double rtu_ai_sp[3], double
-  rty_f_parallel[3], double rtp_li, double rtp_mi,
+static void control_3dof_ParallelControl(const real_T rtu_q[3], const real_T
+  rtu_w[3], const real_T rtu_vforce[3], const real_T rtu_ai_sp[3], real_T
+  rty_f_parallel[3], real_T rtp_li, real_T rtp_mi,
   B_ParallelControl_control_3do_T *localB)
 {
-  double a;
-  double absxk;
-  double rtu_ai_sp_0;
-  double rtu_ai_sp_1;
-  double rtu_ai_sp_2;
-  double scale;
-  double t;
-  int32_t i;
+  real_T a;
+  real_T absxk;
+  real_T rtu_ai_sp_0;
+  real_T rtu_ai_sp_1;
+  real_T rtu_ai_sp_2;
+  real_T scale;
+  real_T t;
+  int32_T i;
 
   /* MATLAB Function 'Cable Controller/Parallel Control/Parallel Control': '<S7>:1' */
   /* '<S7>:1:3' f_parallel = q * q' * vforce + mi * li * (norm(w) ^ 2) * q + mi * q * q' * ai_sp; */
@@ -434,7 +435,7 @@ static void control_3dof_ParallelControl(const double rtu_q[3], const double
   scale *= sqrt(a);
   scale = rtp_mi * rtp_li * (scale * scale);
   for (i = 0; i < 3; i++) {
-    int32_t rtu_q_tmp;
+    int32_T rtu_q_tmp;
     localB->rtu_q[3 * i] = rtu_q[0] * rtu_q[i];
     localB->rtp_mi[3 * i] = rtp_mi * rtu_q[0] * rtu_q[i];
     rtu_q_tmp = 3 * i + 1;
@@ -465,20 +466,20 @@ static void control_3dof_ParallelControl(const double rtu_q[3], const double
  *    '<S10>/Vertical Control'
  *    '<S14>/Vertical Control'
  */
-static void control_3dof_VerticalControl(const double rtu_q_sp[3], const double
-  rtu_q[3], const double rtu_w[3], const double rtu_ai_sp[3], double
-  rty_f_vertical[3], double rty_dot_err[3], double rty_state[12], double rtp_Kq,
-  double rtp_Kw, double rtp_li, double rtp_mi, B_VerticalControl_control_3do_T
+static void control_3dof_VerticalControl(const real_T rtu_q_sp[3], const real_T
+  rtu_q[3], const real_T rtu_w[3], const real_T rtu_ai_sp[3], real_T
+  rty_f_vertical[3], real_T rty_dot_err[3], real_T rty_state[12], real_T rtp_Kq,
+  real_T rtp_Kw, real_T rtp_li, real_T rtp_mi, B_VerticalControl_control_3do_T
   *localB)
 {
-  double rtu_ai_sp_0;
-  double rtu_ai_sp_1;
-  double rtu_ai_sp_2;
-  double w_sp_tmp;
-  double w_sp_tmp_0;
-  double w_sp_tmp_1;
-  int32_t i;
-  int32_t i_0;
+  real_T rtu_ai_sp_0;
+  real_T rtu_ai_sp_1;
+  real_T rtu_ai_sp_2;
+  real_T w_sp_tmp;
+  real_T w_sp_tmp_0;
+  real_T w_sp_tmp_1;
+  int32_T i;
+  int32_T i_0;
 
   /* MATLAB Function 'Cable Controller/Vertical Control/Vertical Control': '<S8>:1' */
   /* '<S8>:1:3' Sqi = [0 -q(3) q(2); q(3) 0 -q(1); -q(2) q(1) 0]; */
@@ -551,7 +552,7 @@ static void control_3dof_VerticalControl(const double rtu_q_sp[3], const double
   rtu_ai_sp_1 = rtu_ai_sp[0];
   rtu_ai_sp_2 = rtu_ai_sp[2];
   for (i = 0; i < 3; i++) {
-    double Sqi;
+    real_T Sqi;
     localB->Sqi_c = localB->Sqi[i + 3];
     localB->Sqi_b = localB->Sqi[i];
     Sqi = localB->Sqi[i + 6];
@@ -570,9 +571,9 @@ static void control_3dof_VerticalControl(const double rtu_q_sp[3], const double
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static double control_3dof_norm(const double x[3])
+static real_T control_3dof_norm(const real_T x[3])
 {
-  double y;
+  real_T y;
   control_3dof_B.scale_dy = 3.3121686421112381E-170;
   control_3dof_B.absxk_lx = fabs(x[0]);
   if (control_3dof_B.absxk_lx > 3.3121686421112381E-170) {
@@ -607,10 +608,10 @@ static double control_3dof_norm(const double x[3])
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static double control_3dof_xzlangeM(const double x[9])
+static real_T control_3dof_xzlangeM(const real_T x[9])
 {
-  double y;
-  bool exitg1;
+  real_T y;
+  boolean_T exitg1;
   y = 0.0;
   control_3dof_B.k_f = 0;
   exitg1 = false;
@@ -632,8 +633,8 @@ static double control_3dof_xzlangeM(const double x[9])
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_xzlascl(double cfrom, double cto, int32_t m, int32_t n,
-  double A[9], int32_t iA0, int32_t lda)
+static void control_3dof_xzlascl(real_T cfrom, real_T cto, int32_T m, int32_T n,
+  real_T A[9], int32_T iA0, int32_T lda)
 {
   control_3dof_B.cfromc_m = cfrom;
   control_3dof_B.ctoc_n = cto;
@@ -665,9 +666,9 @@ static void control_3dof_xzlascl(double cfrom, double cto, int32_t m, int32_t n,
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static double control_3dof_xnrm2(int32_t n, const double x[9], int32_t ix0)
+static real_T control_3dof_xnrm2(int32_T n, const real_T x[9], int32_T ix0)
 {
-  double y;
+  real_T y;
   y = 0.0;
   if (n >= 1) {
     if (n == 1) {
@@ -696,10 +697,10 @@ static double control_3dof_xnrm2(int32_t n, const double x[9], int32_t ix0)
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static double control_3dof_xdotc(int32_t n, const double x[9], int32_t ix0,
-  const double y[9], int32_t iy0)
+static real_T control_3dof_xdotc(int32_T n, const real_T x[9], int32_T ix0,
+  const real_T y[9], int32_T iy0)
 {
-  double d;
+  real_T d;
   d = 0.0;
   if (n >= 1) {
     for (control_3dof_B.k_o = 0; control_3dof_B.k_o < n; control_3dof_B.k_o++) {
@@ -711,8 +712,8 @@ static double control_3dof_xdotc(int32_t n, const double x[9], int32_t ix0,
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_xaxpy(int32_t n, double a, int32_t ix0, double y[9],
-  int32_t iy0)
+static void control_3dof_xaxpy(int32_T n, real_T a, int32_T ix0, real_T y[9],
+  int32_T iy0)
 {
   if ((n >= 1) && (!(a == 0.0))) {
     for (control_3dof_B.k_a = 0; control_3dof_B.k_a < n; control_3dof_B.k_a++) {
@@ -723,9 +724,9 @@ static void control_3dof_xaxpy(int32_t n, double a, int32_t ix0, double y[9],
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static double control_3dof_xnrm2_n(int32_t n, const double x[3], int32_t ix0)
+static real_T control_3dof_xnrm2_n(int32_T n, const real_T x[3], int32_T ix0)
 {
-  double y;
+  real_T y;
   y = 0.0;
   if (n >= 1) {
     if (n == 1) {
@@ -754,8 +755,8 @@ static double control_3dof_xnrm2_n(int32_t n, const double x[3], int32_t ix0)
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_xaxpy_f(int32_t n, double a, const double x[9], int32_t
-  ix0, double y[3], int32_t iy0)
+static void control_3dof_xaxpy_f(int32_T n, real_T a, const real_T x[9], int32_T
+  ix0, real_T y[3], int32_T iy0)
 {
   if ((n >= 1) && (!(a == 0.0))) {
     for (control_3dof_B.k_jz = 0; control_3dof_B.k_jz < n; control_3dof_B.k_jz++)
@@ -767,8 +768,8 @@ static void control_3dof_xaxpy_f(int32_t n, double a, const double x[9], int32_t
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_xaxpy_fh(int32_t n, double a, const double x[3],
-  int32_t ix0, double y[9], int32_t iy0)
+static void control_3dof_xaxpy_fh(int32_T n, real_T a, const real_T x[3],
+  int32_T ix0, real_T y[9], int32_T iy0)
 {
   if ((n >= 1) && (!(a == 0.0))) {
     for (control_3dof_B.k_ju = 0; control_3dof_B.k_ju < n; control_3dof_B.k_ju++)
@@ -780,8 +781,8 @@ static void control_3dof_xaxpy_fh(int32_t n, double a, const double x[3],
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_xzlascl_l(double cfrom, double cto, int32_t m, int32_t
-  n, double A[3], int32_t iA0, int32_t lda)
+static void control_3dof_xzlascl_l(real_T cfrom, real_T cto, int32_T m, int32_T
+  n, real_T A[3], int32_T iA0, int32_T lda)
 {
   control_3dof_B.cfromc = cfrom;
   control_3dof_B.ctoc = cto;
@@ -813,7 +814,7 @@ static void control_3dof_xzlascl_l(double cfrom, double cto, int32_t m, int32_t
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_xswap(double x[9], int32_t ix0, int32_t iy0)
+static void control_3dof_xswap(real_T x[9], int32_T ix0, int32_T iy0)
 {
   control_3dof_B.temp_n = x[ix0 - 1];
   x[ix0 - 1] = x[iy0 - 1];
@@ -827,7 +828,7 @@ static void control_3dof_xswap(double x[9], int32_t ix0, int32_t iy0)
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_xrotg(double *a, double *b, double *c, double *s)
+static void control_3dof_xrotg(real_T *a, real_T *b, real_T *c, real_T *s)
 {
   control_3dof_B.roe = *b;
   control_3dof_B.absa = fabs(*a);
@@ -866,8 +867,8 @@ static void control_3dof_xrotg(double *a, double *b, double *c, double *s)
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_xrot(double x[9], int32_t ix0, int32_t iy0, double c,
-  double s)
+static void control_3dof_xrot(real_T x[9], int32_T ix0, int32_T iy0, real_T c,
+  real_T s)
 {
   control_3dof_B.temp = x[iy0 - 1];
   control_3dof_B.temp_tmp = x[ix0 - 1];
@@ -883,10 +884,10 @@ static void control_3dof_xrot(double x[9], int32_t ix0, int32_t iy0, double c,
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_svd(const double A[9], double U[9], double s[3], double
+static void control_3dof_svd(const real_T A[9], real_T U[9], real_T s[3], real_T
   V[9])
 {
-  bool exitg1;
+  boolean_T exitg1;
   control_3dof_B.b_s[0] = 0.0;
   control_3dof_B.e[0] = 0.0;
   control_3dof_B.work[0] = 0.0;
@@ -1352,9 +1353,9 @@ static void control_3dof_svd(const double A[9], double U[9], double s[3], double
 }
 
 /* Function for MATLAB Function: '<S4>/Force Saturation && Disturbution' */
-static void control_3dof_pinv(const double A[9], double X[9])
+static void control_3dof_pinv(const real_T A[9], real_T X[9])
 {
-  bool exitg1;
+  boolean_T exitg1;
   control_3dof_B.p = true;
   for (control_3dof_B.r_b = 0; control_3dof_B.r_b < 9; control_3dof_B.r_b++) {
     X[control_3dof_B.r_b] = 0.0;
@@ -1447,12 +1448,12 @@ static void control_3dof_pinv(const double A[9], double X[9])
 /* Model step function */
 void control_3dof_step(void)
 {
-  static const int8_t a[18] = { 1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 1, 0,
+  static const int8_T a[18] = { 1, 0, 0, -1, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 1, 0,
     0, -1 };
 
-  static const double b[3] = { 0.0, 0.0, -9.8 };
+  static const real_T b[3] = { 0.0, 0.0, -9.8 };
 
-  bool exitg1;
+  boolean_T exitg1;
 
   /* SignalConversion generated from: '<S20>/Vector Concatenate' incorporates:
    *  Inport: '<Root>/Dir_sp'
@@ -1499,11 +1500,11 @@ void control_3dof_step(void)
    */
   control_3dof_B.Q_new[8] = control_3dof_U.Dir_sp.q_sp3[2];
 
-  /* RelationalOperator: '<S22>/FixPt Relational Operator' incorporates:
+  /* RelationalOperator: '<S23>/FixPt Relational Operator' incorporates:
    *  Inport: '<Root>/Dir_sp'
-   *  UnitDelay: '<S22>/Delay Input1'
+   *  UnitDelay: '<S23>/Delay Input1'
    *
-   * Block description for '<S22>/Delay Input1':
+   * Block description for '<S23>/Delay Input1':
    *
    *  Store in Global RAM
    */
@@ -1593,71 +1594,92 @@ void control_3dof_step(void)
   /* 'pos_2nd_eso:87' z3 = obj.Z_3; */
   /* MATLAB Function 'Payload Controller/Force Saturation && Disturbution': '<S17>:1' */
   /* '<S17>:1:3' q_1 = Payload_Out.pL - Payload_Out.p_1; */
-  control_3dof_B.e_1_k = control_3dof_U.Payload_Out.pL[0] -
+  control_3dof_B.e_1 = control_3dof_U.Payload_Out.pL[0] -
     control_3dof_DW.obj.Z_1[0];
-  control_3dof_B.e_2_c = control_3dof_U.Payload_Out.vL[0] -
+  control_3dof_B.e_2_k = control_3dof_U.Payload_Out.vL[0] -
     control_3dof_DW.obj.Z_2[0];
-  control_3dof_DW.obj.Z_1[0] += (control_3dof_DW.obj.K_p[0] *
-    control_3dof_B.e_1_k + control_3dof_DW.obj.Z_2[0]) * 0.05;
+  control_3dof_DW.obj.Z_1[0] += (control_3dof_DW.obj.K_p[0] * control_3dof_B.e_1
+    + control_3dof_DW.obj.Z_2[0]) * 0.05;
   control_3dof_DW.obj.Z_2[0] += (((control_3dof_DW.UnitDelay_DSTATE[0] +
     control_3dof_DW.obj.Z_3[0]) + control_3dof_DW.obj.K_p[1] *
-    control_3dof_B.e_1_k) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_c) *
+    control_3dof_B.e_1) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_k) *
     0.05;
-  control_3dof_DW.obj.Z_3[0] += (control_3dof_DW.obj.K_p[2] *
-    control_3dof_B.e_1_k + control_3dof_DW.obj.K_v[2] * control_3dof_B.e_2_c) *
-    0.05;
+  control_3dof_DW.obj.Z_3[0] += (control_3dof_DW.obj.K_p[2] * control_3dof_B.e_1
+    + control_3dof_DW.obj.K_v[2] * control_3dof_B.e_2_k) * 0.05;
+
+  /* Sum: '<S18>/Sum' incorporates:
+   *  Inport: '<Root>/Payload_Out'
+   *  Inport: '<Root>/Traj_sp'
+   *  MATLABSystem: '<S4>/Position 2nd ESO'
+   * */
+  control_3dof_B.e_1_idx_0 = control_3dof_U.Traj_sp.pos_sp[0] -
+    control_3dof_U.Payload_Out.pL[0];
 
   /* MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
    *  BusCreator generated from: '<S4>/Force Saturation && Disturbution'
    *  Inport: '<Root>/Payload_Out'
    *  MATLABSystem: '<S4>/Position 2nd ESO'
    * */
-  control_3dof_B.e_1[0] = control_3dof_U.Payload_Out.pL[0] -
+  control_3dof_B.e_2[0] = control_3dof_U.Payload_Out.pL[0] -
     control_3dof_U.Payload_Out.p_1[0];
 
   /* MATLABSystem: '<S4>/Position 2nd ESO' incorporates:
    *  Inport: '<Root>/Payload_Out'
    *  UnitDelay: '<S4>/Unit Delay'
    * */
-  control_3dof_B.e_1_k = control_3dof_U.Payload_Out.pL[1] -
+  control_3dof_B.e_1 = control_3dof_U.Payload_Out.pL[1] -
     control_3dof_DW.obj.Z_1[1];
-  control_3dof_B.e_2_c = control_3dof_U.Payload_Out.vL[1] -
+  control_3dof_B.e_2_k = control_3dof_U.Payload_Out.vL[1] -
     control_3dof_DW.obj.Z_2[1];
-  control_3dof_DW.obj.Z_1[1] += (control_3dof_DW.obj.K_p[0] *
-    control_3dof_B.e_1_k + control_3dof_DW.obj.Z_2[1]) * 0.05;
+  control_3dof_DW.obj.Z_1[1] += (control_3dof_DW.obj.K_p[0] * control_3dof_B.e_1
+    + control_3dof_DW.obj.Z_2[1]) * 0.05;
   control_3dof_DW.obj.Z_2[1] += (((control_3dof_DW.UnitDelay_DSTATE[1] +
     control_3dof_DW.obj.Z_3[1]) + control_3dof_DW.obj.K_p[1] *
-    control_3dof_B.e_1_k) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_c) *
+    control_3dof_B.e_1) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_k) *
     0.05;
-  control_3dof_DW.obj.Z_3[1] += (control_3dof_DW.obj.K_p[2] *
-    control_3dof_B.e_1_k + control_3dof_DW.obj.K_v[2] * control_3dof_B.e_2_c) *
-    0.05;
+  control_3dof_DW.obj.Z_3[1] += (control_3dof_DW.obj.K_p[2] * control_3dof_B.e_1
+    + control_3dof_DW.obj.K_v[2] * control_3dof_B.e_2_k) * 0.05;
+
+  /* Sum: '<S18>/Sum' incorporates:
+   *  Inport: '<Root>/Payload_Out'
+   *  Inport: '<Root>/Traj_sp'
+   *  MATLABSystem: '<S4>/Position 2nd ESO'
+   * */
+  control_3dof_B.e_1_idx_1 = control_3dof_U.Traj_sp.pos_sp[1] -
+    control_3dof_U.Payload_Out.pL[1];
 
   /* MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
    *  BusCreator generated from: '<S4>/Force Saturation && Disturbution'
    *  Inport: '<Root>/Payload_Out'
    *  MATLABSystem: '<S4>/Position 2nd ESO'
    * */
-  control_3dof_B.e_1[1] = control_3dof_U.Payload_Out.pL[1] -
+  control_3dof_B.e_2[1] = control_3dof_U.Payload_Out.pL[1] -
     control_3dof_U.Payload_Out.p_1[1];
 
   /* MATLABSystem: '<S4>/Position 2nd ESO' incorporates:
    *  Inport: '<Root>/Payload_Out'
    *  UnitDelay: '<S4>/Unit Delay'
    * */
-  control_3dof_B.e_1_k = control_3dof_U.Payload_Out.pL[2] -
+  control_3dof_B.e_1 = control_3dof_U.Payload_Out.pL[2] -
     control_3dof_DW.obj.Z_1[2];
-  control_3dof_B.e_2_c = control_3dof_U.Payload_Out.vL[2] -
+  control_3dof_B.e_2_k = control_3dof_U.Payload_Out.vL[2] -
     control_3dof_DW.obj.Z_2[2];
-  control_3dof_DW.obj.Z_1[2] += (control_3dof_DW.obj.K_p[0] *
-    control_3dof_B.e_1_k + control_3dof_DW.obj.Z_2[2]) * 0.05;
+  control_3dof_DW.obj.Z_1[2] += (control_3dof_DW.obj.K_p[0] * control_3dof_B.e_1
+    + control_3dof_DW.obj.Z_2[2]) * 0.05;
   control_3dof_DW.obj.Z_2[2] += ((((control_3dof_DW.UnitDelay_DSTATE[2] +
     control_3dof_DW.obj.Z_3[2]) + 9.8) + control_3dof_DW.obj.K_p[1] *
-    control_3dof_B.e_1_k) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_c) *
+    control_3dof_B.e_1) + control_3dof_DW.obj.K_v[1] * control_3dof_B.e_2_k) *
     0.05;
-  control_3dof_DW.obj.Z_3[2] += (control_3dof_DW.obj.K_p[2] *
-    control_3dof_B.e_1_k + control_3dof_DW.obj.K_v[2] * control_3dof_B.e_2_c) *
-    0.05;
+  control_3dof_DW.obj.Z_3[2] += (control_3dof_DW.obj.K_p[2] * control_3dof_B.e_1
+    + control_3dof_DW.obj.K_v[2] * control_3dof_B.e_2_k) * 0.05;
+
+  /* Sum: '<S18>/Sum' incorporates:
+   *  Inport: '<Root>/Payload_Out'
+   *  Inport: '<Root>/Traj_sp'
+   *  MATLABSystem: '<S4>/Position 2nd ESO'
+   * */
+  control_3dof_B.e_1 = control_3dof_U.Traj_sp.pos_sp[2] -
+    control_3dof_U.Payload_Out.pL[2];
 
   /* MATLAB Function: '<S4>/Force Saturation && Disturbution' incorporates:
    *  Bias: '<S4>/-g'
@@ -1668,36 +1690,36 @@ void control_3dof_step(void)
    *  Saturate: '<S18>/acc_limit'
    *  UnitDelay: '<S4>/Unit Delay'
    * */
-  control_3dof_B.e_1_k = control_3dof_U.Payload_Out.pL[2] -
+  control_3dof_B.e_2_k = control_3dof_U.Payload_Out.pL[2] -
     control_3dof_U.Payload_Out.p_1[2];
-  control_3dof_B.e_1[2] = control_3dof_B.e_1_k;
+  control_3dof_B.e_2[2] = control_3dof_B.e_2_k;
 
   /* '<S17>:1:4' q_1 = q_1 / norm(q_1); */
-  control_3dof_B.F_trim_g = control_3dof_norm(control_3dof_B.e_1);
+  control_3dof_B.F_trim_g = control_3dof_norm(control_3dof_B.e_2);
 
   /* '<S17>:1:5' w_1 = cross(q_1, (Payload_Out.vL - Payload_Out.v_1) / li); */
   /* '<S17>:1:8' q_2 = Payload_Out.pL - Payload_Out.p_2; */
-  control_3dof_B.e_1[0] /= control_3dof_B.F_trim_g;
-  control_3dof_B.e_2[0] = (control_3dof_U.Payload_Out.vL[0] -
+  control_3dof_B.e_2[0] /= control_3dof_B.F_trim_g;
+  control_3dof_B.F_var[0] = (control_3dof_U.Payload_Out.vL[0] -
     control_3dof_U.Payload_Out.v_1[0]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.q_2[0] = control_3dof_U.Payload_Out.pL[0] -
     control_3dof_U.Payload_Out.p_2[0];
-  control_3dof_B.e_1[1] /= control_3dof_B.F_trim_g;
-  control_3dof_B.e_2[1] = (control_3dof_U.Payload_Out.vL[1] -
+  control_3dof_B.e_2[1] /= control_3dof_B.F_trim_g;
+  control_3dof_B.F_var[1] = (control_3dof_U.Payload_Out.vL[1] -
     control_3dof_U.Payload_Out.v_1[1]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.q_2[1] = control_3dof_U.Payload_Out.pL[1] -
     control_3dof_U.Payload_Out.p_2[1];
-  control_3dof_B.e_1[2] = control_3dof_B.e_1_k / control_3dof_B.F_trim_g;
-  control_3dof_B.e_2[2] = (control_3dof_U.Payload_Out.vL[2] -
+  control_3dof_B.e_2[2] = control_3dof_B.e_2_k / control_3dof_B.F_trim_g;
+  control_3dof_B.F_var[2] = (control_3dof_U.Payload_Out.vL[2] -
     control_3dof_U.Payload_Out.v_1[2]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.q_2[2] = control_3dof_U.Payload_Out.pL[2] -
     control_3dof_U.Payload_Out.p_2[2];
-  control_3dof_B.rtb_control_in1_w[0] = control_3dof_B.e_1[1] *
-    control_3dof_B.e_2[2] - control_3dof_B.e_2[1] * control_3dof_B.e_1[2];
-  control_3dof_B.rtb_control_in1_w[1] = control_3dof_B.e_2[0] *
-    control_3dof_B.e_1[2] - control_3dof_B.e_1[0] * control_3dof_B.e_2[2];
-  control_3dof_B.rtb_control_in1_w[2] = control_3dof_B.e_1[0] *
-    control_3dof_B.e_2[1] - control_3dof_B.e_2[0] * control_3dof_B.e_1[1];
+  control_3dof_B.rtb_control_in1_w[0] = control_3dof_B.e_2[1] *
+    control_3dof_B.F_var[2] - control_3dof_B.F_var[1] * control_3dof_B.e_2[2];
+  control_3dof_B.rtb_control_in1_w[1] = control_3dof_B.F_var[0] *
+    control_3dof_B.e_2[2] - control_3dof_B.e_2[0] * control_3dof_B.F_var[2];
+  control_3dof_B.rtb_control_in1_w[2] = control_3dof_B.e_2[0] *
+    control_3dof_B.F_var[1] - control_3dof_B.F_var[0] * control_3dof_B.e_2[1];
 
   /* '<S17>:1:9' q_2 = q_2 / norm(q_2); */
   control_3dof_B.F_trim_g = control_3dof_norm(control_3dof_B.q_2);
@@ -1705,26 +1727,26 @@ void control_3dof_step(void)
   /* '<S17>:1:10' w_2 = cross(q_2, (Payload_Out.vL - Payload_Out.v_2) / li); */
   /* '<S17>:1:13' q_3 = Payload_Out.pL - Payload_Out.p_3; */
   control_3dof_B.q_2[0] /= control_3dof_B.F_trim_g;
-  control_3dof_B.e_2[0] = (control_3dof_U.Payload_Out.vL[0] -
+  control_3dof_B.F_var[0] = (control_3dof_U.Payload_Out.vL[0] -
     control_3dof_U.Payload_Out.v_2[0]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.q_3[0] = control_3dof_U.Payload_Out.pL[0] -
     control_3dof_U.Payload_Out.p_3[0];
   control_3dof_B.q_2[1] /= control_3dof_B.F_trim_g;
-  control_3dof_B.e_2[1] = (control_3dof_U.Payload_Out.vL[1] -
+  control_3dof_B.F_var[1] = (control_3dof_U.Payload_Out.vL[1] -
     control_3dof_U.Payload_Out.v_2[1]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.q_3[1] = control_3dof_U.Payload_Out.pL[1] -
     control_3dof_U.Payload_Out.p_3[1];
   control_3dof_B.q_2[2] /= control_3dof_B.F_trim_g;
-  control_3dof_B.e_2[2] = (control_3dof_U.Payload_Out.vL[2] -
+  control_3dof_B.F_var[2] = (control_3dof_U.Payload_Out.vL[2] -
     control_3dof_U.Payload_Out.v_2[2]) / CONTROL_PARAM.CABLE_LEN;
   control_3dof_B.q_3[2] = control_3dof_U.Payload_Out.pL[2] -
     control_3dof_U.Payload_Out.p_3[2];
   control_3dof_B.rtb_control_in2_w[0] = control_3dof_B.q_2[1] *
-    control_3dof_B.e_2[2] - control_3dof_B.e_2[1] * control_3dof_B.q_2[2];
-  control_3dof_B.rtb_control_in2_w[1] = control_3dof_B.e_2[0] *
-    control_3dof_B.q_2[2] - control_3dof_B.q_2[0] * control_3dof_B.e_2[2];
+    control_3dof_B.F_var[2] - control_3dof_B.F_var[1] * control_3dof_B.q_2[2];
+  control_3dof_B.rtb_control_in2_w[1] = control_3dof_B.F_var[0] *
+    control_3dof_B.q_2[2] - control_3dof_B.q_2[0] * control_3dof_B.F_var[2];
   control_3dof_B.rtb_control_in2_w[2] = control_3dof_B.q_2[0] *
-    control_3dof_B.e_2[1] - control_3dof_B.e_2[0] * control_3dof_B.q_2[1];
+    control_3dof_B.F_var[1] - control_3dof_B.F_var[0] * control_3dof_B.q_2[1];
 
   /* '<S17>:1:14' q_3 = q_3 / norm(q_3); */
   control_3dof_B.F_trim_g = control_3dof_norm(control_3dof_B.q_3);
@@ -1732,39 +1754,39 @@ void control_3dof_step(void)
   /* '<S17>:1:15' w_3 = cross(q_3, (Payload_Out.vL - Payload_Out.v_3) / li); */
   /* '<S17>:1:17' Q = [q_1 q_2 q_3]; */
   /* '<S17>:1:20' F_trim = mL * a_trim; */
-  control_3dof_B.e_1_k = control_3dof_B.q_3[0] / control_3dof_B.F_trim_g;
-  control_3dof_B.q_3[0] = control_3dof_B.e_1_k;
-  control_3dof_B.e_2[0] = (control_3dof_U.Payload_Out.vL[0] -
+  control_3dof_B.e_2_k = control_3dof_B.q_3[0] / control_3dof_B.F_trim_g;
+  control_3dof_B.q_3[0] = control_3dof_B.e_2_k;
+  control_3dof_B.F_var[0] = (control_3dof_U.Payload_Out.vL[0] -
     control_3dof_U.Payload_Out.v_3[0]) / CONTROL_PARAM.CABLE_LEN;
-  control_3dof_B.Q_new[0] = control_3dof_B.e_1[0];
+  control_3dof_B.Q_new[0] = control_3dof_B.e_2[0];
   control_3dof_B.Q_new[3] = control_3dof_B.q_2[0];
-  control_3dof_B.Q_new[6] = control_3dof_B.e_1_k;
+  control_3dof_B.Q_new[6] = control_3dof_B.e_2_k;
   control_3dof_B.F_trim[0] = CONTROL_PARAM.MASS_LOAD * -control_3dof_DW.obj.Z_3
     [0];
-  control_3dof_B.e_1_k = control_3dof_B.q_3[1] / control_3dof_B.F_trim_g;
-  control_3dof_B.q_3[1] = control_3dof_B.e_1_k;
-  control_3dof_B.e_2[1] = (control_3dof_U.Payload_Out.vL[1] -
+  control_3dof_B.e_2_k = control_3dof_B.q_3[1] / control_3dof_B.F_trim_g;
+  control_3dof_B.q_3[1] = control_3dof_B.e_2_k;
+  control_3dof_B.F_var[1] = (control_3dof_U.Payload_Out.vL[1] -
     control_3dof_U.Payload_Out.v_3[1]) / CONTROL_PARAM.CABLE_LEN;
-  control_3dof_B.Q_new[1] = control_3dof_B.e_1[1];
+  control_3dof_B.Q_new[1] = control_3dof_B.e_2[1];
   control_3dof_B.Q_new[4] = control_3dof_B.q_2[1];
-  control_3dof_B.Q_new[7] = control_3dof_B.e_1_k;
+  control_3dof_B.Q_new[7] = control_3dof_B.e_2_k;
   control_3dof_B.F_trim[1] = CONTROL_PARAM.MASS_LOAD * -control_3dof_DW.obj.Z_3
     [1];
-  control_3dof_B.e_1_k = control_3dof_B.q_3[2] / control_3dof_B.F_trim_g;
-  control_3dof_B.q_3[2] = control_3dof_B.e_1_k;
-  control_3dof_B.e_2[2] = (control_3dof_U.Payload_Out.vL[2] -
+  control_3dof_B.e_2_k = control_3dof_B.q_3[2] / control_3dof_B.F_trim_g;
+  control_3dof_B.q_3[2] = control_3dof_B.e_2_k;
+  control_3dof_B.F_var[2] = (control_3dof_U.Payload_Out.vL[2] -
     control_3dof_U.Payload_Out.v_3[2]) / CONTROL_PARAM.CABLE_LEN;
-  control_3dof_B.Q_new[2] = control_3dof_B.e_1[2];
+  control_3dof_B.Q_new[2] = control_3dof_B.e_2[2];
   control_3dof_B.Q_new[5] = control_3dof_B.q_2[2];
-  control_3dof_B.Q_new[8] = control_3dof_B.e_1_k;
+  control_3dof_B.Q_new[8] = control_3dof_B.e_2_k;
   control_3dof_B.F_trim[2] = (-control_3dof_DW.obj.Z_3[2] - 9.8) *
     CONTROL_PARAM.MASS_LOAD;
   control_3dof_B.rtb_control_in3_w[0] = control_3dof_B.q_3[1] *
-    control_3dof_B.e_2[2] - control_3dof_B.e_2[1] * control_3dof_B.e_1_k;
-  control_3dof_B.rtb_control_in3_w[1] = control_3dof_B.e_2[0] *
-    control_3dof_B.e_1_k - control_3dof_B.q_3[0] * control_3dof_B.e_2[2];
+    control_3dof_B.F_var[2] - control_3dof_B.F_var[1] * control_3dof_B.e_2_k;
+  control_3dof_B.rtb_control_in3_w[1] = control_3dof_B.F_var[0] *
+    control_3dof_B.e_2_k - control_3dof_B.q_3[0] * control_3dof_B.F_var[2];
   control_3dof_B.rtb_control_in3_w[2] = control_3dof_B.q_3[0] *
-    control_3dof_B.e_2[1] - control_3dof_B.e_2[0] * control_3dof_B.q_3[1];
+    control_3dof_B.F_var[1] - control_3dof_B.F_var[0] * control_3dof_B.q_3[1];
 
   /* '<S17>:1:21' F_way  = mL * a_way; */
   /* '<S17>:1:22' T_min = min_tension * ones(3, 1); */
@@ -1782,13 +1804,13 @@ void control_3dof_step(void)
   control_3dof_pinv(control_3dof_B.rtb_Q_new_m, control_3dof_B.dv);
   for (control_3dof_B.i = 0; control_3dof_B.i < 3; control_3dof_B.i++) {
     control_3dof_B.F_trim_g = control_3dof_B.dv[3 * control_3dof_B.i + 1];
-    control_3dof_B.e_2_c = control_3dof_B.dv[3 * control_3dof_B.i];
-    control_3dof_B.F_trim_g1 = control_3dof_B.dv[3 * control_3dof_B.i + 2];
+    control_3dof_B.F_trim_g1 = control_3dof_B.dv[3 * control_3dof_B.i];
+    control_3dof_B.upper = control_3dof_B.dv[3 * control_3dof_B.i + 2];
     for (control_3dof_B.c_k = 0; control_3dof_B.c_k < 6; control_3dof_B.c_k++) {
       control_3dof_B.A_wrench_tmp[control_3dof_B.c_k + 6 * control_3dof_B.i] =
-        ((double)a[control_3dof_B.c_k + 6] * control_3dof_B.F_trim_g +
-         control_3dof_B.e_2_c * (double)a[control_3dof_B.c_k]) + (double)
-        a[control_3dof_B.c_k + 12] * control_3dof_B.F_trim_g1;
+        ((real_T)a[control_3dof_B.c_k + 6] * control_3dof_B.F_trim_g +
+         control_3dof_B.F_trim_g1 * (real_T)a[control_3dof_B.c_k]) + (real_T)
+        a[control_3dof_B.c_k + 12] * control_3dof_B.upper;
     }
   }
 
@@ -1803,14 +1825,14 @@ void control_3dof_step(void)
   /* 'PWAS:11' if WrenchIsValid(F_trim, A_wrench, b_wrench) */
   /* 'PWAS:50' retval = all(A_w * F_sp <= b_w); */
   control_3dof_B.F_trim_g = control_3dof_B.F_trim[1];
-  control_3dof_B.e_2_c = control_3dof_B.F_trim[0];
-  control_3dof_B.F_trim_g1 = control_3dof_B.F_trim[2];
+  control_3dof_B.F_trim_g1 = control_3dof_B.F_trim[0];
+  control_3dof_B.upper = control_3dof_B.F_trim[2];
   for (control_3dof_B.i = 0; control_3dof_B.i < 6; control_3dof_B.i++) {
     control_3dof_B.B_tmp[control_3dof_B.i] =
       (control_3dof_B.A_wrench_tmp[control_3dof_B.i + 6] *
        control_3dof_B.F_trim_g + control_3dof_B.A_wrench_tmp[control_3dof_B.i] *
-       control_3dof_B.e_2_c) + control_3dof_B.A_wrench_tmp[control_3dof_B.i + 12]
-      * control_3dof_B.F_trim_g1;
+       control_3dof_B.F_trim_g1) + control_3dof_B.A_wrench_tmp[control_3dof_B.i
+      + 12] * control_3dof_B.upper;
   }
 
   control_3dof_B.FixPtRelationalOperator = true;
@@ -1831,12 +1853,12 @@ void control_3dof_step(void)
     /* 'PWAS:14' F_var = F_way; */
     control_3dof_DW.UnitDelay_DSTATE[0] = control_3dof_B.F_trim[0];
 
-    /* Gain: '<S18>/KP' incorporates:
-     *  Inport: '<Root>/Traj_sp'
-     *  Sum: '<S18>/Sum'
+    /* Sum: '<S21>/Add' incorporates:
+     *  DiscreteIntegrator: '<S21>/Discrete-Time Integrator'
+     *  Gain: '<S21>/KP'
      */
-    control_3dof_B.F_trim_g = (control_3dof_U.Traj_sp.pos_sp[0] -
-      control_3dof_U.Payload_Out.pL[0]) * CONTROL_PARAM.KP;
+    control_3dof_B.F_trim_g = CONTROL_PARAM.KP * control_3dof_B.e_1_idx_0 +
+      control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0];
 
     /* Saturate: '<S18>/vel_limit' */
     if (control_3dof_B.F_trim_g > 5.0) {
@@ -1863,16 +1885,16 @@ void control_3dof_step(void)
       control_3dof_B.F_trim_g = -3.0;
     }
 
-    control_3dof_B.e_2[0] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.F_trim_g;
+    control_3dof_B.F_var[0] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.F_trim_g;
     control_3dof_DW.UnitDelay_DSTATE[1] = control_3dof_B.F_trim[1];
 
-    /* Gain: '<S18>/KP' incorporates:
-     *  Inport: '<Root>/Traj_sp'
+    /* Sum: '<S21>/Add' incorporates:
+     *  DiscreteIntegrator: '<S21>/Discrete-Time Integrator'
+     *  Gain: '<S21>/KP'
      *  Saturate: '<S18>/acc_limit'
-     *  Sum: '<S18>/Sum'
      */
-    control_3dof_B.F_trim_g = (control_3dof_U.Traj_sp.pos_sp[1] -
-      control_3dof_U.Payload_Out.pL[1]) * CONTROL_PARAM.KP;
+    control_3dof_B.F_trim_g = CONTROL_PARAM.KP * control_3dof_B.e_1_idx_1 +
+      control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1];
 
     /* Saturate: '<S18>/vel_limit' */
     if (control_3dof_B.F_trim_g > 5.0) {
@@ -1899,16 +1921,17 @@ void control_3dof_step(void)
       control_3dof_B.F_trim_g = -3.0;
     }
 
-    control_3dof_B.e_2[1] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.F_trim_g;
+    control_3dof_B.F_var[1] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.F_trim_g;
     control_3dof_DW.UnitDelay_DSTATE[2] = control_3dof_B.F_trim[2];
 
-    /* Gain: '<S18>/KP' incorporates:
-     *  Inport: '<Root>/Traj_sp'
+    /* Sum: '<S21>/Add' incorporates:
+     *  DiscreteIntegrator: '<S21>/Discrete-Time Integrator'
+     *  Gain: '<S21>/KP'
      *  Saturate: '<S18>/acc_limit'
      *  Sum: '<S18>/Sum'
      */
-    control_3dof_B.F_trim_g = (control_3dof_U.Traj_sp.pos_sp[2] -
-      control_3dof_U.Payload_Out.pL[2]) * CONTROL_PARAM.KP;
+    control_3dof_B.F_trim_g = CONTROL_PARAM.KP * control_3dof_B.e_1 +
+      control_3dof_DW.DiscreteTimeIntegrator_DSTATE[2];
 
     /* Saturate: '<S18>/vel_limit' */
     if (control_3dof_B.F_trim_g > 5.0) {
@@ -1935,7 +1958,7 @@ void control_3dof_step(void)
       control_3dof_B.F_trim_g = -3.0;
     }
 
-    control_3dof_B.e_2[2] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.F_trim_g;
+    control_3dof_B.F_var[2] = CONTROL_PARAM.MASS_LOAD * control_3dof_B.F_trim_g;
   } else {
     /* 'PWAS:15' else */
     /* 'PWAS:17' F_fixed = [0;0;0]; */
@@ -1944,9 +1967,9 @@ void control_3dof_step(void)
     control_3dof_DW.UnitDelay_DSTATE[2] = 0.0;
 
     /* 'PWAS:18' F_var = [F_trim(1);F_trim(2);F_trim(3)]; */
-    control_3dof_B.e_2[0] = control_3dof_B.F_trim[0];
-    control_3dof_B.e_2[1] = control_3dof_B.F_trim[1];
-    control_3dof_B.e_2[2] = control_3dof_B.F_trim[2];
+    control_3dof_B.F_var[0] = control_3dof_B.F_trim[0];
+    control_3dof_B.F_var[1] = control_3dof_B.F_trim[1];
+    control_3dof_B.F_var[2] = control_3dof_B.F_trim[2];
   }
 
   /* 'PWAS:21' alpha = PWAS_LOPT(F_fixed, F_var, A_wrench, b_wrench); */
@@ -1959,28 +1982,28 @@ void control_3dof_step(void)
   control_3dof_B.lower = 0.0;
 
   /* 'PWAS:33' for i = 1:length(A) */
-  control_3dof_B.e_2_c = control_3dof_B.e_2[0];
-  control_3dof_B.e_2_b = control_3dof_B.e_2[1];
-  control_3dof_B.e_2_p = control_3dof_B.e_2[2];
+  control_3dof_B.F_var_c = control_3dof_B.F_var[0];
+  control_3dof_B.F_var_b = control_3dof_B.F_var[1];
+  control_3dof_B.F_var_p = control_3dof_B.F_var[2];
   control_3dof_B.UnitDelay_DSTATE = control_3dof_DW.UnitDelay_DSTATE[0];
   control_3dof_B.UnitDelay_DSTATE_c = control_3dof_DW.UnitDelay_DSTATE[1];
   control_3dof_B.UnitDelay_DSTATE_f = control_3dof_DW.UnitDelay_DSTATE[2];
   for (control_3dof_B.i = 0; control_3dof_B.i < 6; control_3dof_B.i++) {
     control_3dof_B.A_wrench_tmp_c = control_3dof_B.A_wrench_tmp[control_3dof_B.i];
     control_3dof_B.F_trim_g1 = control_3dof_B.A_wrench_tmp_c *
-      control_3dof_B.e_2_c;
+      control_3dof_B.F_var_c;
     control_3dof_B.F_trim_g = control_3dof_B.A_wrench_tmp_c *
       control_3dof_B.UnitDelay_DSTATE;
     control_3dof_B.A_wrench_tmp_c = control_3dof_B.A_wrench_tmp[control_3dof_B.i
       + 6];
     control_3dof_B.F_trim_g1 += control_3dof_B.A_wrench_tmp_c *
-      control_3dof_B.e_2_b;
+      control_3dof_B.F_var_b;
     control_3dof_B.F_trim_g += control_3dof_B.A_wrench_tmp_c *
       control_3dof_B.UnitDelay_DSTATE_c;
     control_3dof_B.A_wrench_tmp_c = control_3dof_B.A_wrench_tmp[control_3dof_B.i
       + 12];
     control_3dof_B.F_trim_g1 += control_3dof_B.A_wrench_tmp_c *
-      control_3dof_B.e_2_p;
+      control_3dof_B.F_var_p;
     control_3dof_B.F_trim_g = control_3dof_B.b_wrench[control_3dof_B.i] -
       (control_3dof_B.A_wrench_tmp_c * control_3dof_B.UnitDelay_DSTATE_f +
        control_3dof_B.F_trim_g);
@@ -2009,19 +2032,19 @@ void control_3dof_step(void)
 
   /* 'PWAS:23' F_actual = F_fixed + alpha * F_var; */
   control_3dof_DW.UnitDelay_DSTATE[0] += control_3dof_B.alpha *
-    control_3dof_B.e_2[0];
+    control_3dof_B.F_var[0];
   control_3dof_DW.UnitDelay_DSTATE[1] += control_3dof_B.alpha *
-    control_3dof_B.e_2[1];
+    control_3dof_B.F_var[1];
   control_3dof_DW.UnitDelay_DSTATE[2] += control_3dof_B.alpha *
-    control_3dof_B.e_2[2];
+    control_3dof_B.F_var[2];
 
   /* 'PWAS:24' result = pinv(Q) * F_actual; */
   control_3dof_pinv(control_3dof_B.Q_new, control_3dof_B.dv);
 
   /* '<S17>:1:27' aL_sp = [0;0;-9.8] + (F_actual - F_trim) / mL; */
   for (control_3dof_B.i = 0; control_3dof_B.i < 3; control_3dof_B.i++) {
-    control_3dof_B.e_2[control_3dof_B.i] = (control_3dof_B.dv[control_3dof_B.i +
-      3] * control_3dof_DW.UnitDelay_DSTATE[1] +
+    control_3dof_B.F_var[control_3dof_B.i] = (control_3dof_B.dv[control_3dof_B.i
+      + 3] * control_3dof_DW.UnitDelay_DSTATE[1] +
       control_3dof_B.dv[control_3dof_B.i] * control_3dof_DW.UnitDelay_DSTATE[0])
       + control_3dof_B.dv[control_3dof_B.i + 6] *
       control_3dof_DW.UnitDelay_DSTATE[2];
@@ -2101,14 +2124,14 @@ void control_3dof_step(void)
   /* '<S17>:1:41' control_in1.vi = Payload_Out.v_1; */
   /* '<S17>:1:43' control_in2.timestamp = uint64(1); */
   /* '<S17>:1:44' control_in2.vforce = vu(2) * q_2; */
-  control_3dof_B.xv[0] = control_3dof_B.e_2[0] * control_3dof_B.e_1[0];
+  control_3dof_B.xv[0] = control_3dof_B.F_var[0] * control_3dof_B.e_2[0];
   control_3dof_B.rtb_control_in2_vforce[0] = control_3dof_B.q_2[0] *
-    control_3dof_B.e_2[1];
-  control_3dof_B.xv[1] = control_3dof_B.e_2[0] * control_3dof_B.e_1[1];
-  control_3dof_B.rtb_control_in2_vforce[1] = control_3dof_B.e_2[1] *
+    control_3dof_B.F_var[1];
+  control_3dof_B.xv[1] = control_3dof_B.F_var[0] * control_3dof_B.e_2[1];
+  control_3dof_B.rtb_control_in2_vforce[1] = control_3dof_B.F_var[1] *
     control_3dof_B.q_2[1];
-  control_3dof_B.xv[2] = control_3dof_B.e_2[0] * control_3dof_B.e_1[2];
-  control_3dof_B.rtb_control_in2_vforce[2] = control_3dof_B.e_2[1] *
+  control_3dof_B.xv[2] = control_3dof_B.F_var[0] * control_3dof_B.e_2[2];
+  control_3dof_B.rtb_control_in2_vforce[2] = control_3dof_B.F_var[1] *
     control_3dof_B.q_2[2];
 
   /* '<S17>:1:45' control_in2.q_sp = Q_sp(:, 2); */
@@ -2119,10 +2142,10 @@ void control_3dof_step(void)
   /* '<S17>:1:50' control_in2.vi = Payload_Out.v_2; */
   /* '<S17>:1:52' control_in3.timestamp = uint64(1); */
   /* '<S17>:1:53' control_in3.vforce = vu(3) * q_3; */
-  control_3dof_B.e_2_c = control_3dof_B.e_2[2];
-  control_3dof_B.e_2[0] = control_3dof_B.e_2_c * control_3dof_B.q_3[0];
-  control_3dof_B.e_2[1] = control_3dof_B.e_2_c * control_3dof_B.q_3[1];
-  control_3dof_B.e_2[2] = control_3dof_B.e_2_c * control_3dof_B.e_1_k;
+  control_3dof_B.F_var_c = control_3dof_B.F_var[2];
+  control_3dof_B.F_var[0] = control_3dof_B.F_var_c * control_3dof_B.q_3[0];
+  control_3dof_B.F_var[1] = control_3dof_B.F_var_c * control_3dof_B.q_3[1];
+  control_3dof_B.F_var[2] = control_3dof_B.F_var_c * control_3dof_B.e_2_k;
 
   /* MATLAB Function: '<S6>/Vertical Control' incorporates:
    *  MATLAB Function: '<S4>/Force Saturation && Disturbution'
@@ -2135,7 +2158,7 @@ void control_3dof_step(void)
   /* '<S17>:1:58' control_in3.pi = Payload_Out.p_3; */
   /* '<S17>:1:59' control_in3.vi = Payload_Out.v_3; */
   control_3dof_VerticalControl(&control_3dof_DW.Delay_DSTATE[0],
-    control_3dof_B.e_1, control_3dof_B.rtb_control_in1_w, control_3dof_B.F_trim,
+    control_3dof_B.e_2, control_3dof_B.rtb_control_in1_w, control_3dof_B.F_trim,
     control_3dof_B.f_vertical, control_3dof_B.dot_err_g, control_3dof_B.state_f,
     CONTROL_PARAM.KQ, CONTROL_PARAM.KW, CONTROL_PARAM.CABLE_LEN,
     CONTROL_PARAM.MASS_UAV, &control_3dof_B.sf_VerticalControl);
@@ -2172,9 +2195,9 @@ void control_3dof_step(void)
    *  MATLAB Function: '<S4>/Force Saturation && Disturbution'
    */
   control_3dof_ParallelControl(control_3dof_B.q_3,
-    control_3dof_B.rtb_control_in3_w, control_3dof_B.e_2, control_3dof_B.F_trim,
-    control_3dof_Y.force_sp2, CONTROL_PARAM.CABLE_LEN, CONTROL_PARAM.MASS_UAV,
-    &control_3dof_B.sf_ParallelControl_p);
+    control_3dof_B.rtb_control_in3_w, control_3dof_B.F_var,
+    control_3dof_B.F_trim, control_3dof_Y.force_sp2, CONTROL_PARAM.CABLE_LEN,
+    CONTROL_PARAM.MASS_UAV, &control_3dof_B.sf_ParallelControl_p);
 
   /* Gain: '<S3>/Gain1' incorporates:
    *  Gain: '<S1>/Gain1'
@@ -2191,19 +2214,19 @@ void control_3dof_step(void)
    *  Sum: '<S14>/Sum'
    *  Sum: '<S1>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem_a.MATLABSystem_o3[0] + control_3dof_Y.force_sp2
     [0]) + (control_3dof_Y.force_sp1[0] +
-            control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0]);
-  control_3dof_Y.force_sp3[0] = control_3dof_B.e_1_k;
+            control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[0]);
+  control_3dof_Y.force_sp3[0] = control_3dof_B.e_2_k;
 
   /* Gain: '<S3>/Gain1' incorporates:
    *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
    *  Sum: '<S3>/Sum'
    *  UnitDelay: '<S3>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_l[0] = (control_3dof_B.e_1_k -
-    control_3dof_B.e_2[0]) * control_3dof_B.F_trim_g;
+  control_3dof_DW.UnitDelay_DSTATE_l[0] = (control_3dof_B.e_2_k -
+    control_3dof_B.F_var[0]) * control_3dof_B.F_trim_g;
 
   /* Sum: '<S3>/Sum1' incorporates:
    *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
@@ -2214,19 +2237,19 @@ void control_3dof_step(void)
    *  Sum: '<S14>/Sum'
    *  Sum: '<S1>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem_a.MATLABSystem_o3[1] + control_3dof_Y.force_sp2
     [1]) + (control_3dof_Y.force_sp1[1] +
-            control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1]);
-  control_3dof_Y.force_sp3[1] = control_3dof_B.e_1_k;
+            control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[1]);
+  control_3dof_Y.force_sp3[1] = control_3dof_B.e_2_k;
 
   /* Gain: '<S3>/Gain1' incorporates:
    *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
    *  Sum: '<S3>/Sum'
    *  UnitDelay: '<S3>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_l[1] = (control_3dof_B.e_1_k -
-    control_3dof_B.e_2[1]) * control_3dof_B.F_trim_g;
+  control_3dof_DW.UnitDelay_DSTATE_l[1] = (control_3dof_B.e_2_k -
+    control_3dof_B.F_var[1]) * control_3dof_B.F_trim_g;
 
   /* Sum: '<S3>/Sum1' incorporates:
    *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
@@ -2237,19 +2260,19 @@ void control_3dof_step(void)
    *  Sum: '<S14>/Sum'
    *  Sum: '<S1>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem_a.MATLABSystem_o3[2] + control_3dof_Y.force_sp2
     [2]) + (control_3dof_Y.force_sp1[2] +
-            control_3dof_DW.DiscreteTimeIntegrator_DSTATE[2]);
-  control_3dof_Y.force_sp3[2] = control_3dof_B.e_1_k;
+            control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[2]);
+  control_3dof_Y.force_sp3[2] = control_3dof_B.e_2_k;
 
   /* Gain: '<S3>/Gain1' incorporates:
    *  DiscreteIntegrator: '<S10>/Discrete-Time Integrator'
    *  Sum: '<S3>/Sum'
    *  UnitDelay: '<S3>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_l[2] = (control_3dof_B.e_1_k -
-    control_3dof_B.e_2[2]) * control_3dof_B.F_trim_g;
+  control_3dof_DW.UnitDelay_DSTATE_l[2] = (control_3dof_B.e_2_k -
+    control_3dof_B.F_var[2]) * control_3dof_B.F_trim_g;
 
   /* UnitDelay: '<S2>/Unit Delay' incorporates:
    *  BusCreator generated from: '<S4>/Force Saturation && Disturbution'
@@ -2275,18 +2298,18 @@ void control_3dof_step(void)
    *  Sum: '<S10>/Sum'
    *  Sum: '<S1>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem_g.MATLABSystem_o3[0] + control_3dof_Y.force_sp1
     [0]) + (control_3dof_B.f_parallel[0] +
             control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[0]);
-  control_3dof_Y.force_sp2[0] = control_3dof_B.e_1_k;
+  control_3dof_Y.force_sp2[0] = control_3dof_B.e_2_k;
 
   /* Gain: '<S2>/Gain1' incorporates:
    *  DiscreteIntegrator: '<S6>/Discrete-Time Integrator'
    *  Sum: '<S2>/Sum'
    *  UnitDelay: '<S2>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_a[0] = (control_3dof_B.e_1_k -
+  control_3dof_DW.UnitDelay_DSTATE_a[0] = (control_3dof_B.e_2_k -
     control_3dof_B.rtb_control_in2_vforce[0]) * control_3dof_B.F_trim_g;
 
   /* Sum: '<S2>/Sum1' incorporates:
@@ -2297,18 +2320,18 @@ void control_3dof_step(void)
    *  Sum: '<S10>/Sum'
    *  Sum: '<S1>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem_g.MATLABSystem_o3[1] + control_3dof_Y.force_sp1
     [1]) + (control_3dof_B.f_parallel[1] +
             control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[1]);
-  control_3dof_Y.force_sp2[1] = control_3dof_B.e_1_k;
+  control_3dof_Y.force_sp2[1] = control_3dof_B.e_2_k;
 
   /* Gain: '<S2>/Gain1' incorporates:
    *  DiscreteIntegrator: '<S6>/Discrete-Time Integrator'
    *  Sum: '<S2>/Sum'
    *  UnitDelay: '<S2>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_a[1] = (control_3dof_B.e_1_k -
+  control_3dof_DW.UnitDelay_DSTATE_a[1] = (control_3dof_B.e_2_k -
     control_3dof_B.rtb_control_in2_vforce[1]) * control_3dof_B.F_trim_g;
 
   /* Sum: '<S2>/Sum1' incorporates:
@@ -2319,18 +2342,18 @@ void control_3dof_step(void)
    *  Sum: '<S10>/Sum'
    *  Sum: '<S1>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem_g.MATLABSystem_o3[2] + control_3dof_Y.force_sp1
     [2]) + (control_3dof_B.f_parallel[2] +
             control_3dof_DW.DiscreteTimeIntegrator_DSTATE_l[2]);
-  control_3dof_Y.force_sp2[2] = control_3dof_B.e_1_k;
+  control_3dof_Y.force_sp2[2] = control_3dof_B.e_2_k;
 
   /* Gain: '<S2>/Gain1' incorporates:
    *  DiscreteIntegrator: '<S6>/Discrete-Time Integrator'
    *  Sum: '<S2>/Sum'
    *  UnitDelay: '<S2>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_a[2] = (control_3dof_B.e_1_k -
+  control_3dof_DW.UnitDelay_DSTATE_a[2] = (control_3dof_B.e_2_k -
     control_3dof_B.rtb_control_in2_vforce[2]) * control_3dof_B.F_trim_g;
 
   /* UnitDelay: '<S1>/Unit Delay' incorporates:
@@ -2344,13 +2367,13 @@ void control_3dof_step(void)
   /* MATLAB Function: '<S5>/Parallel Control' incorporates:
    *  MATLAB Function: '<S4>/Force Saturation && Disturbution'
    */
-  control_3dof_ParallelControl(control_3dof_B.e_1,
+  control_3dof_ParallelControl(control_3dof_B.e_2,
     control_3dof_B.rtb_control_in1_w, control_3dof_B.xv, control_3dof_B.F_trim,
     control_3dof_B.f_parallel, CONTROL_PARAM.CABLE_LEN, CONTROL_PARAM.MASS_UAV,
     &control_3dof_B.sf_ParallelControl);
 
   /* BusCreator generated from: '<Root>/state' incorporates:
-   *  DiscreteIntegrator: '<S21>/Accumulator'
+   *  DiscreteIntegrator: '<S22>/Accumulator'
    *  Outport: '<Root>/state'
    */
   control_3dof_Y.state.timestamp = control_3dof_DW.Accumulator_DSTATE;
@@ -2362,17 +2385,17 @@ void control_3dof_step(void)
    *  Sum: '<S1>/Sum'
    *  Sum: '<S6>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem.MATLABSystem_o3[0] + control_3dof_B.f_parallel[0])
     + (control_3dof_B.f_vertical[0] +
-       control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[0]);
-  control_3dof_Y.force_sp1[0] = control_3dof_B.e_1_k;
+       control_3dof_DW.DiscreteTimeIntegrator_DSTAT_pb[0]);
+  control_3dof_Y.force_sp1[0] = control_3dof_B.e_2_k;
 
   /* Gain: '<S1>/Gain1' incorporates:
    *  Sum: '<S1>/Sum'
    *  UnitDelay: '<S1>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_f[0] = (control_3dof_B.e_1_k -
+  control_3dof_DW.UnitDelay_DSTATE_f[0] = (control_3dof_B.e_2_k -
     control_3dof_B.xv[0]) * control_3dof_B.F_trim_g;
 
   /* BusCreator generated from: '<Root>/state' incorporates:
@@ -2388,17 +2411,17 @@ void control_3dof_step(void)
    *  Sum: '<S1>/Sum'
    *  Sum: '<S6>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem.MATLABSystem_o3[1] + control_3dof_B.f_parallel[1])
     + (control_3dof_B.f_vertical[1] +
-       control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[1]);
-  control_3dof_Y.force_sp1[1] = control_3dof_B.e_1_k;
+       control_3dof_DW.DiscreteTimeIntegrator_DSTAT_pb[1]);
+  control_3dof_Y.force_sp1[1] = control_3dof_B.e_2_k;
 
   /* Gain: '<S1>/Gain1' incorporates:
    *  Sum: '<S1>/Sum'
    *  UnitDelay: '<S1>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_f[1] = (control_3dof_B.e_1_k -
+  control_3dof_DW.UnitDelay_DSTATE_f[1] = (control_3dof_B.e_2_k -
     control_3dof_B.xv[1]) * control_3dof_B.F_trim_g;
 
   /* BusCreator generated from: '<Root>/state' incorporates:
@@ -2414,17 +2437,17 @@ void control_3dof_step(void)
    *  Sum: '<S1>/Sum'
    *  Sum: '<S6>/Sum'
    */
-  control_3dof_B.e_1_k = (-CONTROL_PARAM.MASS_UAV *
+  control_3dof_B.e_2_k = (-CONTROL_PARAM.MASS_UAV *
     control_3dof_B.MATLABSystem.MATLABSystem_o3[2] + control_3dof_B.f_parallel[2])
     + (control_3dof_B.f_vertical[2] +
-       control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[2]);
-  control_3dof_Y.force_sp1[2] = control_3dof_B.e_1_k;
+       control_3dof_DW.DiscreteTimeIntegrator_DSTAT_pb[2]);
+  control_3dof_Y.force_sp1[2] = control_3dof_B.e_2_k;
 
   /* Gain: '<S1>/Gain1' incorporates:
    *  Sum: '<S1>/Sum'
    *  UnitDelay: '<S1>/Unit Delay'
    */
-  control_3dof_DW.UnitDelay_DSTATE_f[2] = (control_3dof_B.e_1_k -
+  control_3dof_DW.UnitDelay_DSTATE_f[2] = (control_3dof_B.e_2_k -
     control_3dof_B.xv[2]) * control_3dof_B.F_trim_g;
 
   /* BusCreator generated from: '<Root>/state' incorporates:
@@ -2433,10 +2456,10 @@ void control_3dof_step(void)
    * */
   control_3dof_Y.state.dL[2] = control_3dof_DW.obj.Z_3[2];
 
-  /* Update for UnitDelay: '<S22>/Delay Input1' incorporates:
+  /* Update for UnitDelay: '<S23>/Delay Input1' incorporates:
    *  Inport: '<Root>/Dir_sp'
    *
-   * Block description for '<S22>/Delay Input1':
+   * Block description for '<S23>/Delay Input1':
    *
    *  Store in Global RAM
    */
@@ -2445,10 +2468,16 @@ void control_3dof_step(void)
   /* Update for Delay: '<S20>/Delay' */
   control_3dof_DW.icLoad = false;
 
+  /* Update for DiscreteIntegrator: '<S21>/Discrete-Time Integrator' incorporates:
+   *  Gain: '<S21>/KPI'
+   */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0] += CONTROL_PARAM.KPI *
+    control_3dof_B.e_1_idx_0 * 0.05;
+
   /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' incorporates:
    *  Gain: '<S14>/Gain'
    */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[0] += CONTROL_PARAM.KQI *
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[0] += CONTROL_PARAM.KQI *
     control_3dof_B.dot_err[0] * 0.05;
 
   /* Update for DiscreteIntegrator: '<S10>/Discrete-Time Integrator' incorporates:
@@ -2460,13 +2489,19 @@ void control_3dof_step(void)
   /* Update for DiscreteIntegrator: '<S6>/Discrete-Time Integrator' incorporates:
    *  Gain: '<S6>/Gain'
    */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[0] += CONTROL_PARAM.KQI *
+  control_3dof_DW.DiscreteTimeIntegrator_DSTAT_pb[0] += CONTROL_PARAM.KQI *
     control_3dof_B.dot_err_g[0] * 0.05;
+
+  /* Update for DiscreteIntegrator: '<S21>/Discrete-Time Integrator' incorporates:
+   *  Gain: '<S21>/KPI'
+   */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1] += CONTROL_PARAM.KPI *
+    control_3dof_B.e_1_idx_1 * 0.05;
 
   /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' incorporates:
    *  Gain: '<S14>/Gain'
    */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[1] += CONTROL_PARAM.KQI *
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[1] += CONTROL_PARAM.KQI *
     control_3dof_B.dot_err[1] * 0.05;
 
   /* Update for DiscreteIntegrator: '<S10>/Discrete-Time Integrator' incorporates:
@@ -2478,13 +2513,20 @@ void control_3dof_step(void)
   /* Update for DiscreteIntegrator: '<S6>/Discrete-Time Integrator' incorporates:
    *  Gain: '<S6>/Gain'
    */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[1] += CONTROL_PARAM.KQI *
+  control_3dof_DW.DiscreteTimeIntegrator_DSTAT_pb[1] += CONTROL_PARAM.KQI *
     control_3dof_B.dot_err_g[1] * 0.05;
+
+  /* Update for DiscreteIntegrator: '<S21>/Discrete-Time Integrator' incorporates:
+   *  Gain: '<S21>/KPI'
+   *  Sum: '<S18>/Sum'
+   */
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[2] += CONTROL_PARAM.KPI *
+    control_3dof_B.e_1 * 0.05;
 
   /* Update for DiscreteIntegrator: '<S14>/Discrete-Time Integrator' incorporates:
    *  Gain: '<S14>/Gain'
    */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE[2] += CONTROL_PARAM.KQI *
+  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[2] += CONTROL_PARAM.KQI *
     control_3dof_B.dot_err[2] * 0.05;
 
   /* Update for DiscreteIntegrator: '<S10>/Discrete-Time Integrator' incorporates:
@@ -2496,14 +2538,14 @@ void control_3dof_step(void)
   /* Update for DiscreteIntegrator: '<S6>/Discrete-Time Integrator' incorporates:
    *  Gain: '<S6>/Gain'
    */
-  control_3dof_DW.DiscreteTimeIntegrator_DSTATE_p[2] += CONTROL_PARAM.KQI *
+  control_3dof_DW.DiscreteTimeIntegrator_DSTAT_pb[2] += CONTROL_PARAM.KQI *
     control_3dof_B.dot_err_g[2] * 0.05;
 
-  /* Switch: '<S21>/Switch' incorporates:
-   *  Constant: '<S21>/Period [ms]'
-   *  SampleTimeMath: '<S21>/Ts [ms]'
+  /* Switch: '<S22>/Switch' incorporates:
+   *  Constant: '<S22>/Period [ms]'
+   *  SampleTimeMath: '<S22>/Ts [ms]'
    *
-   * About '<S21>/Ts [ms]':
+   * About '<S22>/Ts [ms]':
    *  y = K where K = ( w * Ts )
    *   */
   if (CONTROL_EXPORT.period > 0) {
@@ -2512,11 +2554,11 @@ void control_3dof_step(void)
     control_3dof_B.i = 50;
   }
 
-  /* Update for DiscreteIntegrator: '<S21>/Accumulator' incorporates:
-   *  DataTypeConversion: '<S21>/Data Type Conversion'
-   *  Switch: '<S21>/Switch'
+  /* Update for DiscreteIntegrator: '<S22>/Accumulator' incorporates:
+   *  DataTypeConversion: '<S22>/Data Type Conversion'
+   *  Switch: '<S22>/Switch'
    */
-  control_3dof_DW.Accumulator_DSTATE += (uint64_t)control_3dof_B.i;
+  control_3dof_DW.Accumulator_DSTATE += (uint64_T)control_3dof_B.i;
 }
 
 /* Model initialize function */

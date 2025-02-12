@@ -176,13 +176,23 @@ private:
 
             RCLCPP_INFO(this->get_logger(), "Request ForceOpt: [%f %f %f]", trim_acc_filter.getState()[0], trim_acc_filter.getState()[1], trim_acc_filter.getState()[2]);
         };
-        bool need_accs_update = output.state.margin < _opt_margin * 0.2; // 20% threshold
+
+#if 0
+        static int sp_count = 0;
+        if (traj_out.position.x() == 2) {
+            sp_count++;
+            if (sp_count == 2) {
+                accs_update();
+            }
+        }
+#else
+        bool need_accs_update = this->get_parameter("accs_enable").as_bool() && output.state.margin < _opt_margin * 0.2; // 20% threshold
         DELAYED_RUN_IF(_running_time, 
                         5_s, 
                         accs_update(),
                         need_accs_update
         );
-
+#endif
         RCLCPP_DEBUG(this->get_logger(), "\nPOS1: %f %f %f VEL1: %f %f %f\nPOS2: %f %f %f VEL2: %f %f %f\nPOS3: %f %f %f VEL3: %f %f %f\n", 
                     _control_input.Payload_Out.p_1[0], _control_input.Payload_Out.p_1[1], _control_input.Payload_Out.p_1[2], 
                     _control_input.Payload_Out.v_1[0], _control_input.Payload_Out.v_1[1], _control_input.Payload_Out.v_1[2],
@@ -326,10 +336,14 @@ private:
     {
         // controller parameters
         this->declare_parameter("eso_enable", true);
+        this->declare_parameter("pwas_enable", true);
+        this->declare_parameter("accs_enable", true);
         this->declare_parameter("eso_pl", std::vector<double>{3.0, 5.0, 10.0});
         this->declare_parameter("eso_vl", std::vector<double>{0.0, 20.0, 30.0});
         this->declare_parameter("min_tension", 0.0); // N
         this->declare_parameter("max_tension", 7.0); // N
+        this->declare_parameter("kp", 0.5);
+        this->declare_parameter("kv", 1.0);
         this->declare_parameter("kq", 1.0);
         this->declare_parameter("kw", 1.0);
 
@@ -342,13 +356,14 @@ private:
     void parameter_update()
     {
         // Mutable control parameters
-        CONTROL_PARAM.KP = 0.5;
-        CONTROL_PARAM.KV = 1.0;
+        CONTROL_PARAM.KP = this->get_parameter("kp").as_double();
+        CONTROL_PARAM.KV = this->get_parameter("kv").as_double();
         CONTROL_PARAM.KQ = this->get_parameter("kq").as_double();
         CONTROL_PARAM.KW = this->get_parameter("kw").as_double();
-        CONTROL_PARAM.KQI = 0.0;
-        CONTROL_PARAM.TENSION_MIN = this->get_parameter("min_tension").as_double();
-        CONTROL_PARAM.TENSION_MAX = this->get_parameter("max_tension").as_double();
+
+        const bool pwas_enable = this->get_parameter("pwas_enable").as_bool();
+        CONTROL_PARAM.TENSION_MIN = pwas_enable ? this->get_parameter("min_tension").as_double() : -1000;
+        CONTROL_PARAM.TENSION_MAX = pwas_enable ? this->get_parameter("max_tension").as_double() : 1000;
 
         const bool eso_enable = this->get_parameter("eso_enable").as_bool();
         const std::vector<double> eso_pl = this->get_parameter("eso_pl").as_double_array();
@@ -359,6 +374,8 @@ private:
             CONTROL_PARAM.ESO_PI[i] = eso_enable ? eso_pl[i] : 0;
             CONTROL_PARAM.ESO_VI[i] = eso_enable ? eso_vl[i] : 0;
         }
+        CONTROL_PARAM.KPI = eso_enable ? 0 : 0.2;
+        CONTROL_PARAM.KQI = eso_enable ? 0 : 0.2;
     }
 
     void async_request_force_opt(const Eigen::Vector3d &center)
@@ -440,6 +457,9 @@ private:
         
         frame.dL = array_to_vector3(_controller.getOutput().state.dL);
         frame.margin = _controller.getOutput().state.margin;
+
+        frame.load_position_sp = array_to_vector3(_control_input.Traj_sp.pos_sp);
+        frame.load_velocity_sp = array_to_vector3(_control_input.Traj_sp.vel_sp);
         
         _recorder.push(frame);
     }

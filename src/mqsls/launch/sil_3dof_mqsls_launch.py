@@ -9,15 +9,20 @@ from launch.event_handlers import OnProcessExit
 def generate_launch_description():
 
     world_name = 'x500_3dof_mqsls'
-    args = [DeclareLaunchArgument('world_name', default_value=world_name, description='World name'),]
+    args = [DeclareLaunchArgument('world_name', default_value=world_name, description='World name'),
+            DeclareLaunchArgument('gzsim_options', default_value='', description='Additional options to pass to gz sim'),
+            DeclareLaunchArgument('eso_enable', default_value='True', description='Enable ESO'),
+            DeclareLaunchArgument('pwas_enable', default_value='True', description='Enable PWAS'),
+            DeclareLaunchArgument('accs_enable', default_value='True', description='Enable ACCS'),
+            DeclareLaunchArgument('traj_type', default_value='circle', description='Trajectory type'),]
 
     model_dir = os.path.join(get_package_share_directory('mqsls'), 'gz', 'models')
     world_dir = os.path.join(get_package_share_directory('mqsls'), 'gz', 'worlds')
-    
+
     full_world_path = PythonExpression(["'", LaunchConfiguration('world_name'), ".sdf'"])
     gz_sim = ExecuteProcess(
         cmd=[
-            'gz sim', full_world_path, '--verbose 1',
+            'gz sim --verbose=1 -r', LaunchConfiguration('gzsim_options'), full_world_path,
         ],
         shell=True,
         additional_env={'GZ_SIM_RESOURCE_PATH': model_dir + ':' + world_dir},
@@ -57,13 +62,17 @@ def generate_launch_description():
             'load_mass': 1.0,
             'uav_mass': 2.064307692307692,
             'hover_thrust': 0.74,
-            'eso_enable': True,
+            'kp': 1.5,
+            'kv': 2.0,
             'kq': 0.5,
             'kw': 3.0,
-            'min_tension': 0.0,
+            'eso_enable':  LaunchConfiguration('eso_enable'),
+            'pwas_enable': LaunchConfiguration('pwas_enable'),
+            'accs_enable': LaunchConfiguration('accs_enable'),
+            'min_tension': 2.0,
             'max_tension': 7.0,
-            'traj_type': 'lissajous', # 'line', 'circle', 'rectangle', 'lissajous'
-            'lasting_time': 60,
+            'traj_type': LaunchConfiguration('traj_type'), # 'line', 'circle', 'rectangle', 'lissajous'
+            'lasting_time': 70,
         }],
     )
 

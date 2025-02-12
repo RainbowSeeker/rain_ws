@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'control_3dof'.
  *
- * Model version                  : 1.755
+ * Model version                  : 1.756
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Tue Jan 14 10:43:17 2025
+ * C/C++ source code generated on : Wed Feb 12 10:21:57 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Custom Processor->Custom Processor

@@ -29,6 +29,9 @@ struct MqslsDataFrame {
     Eigen::Vector3d dL;
     double margin;
 
+    Eigen::Vector3d load_position_sp;
+    Eigen::Vector3d load_velocity_sp;
+
     // operator<<
     friend std::ostream &operator<<(std::ostream &os, const MqslsDataFrame &frame) {
         os << frame.timestamp << ' '
@@ -39,7 +42,9 @@ struct MqslsDataFrame {
                << frame.uav_velocity[i].x() << ' ' << frame.uav_velocity[i].y() << ' ' << frame.uav_velocity[i].z() << ' ';
         }
         os << frame.dL.x() << ' ' << frame.dL.y() << ' ' << frame.dL.z() << ' ';
-        os << frame.margin;
+        os << frame.margin << ' ';
+        os << frame.load_position_sp.x() << ' ' << frame.load_position_sp.y() << ' ' << frame.load_position_sp.z() << ' '
+           << frame.load_velocity_sp.x() << ' ' << frame.load_velocity_sp.y() << ' ' << frame.load_velocity_sp.z() << ' ';
         os << '\n';
         return os;
     }
@@ -54,7 +59,9 @@ struct MqslsDataFrame {
                 << "vx" << i << " vy" << i << " vz" << i << ' ';
         }
         ss  << "dLx dLy dLz" << ' '
-            << "margin";
+            << "margin" << ' ';
+        ss  << "x_sp y_sp z_sp" << ' '
+            << "vx_sp vy_sp vz_sp" << ' ';
 
         return ss.str();
     }
