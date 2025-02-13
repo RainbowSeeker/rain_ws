@@ -79,16 +79,12 @@ private:
         {
         case STATE_PREPARE:
             if (state_prepare(output)) {
-                // _state = STATE_RUNNING;
+                _state = STATE_RUNNING;
             }
-            // TODO: only for test
-#if 1
-            // _state = STATE_RUNNING;
-#endif
             break;
         case STATE_RUNNING:
             if (state_running(output)) {
-                _state = STATE_STOPPING;
+                // _state = STATE_STOPPING;
             }
             break;
         case STATE_STOPPING:
@@ -181,7 +177,18 @@ private:
             }
         }
 
-        return all_in_position;
+        bool ready_for_10s = false;
+        static uint64_t start_time = _running_time;
+        if (!all_in_position) {
+            start_time = _running_time;
+        }
+        else if (_running_time - start_time > 10_s) {
+            ready_for_10s = true;
+        }
+
+        RCLCPP_INFO(this->get_logger(), "All Ready left time: %f", (double)(10_s - (_running_time - start_time)) / 1_s);
+
+        return ready_for_10s;
     }
 
     bool state_running(CodeGenController::OutputBus &output)
