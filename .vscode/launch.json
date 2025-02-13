@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/install/mqsls/lib/mqsls/sim_mqsls_control_node",
+            "program": "${workspaceFolder}/install/mqsls/lib/mqsls/3dof_mqsls_controller_node",
             "args": ["1"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

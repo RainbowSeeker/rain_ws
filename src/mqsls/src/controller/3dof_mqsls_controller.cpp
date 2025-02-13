@@ -79,8 +79,12 @@ private:
         {
         case STATE_PREPARE:
             if (state_prepare(output)) {
-                _state = STATE_RUNNING;
+                // _state = STATE_RUNNING;
             }
+            // TODO: only for test
+#if 1
+            // _state = STATE_RUNNING;
+#endif
             break;
         case STATE_RUNNING:
             if (state_running(output)) {
@@ -110,18 +114,43 @@ private:
         // prepare phase: set uav pose to expected cope end
         auto pos_pid_controller = [&, this](int index, Eigen::Vector3d &position_err, Eigen::Vector3d &acceleration_sp) -> void
         {
-            const double KP = 1;
-            const double KD = 1.2;
+            #define SINGLE_TEST 0
+
+            const double KP = 2.0;
+            const double KD = 3.0;
+
+#if SINGLE_TEST
+            TrajectoryGenerator::traj_out traj_out;
+            static std::shared_ptr<TrajectoryGenerator> traj_gen {std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -0.5), 1, deg2rad(4))};
+            traj_gen->update(CONTROL_PERIOD, traj_out);
+
+            static uint64_t start_time = _running_time;
+            if (_running_time - start_time < 1000_s) {
+                traj_out.position = Eigen::Vector3d(0, 0, -0.5);
+            }
+
+            const Eigen::Vector3d position_sp = traj_out.position;
+            const Eigen::Vector3d position_now = array_to_vector3(_follower_msg[index].position_uav);
+#else
             // NED frame, payload position is the origin
             const Eigen::Vector3d q_sp = _cable_dir_sp[index];
-            const double safety_len = _cable_len * 0.9; // 90% of cable length
+            const double safety_len = _cable_len * 0.85; // 85% of cable length
             const Eigen::Vector3d position_sp = -q_sp * safety_len;
             const Eigen::Vector3d position_now = array_to_vector3(_follower_msg[index].position_uav) - array_to_vector3(_follower_msg[index].position_load);
+#endif
+            #undef SINGLE_TEST
+            
             const Eigen::Vector3d velocity_now = array_to_vector3(_follower_msg[index].velocity_uav);
 
             position_err = position_sp - position_now;
             acceleration_sp = KP * position_err - KD * velocity_now;
 
+            if (index == 0) {
+            RCLCPP_INFO(this->get_logger(), "UAV%d pos: %f %f %f, vel: %f %f %f, pos_sp: %f %f %f, acc_sp: %f %f %f", 
+                        index, position_now[0], position_now[1], position_now[2], 
+                        velocity_now[0], velocity_now[1], velocity_now[2], 
+                        position_sp[0], position_sp[1], position_sp[2], 
+                        acceleration_sp[0], acceleration_sp[1], acceleration_sp[2]);}
             RCLCPP_DEBUG(this->get_logger(), "UAV%d perr: %f %f %f", index, position_err[0], position_err[1], position_err[2]);
         };
 
@@ -141,14 +170,18 @@ private:
         #undef FILL_OUTPUT_FORCE
     
         // check if all uav are in position
+        bool all_in_position = true;
         for (int i = 0; i < 3; i++) {
             if (position_err[i].norm() > 0.3) {
-                RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 1000, 
-                        "UAV%d not in position, dist: %f", i + 1, position_err[i].norm());
-                return false;
+                RCLCPP_INFO(this->get_logger(), "UAV%d not in position, dist: %f", i + 1, position_err[i].norm());
+                all_in_position = false;
+            }
+            else {
+                RCLCPP_INFO(this->get_logger(), "UAV%d READY, dist: %f", i + 1, position_err[i].norm());
             }
         }
-        return true;
+
+        return all_in_position;
     }
 
     bool state_running(CodeGenController::OutputBus &output)
@@ -156,6 +189,12 @@ private:
         // trajectory generator
         TrajectoryGenerator::traj_out traj_out;
         _traj_gen->update(CONTROL_PERIOD, traj_out);
+
+#if 1
+        traj_out.position = Eigen::Vector3d(0, 0, -0.2);
+        traj_out.velocity = Eigen::Vector3d::Zero();
+        traj_out.acceleration = Eigen::Vector3d::Zero();
+#endif
 
         // controller step
         output = controller_step(traj_out);

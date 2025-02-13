@@ -25,7 +25,7 @@ public:
         ROS_INFO("ROS1 Mocap Bridge starting");
 
         // Subscriber
-        const std::string rigid_body_prefix = "rb_";
+        const std::string rigid_body_prefix = "px4_";
         for (int i = 0; i < 4; i++)
         {
             _odom_sub[i] = _nh.subscribe<geometry_msgs::PoseStamped>(
@@ -68,28 +68,37 @@ private:
         data.timestamp = msg->header.stamp.toNSec() / 1000;
 
         // ENU -> NED
-        // TODO: Check the rotation
-        data.position[0] = msg->pose.position.y;
-        data.position[1] = msg->pose.position.x;
-        data.position[2] = -msg->pose.position.z;
-        Eigen::Quaterniond q_gr = Eigen::Quaterniond(
+        // Copy from mavros_extras plugin        
+        Eigen::Quaterniond q_enu = Eigen::Quaterniond(
                                     msg->pose.orientation.w, 
                                     msg->pose.orientation.x,
                                     msg->pose.orientation.y,
                                     msg->pose.orientation.z);
-        Eigen::Quaterniond q_nb;
-        rotateQuaternion(q_nb, q_gr);
 
-        data.q[0] = q_nb.w();
-        data.q[1] = q_nb.x();
-        data.q[2] = q_nb.y();
-        data.q[3] = q_nb.z();
+        Eigen::Quaterniond q;
+
+        rotateQuaternion(q, q_enu);
+
+        data.position[0] = msg->pose.position.y;
+        data.position[1] = msg->pose.position.x;
+        data.position[2] = -msg->pose.position.z;
+
+        data.q[0] = q.w();
+        data.q[1] = q.x();
+        data.q[2] = q.y();
+        data.q[3] = q.z();
 
         _socket.send_to(buffer(&data, sizeof(data)), _remote_endpoint);
 
         static int count = 0;
-        if (count ++ % 400 == 0)
-            ROS_INFO("Send mocap data: id=%d, x=%f, y=%f, z=%f", data.id, data.position[0], data.position[1], data.position[2]);
+        if (count ++ % 40 == 0)
+        {
+            #define rad2deg(x) ((x) * 180 / M_PI)
+
+            Eigen::Vector3d euler = q.toRotationMatrix().eulerAngles(2, 1, 0);
+            ROS_INFO("Send mocap data: id=%d, x=%f, y=%f, z=%f", 
+                        data.id, data.position[0], data.position[1], data.position[2]);
+        }
     }
 
     // ros1

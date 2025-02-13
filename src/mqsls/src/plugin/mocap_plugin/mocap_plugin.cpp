@@ -8,7 +8,7 @@
 
 using namespace boost::asio;
 
-#define SAMPLE_FREQ     100 // Hz
+#define SAMPLE_FREQ     120 // Hz
 
 struct MocapData
 {
@@ -97,13 +97,38 @@ private:
             // To PX4
             px4_msgs::msg::VehicleOdometry odom {};
             odom.timestamp = data->timestamp;
+            odom.timestamp_sample = data->timestamp;
             odom.position[0] = data->position[0];
             odom.position[1] = data->position[1];
             odom.position[2] = data->position[2];
-            odom.q[0] = data->q[0];
-            odom.q[1] = data->q[1];
-            odom.q[2] = data->q[2];
-            odom.q[3] = data->q[3];
+            // odom.q[0] = data->q[0];
+            // odom.q[1] = data->q[1];
+            // odom.q[2] = data->q[2];
+            // odom.q[3] = data->q[3];
+            odom.pose_frame = px4_msgs::msg::VehicleOdometry::POSE_FRAME_NED;
+
+            odom.q[0] = NAN;
+            odom.q[1] = NAN;
+            odom.q[2] = NAN;
+            odom.q[3] = NAN;
+            odom.velocity[0] = NAN;
+            odom.velocity[1] = NAN;
+            odom.velocity[2] = NAN;
+            odom.angular_velocity[0] = NAN;
+            odom.angular_velocity[1] = NAN;
+            odom.angular_velocity[2] = NAN;
+            odom.position_variance[0] = NAN;
+            odom.position_variance[1] = NAN;
+            odom.position_variance[2] = NAN;
+            odom.orientation_variance[0] = NAN;
+            odom.orientation_variance[1] = NAN;
+            odom.orientation_variance[2] = NAN;
+            odom.velocity_variance[0] = NAN;
+            odom.velocity_variance[1] = NAN;
+            odom.velocity_variance[2] = NAN;
+            odom.velocity_frame = px4_msgs::msg::VehicleOdometry::VELOCITY_FRAME_UNKNOWN;
+            odom.reset_counter = 0;
+            odom.quality = 0;
 
             _odom_pub[data->id - 1]->publish(odom);
         }
@@ -127,6 +152,11 @@ private:
                 send.velocity_uav[i] = _uav_velocity[data->id - 1][i];
             }
             _follower_pub[data->id - 1]->publish(send);
+
+            RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 100,
+                "UAV %d position: [%.2f, %.2f, %.2f], velocity: [%.2f, %.2f, %.2f]",
+                data->id, _uav_position[data->id - 1][0], _uav_position[data->id - 1][1], _uav_position[data->id - 1][2],
+                _uav_velocity[data->id - 1][0], _uav_velocity[data->id - 1][1], _uav_velocity[data->id - 1][2]);
         }
         else
         {
@@ -135,12 +165,12 @@ private:
                 _load_velocity[i] = (data->position[i] - _load_positon[i]) * SAMPLE_FREQ;
                 _load_positon[i] = data->position[i];
             }
+
+            RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 100, 
+                "Load position: [%.2f, %.2f, %.2f], velocity: [%.2f, %.2f, %.2f]",
+                _load_positon[0], _load_positon[1], _load_positon[2],
+                _load_velocity[0], _load_velocity[1], _load_velocity[2]);
         }
-
-
-        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 1000, 
-            "ID: %d, Pos: (%.2f, %.2f, %.2f)",
-            data->id, data->position[0], data->position[1], data->position[2]);    
     }
 
     // asio

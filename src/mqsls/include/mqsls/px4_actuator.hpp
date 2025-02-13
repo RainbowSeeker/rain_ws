@@ -13,6 +13,8 @@
 #include <px4_msgs/msg/vehicle_attitude_setpoint.hpp>
 #include <mqsls/msg/follower_recv.hpp>
 
+#include "formation/utils.hpp"
+
 namespace mqsls {
 
 #define absolute_time() _node->get_clock()->now().nanoseconds() / 1e3
@@ -20,7 +22,7 @@ namespace mqsls {
 class PX4OutputActuator
 {
 public:
-    PX4OutputActuator(rclcpp::Node *node, int node_index) : _node(node)
+    PX4OutputActuator(rclcpp::Node *node, int node_index) : _node(node), _node_index(node_index)
     {
         const std::string topic_ns = "/px4_" + std::to_string(node_index);
 
@@ -73,9 +75,15 @@ public:
         const double hover_thrust = _node->get_parameter("hover_thrust").as_double();
         const double uav_mass = _node->get_parameter("uav_mass").as_double();
 
+        if (!_is_init_yaw)
+        {
+            _init_yaw = utils::quaternion::quaternion_get_yaw(utils::quaternion::array_to_eigen_quat(_att.q));
+            _is_init_yaw = true;
+        }
+
         Eigen::Vector3d thrust_sp {msg.force[0], msg.force[1], msg.force[2]};
         Eigen::Quaterniond q_d;
-        bodyzToAttitude(-thrust_sp, q_d);
+        bodyzToAttitude(-thrust_sp, _init_yaw, q_d);
         
         Eigen::Quaterniond q_att = {_att.q[0], _att.q[1], _att.q[2], _att.q[3]};
         double thrust_project = thrust_sp.dot(q_att.toRotationMatrix() * Eigen::Vector3d(0, 0, -1));
@@ -84,14 +92,15 @@ public:
         publish_attitude_setpoint(q_d, -thrust_project * thrust_coff);
     }
 private:
-    static void bodyzToAttitude(Eigen::Vector3d body_z, Eigen::Quaterniond &q_d)
+    static void bodyzToAttitude(Eigen::Vector3d body_z, const double yaw_sp, Eigen::Quaterniond &q_d)
     {
         body_z.normalize();
 
-        const Eigen::Vector3d y{0, 1, 0};
+        // vector of desired yaw direction in XY plane, rotated by PI/2
+        const Eigen::Vector3d y_C{-sinf(yaw_sp), cosf(yaw_sp), 0.f};
 
         // desired body_x axis, orthogonal to body_z
-        Eigen::Vector3d body_x = y.cross(body_z);
+        Eigen::Vector3d body_x = y_C.cross(body_z);
 
         // keep nose to front while inverted upside down
         if (body_z(2) < 0.0f) {
@@ -186,6 +195,13 @@ private:
 
     bool preprocess()
     {
+        // check list 3: manual control
+        if (is_ignore_state(_vehicle_status.nav_state))
+        {
+            RCLCPP_INFO(_node->get_logger(), "UAV%d cannot control, nav_state: %s", _node_index, get_state(_vehicle_status.nav_state));
+            return false;
+        }
+
         // check list 4: switch to offboard mode
         bool is_offboard = _vehicle_status.arming_state == px4_msgs::msg::VehicleStatus::ARMING_STATE_ARMED &&
                             _vehicle_status.nav_state == px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_OFFBOARD;
@@ -195,17 +211,53 @@ private:
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1);
 
-            // takeoff
-            publish_attitude_setpoint(Eigen::Quaterniond::Identity(), -_node->get_parameter("hover_thrust").as_double());
-
-            RCLCPP_INFO_THROTTLE(_node->get_logger(), *_node->get_clock(), 1000, "Try to switch to offboard mode.");
-            return false;
+            RCLCPP_INFO(_node->get_logger(), "UAV%d Try to switch to offboard mode.", _node_index);
         }
 
         return true;
     }
 
+    static bool is_ignore_state(uint8_t state)
+    {
+        static const uint8_t ignore_state[] = {
+            px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_MANUAL,
+            px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_AUTO_LOITER,
+            px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_POSCTL,
+            px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_AUTO_LAND,
+            px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_AUTO_RTL,
+        };
+
+        for (size_t i = 0; i < sizeof(ignore_state); i++)
+        {
+            if (state == ignore_state[i])
+                return true;
+        }
+        return false;
+    }
+
+    static const char *get_state(uint8_t state)
+    {
+        static const std::map<uint8_t, std::string> state_str = {
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_MANUAL,         "MANUAL"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_ALTCTL,         "ALTCTL"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_POSCTL,         "POSCTL"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_AUTO_MISSION,   "AUTO_MISSION"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_AUTO_LOITER,    "AUTO_LOITER"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_AUTO_RTL,       "AUTO_RTL"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_ACRO,           "ACRO"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_OFFBOARD,       "OFFBOARD"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_STAB,           "STAB"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_AUTO_TAKEOFF,   "AUTO_TAKEOFF"},
+            {px4_msgs::msg::VehicleStatus::NAVIGATION_STATE_AUTO_LAND,      "AUTO_LAND"},
+        };
+        auto it = state_str.find(state);
+        if (it != state_str.end())
+            return it->second.c_str();
+        return "UNKNOWN";
+    }
+
     rclcpp::Node *_node;
+    const int _node_index;
 
     // Subscriptions
     rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>::SharedPtr    _local_pos_sub;
@@ -222,6 +274,8 @@ private:
     px4_msgs::msg::VehicleStatus	    _vehicle_status{};
     px4_msgs::msg::VehicleLocalPosition _local_pos{};
     px4_msgs::msg::VehicleAttitude	    _att{};
+    double  _init_yaw = 0;
+    bool    _is_init_yaw = false;
 };
 
 #undef absolute_time

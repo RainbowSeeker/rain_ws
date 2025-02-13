@@ -42,18 +42,18 @@ def generate_launch_description():
         arguments=[LaunchConfiguration('gcs_ip'), '14550'],
     )
     
-    mocap_plugin = Node(
-        package='mqsls',
-        executable='mocap_plugin_node',
-        output='screen',
-        shell=True,
-        name='mocap_plugin',
-        condition=IfCondition(PythonExpression(["'", LaunchConfiguration('amc_id'), "' == '", str(plugin_id), "'"])),
-    )
+    # mocap_plugin = Node(
+    #     package='mqsls',
+    #     executable='mocap_plugin_node',
+    #     output='screen',
+    #     shell=True,
+    #     name='mocap_plugin',
+    #     condition=IfCondition(PythonExpression(["'", LaunchConfiguration('amc_id'), "' == '", str(plugin_id), "'"])),
+    # )
     
     return LaunchDescription([
         *args,
         dds_agent,
         gcs_map,
-        mocap_plugin,
+        # mocap_plugin,
     ])

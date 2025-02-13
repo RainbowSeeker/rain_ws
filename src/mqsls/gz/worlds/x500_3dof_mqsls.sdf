@@ -129,14 +129,14 @@
     <!-- !!! IMPORTANT !!! The force on uav is always in ENU.-->
     <!-- mi = 1.5 mr = ~0 mL = 1 avg = 17.966666666666669-->
     <wind>
-      <linear_velocity>3 0 0</linear_velocity>
+      <linear_velocity>0 0 0</linear_velocity>
     </wind>
     <plugin
       filename="gz-sim-wind-effects-system"
       name="gz::sim::systems::WindEffects">
       <force_approximation_scaling_factor>1</force_approximation_scaling_factor>
       <horizontal>
-        <magnitude>
+        <!-- <magnitude>
           <time_for_rise>8</time_for_rise>
           <sin>
             <amplitude_percent>0.05</amplitude_percent>
@@ -146,7 +146,7 @@
            <mean>0</mean>
            <stddev>0.0002</stddev>
           </noise>
-        </magnitude>
+        </magnitude> -->
         <!-- <direction>
           <time_for_rise>30</time_for_rise>
           <sin>
