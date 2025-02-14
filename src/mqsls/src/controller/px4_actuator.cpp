@@ -1,5 +1,3 @@
-#ifndef PX4_ACTUATOR_HPP
-#define PX4_ACTUATOR_HPP
 #include <string>
 #include <iostream>
 #include <Eigen/Eigen>
@@ -7,9 +5,7 @@
 #include <px4_msgs/msg/vehicle_status.hpp>
 #include <px4_msgs/msg/vehicle_command.hpp>
 #include <px4_msgs/msg/vehicle_attitude.hpp>
-#include <px4_msgs/msg/trajectory_setpoint.hpp>
 #include <px4_msgs/msg/offboard_control_mode.hpp>
-#include <px4_msgs/msg/vehicle_local_position.hpp>
 #include <px4_msgs/msg/vehicle_attitude_setpoint.hpp>
 #include <mqsls/msg/follower_recv.hpp>
 
@@ -17,63 +13,55 @@
 
 namespace mqsls {
 
-#define absolute_time() _node->get_clock()->now().nanoseconds() / 1e3
+#define absolute_time() this->get_clock()->now().nanoseconds() / 1e3
 
-class PX4OutputActuator
+class PX4OutputActuator : public rclcpp::Node
 {
 public:
-    PX4OutputActuator(rclcpp::Node *node, int node_index) : _node(node), _node_index(node_index)
+    PX4OutputActuator() : Node("px4_output_actuator")
     {
-        const std::string topic_ns = "/px4_" + std::to_string(node_index);
+        const std::string topic_ns = "/px4_" + std::to_string(_node_index);
 
         rmw_qos_profile_t qos_profile = rmw_qos_profile_sensor_data;
         auto qos = rclcpp::QoS(rclcpp::QoSInitialization(qos_profile.history, 5), qos_profile);
 
         // Subscriptions
-        _local_pos_sub = _node->create_subscription<px4_msgs::msg::VehicleLocalPosition>(
-            topic_ns + "/fmu/out/vehicle_local_position", qos,
-            [this](const px4_msgs::msg::VehicleLocalPosition::SharedPtr msg) {
-                _local_pos = *msg;
+        _follower_recv_sub = this->create_subscription<mqsls::msg::FollowerRecv>(
+            "/follower_recv" + std::to_string(_node_index), qos,
+            [this](const mqsls::msg::FollowerRecv::SharedPtr msg) {
+                apply_force(*msg);
             });
 
-        _vehicle_attitude_sub = _node->create_subscription<px4_msgs::msg::VehicleAttitude>(
+
+        _vehicle_attitude_sub = this->create_subscription<px4_msgs::msg::VehicleAttitude>(
             topic_ns + "/fmu/out/vehicle_attitude", qos,
             [this](const px4_msgs::msg::VehicleAttitude::SharedPtr msg) {
                 _att = *msg;
             });
 
-        _vehicle_status_sub = _node->create_subscription<px4_msgs::msg::VehicleStatus>(
+        _vehicle_status_sub = this->create_subscription<px4_msgs::msg::VehicleStatus>(
             topic_ns + "/fmu/out/vehicle_status", qos,
             [this](const px4_msgs::msg::VehicleStatus::SharedPtr msg) {
                 _vehicle_status = *msg;
             });
 
         // Publishers
-        _offboard_control_mode_pub = _node->create_publisher<px4_msgs::msg::OffboardControlMode>(
+        _offboard_control_mode_pub = this->create_publisher<px4_msgs::msg::OffboardControlMode>(
             topic_ns + "/fmu/in/offboard_control_mode", 10);
 
-        _vehicle_attitude_setpoint_pub = _node->create_publisher<px4_msgs::msg::VehicleAttitudeSetpoint>(
+        _vehicle_attitude_setpoint_pub = this->create_publisher<px4_msgs::msg::VehicleAttitudeSetpoint>(
             topic_ns + "/fmu/in/vehicle_attitude_setpoint", 10);
 
-        _trajectory_setpoint_pub = _node->create_publisher<px4_msgs::msg::TrajectorySetpoint>(
-            topic_ns + "/fmu/in/trajectory_setpoint", 10);
-
-        _vehicle_command_pub = _node->create_publisher<px4_msgs::msg::VehicleCommand>(
+        _vehicle_command_pub = this->create_publisher<px4_msgs::msg::VehicleCommand>(
             topic_ns + "/fmu/in/vehicle_command", 10);
 
-        // Parameter declare
-        if (!_node->has_parameter("hover_thrust")) _node->declare_parameter("hover_thrust", 0.5);
-        if (!_node->has_parameter("uav_mass")) _node->declare_parameter("uav_mass", 1.0);
+        RCLCPP_INFO(this->get_logger(), "PX4OutputActuator node for UAV%d has been created.", _node_index);
     }
 
-    void apply(const mqsls::msg::FollowerRecv &msg)
+    void apply_force(const mqsls::msg::FollowerRecv &msg)
     {
         if (!preprocess())
             return;
-
-        // Get parameters
-        const double hover_thrust = _node->get_parameter("hover_thrust").as_double();
-        const double uav_mass = _node->get_parameter("uav_mass").as_double();
 
         if (!_is_init_yaw)
         {
@@ -88,8 +76,8 @@ public:
         Eigen::Quaterniond q_att = {_att.q[0], _att.q[1], _att.q[2], _att.q[3]};
         double thrust_project = thrust_sp.dot(q_att.toRotationMatrix() * Eigen::Vector3d(0, 0, -1));
         // convert thrust to normalized thrust. 
-        double thrust_coff = hover_thrust / uav_mass / 9.81;
-        publish_attitude_setpoint(q_d, -thrust_project * thrust_coff);
+        // double thrust_coff = hover_thrust / uav_mass / 9.81;
+        publish_attitude_setpoint(q_d, -thrust_project * msg.thrust_coff);
     }
 private:
     static void bodyzToAttitude(Eigen::Vector3d body_z, const double yaw_sp, Eigen::Quaterniond &q_d)
@@ -152,26 +140,26 @@ private:
         _vehicle_attitude_setpoint_pub->publish(att_sp);
     }
 
-    void publish_trajectory_setpoint(Eigen::Vector3d postion)
-    {
-        px4_msgs::msg::OffboardControlMode ocm{};
-        ocm.position = true;
-        ocm.velocity = false;
-        ocm.acceleration = false;
-        ocm.attitude = false;
-        ocm.body_rate = false;
-        ocm.actuator = false;
-        ocm.timestamp = absolute_time();
-        _offboard_control_mode_pub->publish(ocm);
+    // void publish_trajectory_setpoint(Eigen::Vector3d postion)
+    // {
+    //     px4_msgs::msg::OffboardControlMode ocm{};
+    //     ocm.position = true;
+    //     ocm.velocity = false;
+    //     ocm.acceleration = false;
+    //     ocm.attitude = false;
+    //     ocm.body_rate = false;
+    //     ocm.actuator = false;
+    //     ocm.timestamp = absolute_time();
+    //     _offboard_control_mode_pub->publish(ocm);
 
-        px4_msgs::msg::TrajectorySetpoint setpoint{};
-        setpoint.position[0] = postion(0);
-        setpoint.position[1] = postion(1);
-        setpoint.position[2] = postion(2);
-        setpoint.yaw = 0;
-        setpoint.timestamp = absolute_time();
-        _trajectory_setpoint_pub->publish(setpoint);
-    }
+    //     px4_msgs::msg::TrajectorySetpoint setpoint{};
+    //     setpoint.position[0] = postion(0);
+    //     setpoint.position[1] = postion(1);
+    //     setpoint.position[2] = postion(2);
+    //     setpoint.yaw = 0;
+    //     setpoint.timestamp = absolute_time();
+    //     _trajectory_setpoint_pub->publish(setpoint);
+    // }
 
     void publish_vehicle_command(uint32_t command, float param1, float param2 = NAN, float param3 = NAN, float param4 = NAN, double param5 = NAN, double param6 = NAN, float param7 = NAN)
     {
@@ -198,7 +186,7 @@ private:
         // check list 3: manual control
         if (is_ignore_state(_vehicle_status.nav_state))
         {
-            RCLCPP_INFO(_node->get_logger(), "UAV%d cannot control, nav_state: %s", _node_index, get_state(_vehicle_status.nav_state));
+            RCLCPP_INFO(this->get_logger(), "UAV%d cannot control, nav_state: %s", _node_index, get_state(_vehicle_status.nav_state));
             return false;
         }
 
@@ -211,7 +199,7 @@ private:
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_DO_SET_MODE, 1, 6);
             publish_vehicle_command(px4_msgs::msg::VehicleCommand::VEHICLE_CMD_COMPONENT_ARM_DISARM, 1);
 
-            RCLCPP_INFO(_node->get_logger(), "UAV%d Try to switch to offboard mode.", _node_index);
+            RCLCPP_INFO(this->get_logger(), "UAV%d Try to switch to offboard mode.", _node_index);
         }
 
         return true;
@@ -256,30 +244,37 @@ private:
         return "UNKNOWN";
     }
 
-    rclcpp::Node *_node;
-    const int _node_index;
+    const int _node_index = this->declare_parameter("amc_id", 1);
 
     // Subscriptions
-    rclcpp::Subscription<px4_msgs::msg::VehicleLocalPosition>::SharedPtr    _local_pos_sub;
+    rclcpp::Subscription<mqsls::msg::FollowerRecv>::SharedPtr               _follower_recv_sub;
     rclcpp::Subscription<px4_msgs::msg::VehicleAttitude>::SharedPtr         _vehicle_attitude_sub;
     rclcpp::Subscription<px4_msgs::msg::VehicleStatus>::SharedPtr           _vehicle_status_sub;
 
     // Publisher
     rclcpp::Publisher<px4_msgs::msg::OffboardControlMode>::SharedPtr        _offboard_control_mode_pub;
     rclcpp::Publisher<px4_msgs::msg::VehicleAttitudeSetpoint>::SharedPtr    _vehicle_attitude_setpoint_pub;
-    rclcpp::Publisher<px4_msgs::msg::TrajectorySetpoint>::SharedPtr         _trajectory_setpoint_pub;
     rclcpp::Publisher<px4_msgs::msg::VehicleCommand>::SharedPtr             _vehicle_command_pub;
 
     // store
     px4_msgs::msg::VehicleStatus	    _vehicle_status{};
-    px4_msgs::msg::VehicleLocalPosition _local_pos{};
     px4_msgs::msg::VehicleAttitude	    _att{};
+    mqsls::msg::FollowerRecv            _follower_recv{};
+
     double  _init_yaw = 0;
     bool    _is_init_yaw = false;
 };
 
-#undef absolute_time
-
 } // namespace mqsls
 
-#endif // !PX4_ACTUATOR_HPP
+
+int main(int argc, const char** argv) 
+{
+    rclcpp::init(argc, argv);
+
+    rclcpp::spin(std::make_shared<mqsls::PX4OutputActuator>());
+
+    rclcpp::shutdown();
+
+    return 0;
+}

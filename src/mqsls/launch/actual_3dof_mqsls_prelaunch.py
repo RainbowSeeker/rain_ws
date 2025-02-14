@@ -42,6 +42,16 @@ def generate_launch_description():
         arguments=[LaunchConfiguration('gcs_ip'), '14550'],
     )
     
+    px4_actuator = Node(
+        package='mqsls',
+        executable='px4_actuator_node',
+        output='screen',
+        shell=True,
+        parameters=[{
+            'amc_id': LaunchConfiguration('amc_id'),
+        }],
+    )
+
     # mocap_plugin = Node(
     #     package='mqsls',
     #     executable='mocap_plugin_node',
@@ -55,5 +65,6 @@ def generate_launch_description():
         *args,
         dds_agent,
         gcs_map,
+        px4_actuator,
         # mocap_plugin,
     ])

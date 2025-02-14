@@ -83,6 +83,20 @@ def generate_launch_description():
         shell=True,
         name='force_planner',
     )
+
+    px4_actuators = []
+    for i in range(3):
+        px4_actuator = Node(
+            package='mqsls',
+            executable='px4_actuator_node',
+            output='screen',
+            shell=True,
+            name='px4_actuator_' + str(i + 1),
+            parameters=[{
+                'amc_id': i + 1,
+            }],
+        )
+        px4_actuators.append(px4_actuator)
     
     px4_client = []
     for i in range(3):
@@ -120,6 +134,7 @@ def generate_launch_description():
                 gz_plugin,
                 controller,
                 force_planner,
+                *px4_actuators,
                 *px4_client,
                 dds_agent,
             ])],

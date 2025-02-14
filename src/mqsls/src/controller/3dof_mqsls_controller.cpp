@@ -44,7 +44,8 @@ public:
                     _follower_msg[i] = *msg;
                 });
             
-            _output_actuator[i] = std::make_shared<PX4OutputActuator>(this, i + 1);
+            _follower_recv_pub[i] = this->create_publisher<mqsls::msg::FollowerRecv>(
+                "follower_recv" + std::to_string(i + 1), 10);
         }
 
         _force_opt_client = this->create_client<mqsls::srv::ForceOpt>("force_opt");
@@ -112,7 +113,7 @@ private:
         {
             #define SINGLE_TEST 0
 
-            const double KP = 2.0;
+            const double KP = 3.0;
             const double KD = 3.0;
 
 #if SINGLE_TEST
@@ -177,18 +178,18 @@ private:
             }
         }
 
-        bool ready_for_10s = false;
+        bool ready_for_3s = false;
         static uint64_t start_time = _running_time;
         if (!all_in_position) {
             start_time = _running_time;
         }
-        else if (_running_time - start_time > 10_s) {
-            ready_for_10s = true;
+        else if (_running_time - start_time > 3_s) {
+            ready_for_3s = true;
         }
 
-        RCLCPP_INFO(this->get_logger(), "All Ready left time: %f", (double)(10_s - (_running_time - start_time)) / 1_s);
+        RCLCPP_INFO(this->get_logger(), "All Ready left time: %f", (double)(3_s - (_running_time - start_time)) / 1_s);
 
-        return ready_for_10s;
+        return ready_for_3s;
     }
 
     bool state_running(CodeGenController::OutputBus &output)
@@ -360,7 +361,8 @@ private:
             msg.force[0] = output.force_sp##i[0]; \
             msg.force[1] = output.force_sp##i[1]; \
             msg.force[2] = output.force_sp##i[2]; \
-            _output_actuator[i - 1]->apply(msg); \
+            msg.thrust_coff = _hover_thrust / _uav_mass / 9.81; \
+            _follower_recv_pub[i - 1]->publish(msg); \
         }
 
         FILL_OUTPUT_ACTUATOR(1);
@@ -454,7 +456,10 @@ private:
     }
     
     // Subscriber
-    rclcpp::Subscription<mqsls::msg::FollowerSend>::SharedPtr _follower_send_sub[3];
+    rclcpp::Subscription<mqsls::msg::FollowerSend>::SharedPtr _follower_send_sub[3];// 0: leader, 1: follower 2, 2: follower 3
+
+    // Publisher
+    rclcpp::Publisher<mqsls::msg::FollowerRecv>::SharedPtr _follower_recv_pub[3]; // 0: leader, 1: follower 2, 2: follower 3
 
     // client for force optimization
     rclcpp::Client<mqsls::srv::ForceOpt>::SharedPtr _force_opt_client;
@@ -466,6 +471,7 @@ private:
     const double _load_mass = this->declare_parameter("load_mass", 1.0); // kg
     const double _uav_mass = this->declare_parameter("uav_mass", 1.5); // kg
     const double _cable_len = this->declare_parameter("cable_len", 1.0); // m
+    const double _hover_thrust = this->declare_parameter("hover_thrust", 0.5); // percent %
     const std::string _traj_type = this->declare_parameter("traj_type", "line");
     const uint64_t _lasting_time = this->declare_parameter("lasting_time", 60) * 1_s; // s
 
@@ -479,7 +485,6 @@ private:
     uint64_t _cable_dir_timestamp = 0;
     double _opt_margin = 2; // N
     mqsls::msg::FollowerSend _follower_msg[3]; // 0: leader, 1: follower 2, 2: follower 3
-    std::shared_ptr<PX4OutputActuator> _output_actuator[3]; // 0: leader, 1: follower 2, 2: follower 3
 
     // controller
     CodeGenController::InputBus _control_input;

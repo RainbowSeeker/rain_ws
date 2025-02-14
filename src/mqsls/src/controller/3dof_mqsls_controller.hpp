@@ -5,7 +5,6 @@
 #include <formation/data_recorder.hpp>
 #include <formation/utils.hpp>
 #include <mqsls/AlphaFilter.hpp>
-#include <mqsls/px4_actuator.hpp>
 #include <mqsls/trajectory_generator.hpp>
 #include <mqsls/msg/follower_send.hpp>
 #include <mqsls/msg/follower_recv.hpp>
