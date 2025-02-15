@@ -47,6 +47,7 @@ def generate_launch_description():
         executable='px4_actuator_node',
         output='screen',
         shell=True,
+        name=['px4_actuator', LaunchConfiguration('amc_id')],
         parameters=[{
             'amc_id': LaunchConfiguration('amc_id'),
         }],

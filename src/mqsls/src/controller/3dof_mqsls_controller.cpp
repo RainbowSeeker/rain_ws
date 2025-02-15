@@ -80,7 +80,7 @@ private:
         {
         case STATE_PREPARE:
             if (state_prepare(output)) {
-                _state = STATE_RUNNING;
+                // _state = STATE_RUNNING;
             }
             break;
         case STATE_RUNNING:
@@ -114,7 +114,7 @@ private:
             #define SINGLE_TEST 0
 
             const double KP = 3.0;
-            const double KD = 3.0;
+            const double KD = 2.0;
 
 #if SINGLE_TEST
             TrajectoryGenerator::traj_out traj_out;
@@ -142,12 +142,10 @@ private:
             position_err = position_sp - position_now;
             acceleration_sp = KP * position_err - KD * velocity_now;
 
-            if (index == 0) {
-            RCLCPP_INFO(this->get_logger(), "UAV%d pos: %f %f %f, vel: %f %f %f, pos_sp: %f %f %f, acc_sp: %f %f %f", 
+            RCLCPP_INFO(this->get_logger(), "UAV%d pos: %f %f %f, pos_sp: %f %f %f\nacc_sp: %f %f %f", 
                         index, position_now[0], position_now[1], position_now[2], 
-                        velocity_now[0], velocity_now[1], velocity_now[2], 
                         position_sp[0], position_sp[1], position_sp[2], 
-                        acceleration_sp[0], acceleration_sp[1], acceleration_sp[2]);}
+                        acceleration_sp[0], acceleration_sp[1], acceleration_sp[2]);
             RCLCPP_DEBUG(this->get_logger(), "UAV%d perr: %f %f %f", index, position_err[0], position_err[1], position_err[2]);
         };
 
@@ -178,18 +176,20 @@ private:
             }
         }
 
-        bool ready_for_3s = false;
+        return false;
+
+        bool ready_for_10s = false;
         static uint64_t start_time = _running_time;
         if (!all_in_position) {
             start_time = _running_time;
         }
-        else if (_running_time - start_time > 3_s) {
-            ready_for_3s = true;
+        else if (_running_time - start_time > 10_s) {
+            ready_for_10s = true;
         }
 
-        RCLCPP_INFO(this->get_logger(), "All Ready left time: %f", (double)(3_s - (_running_time - start_time)) / 1_s);
+        RCLCPP_INFO(this->get_logger(), "All Ready left time: %f", (double)(10_s - (_running_time - start_time)) / 1_s);
 
-        return ready_for_3s;
+        return ready_for_10s;
     }
 
     bool state_running(CodeGenController::OutputBus &output)
