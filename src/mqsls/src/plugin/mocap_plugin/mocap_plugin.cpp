@@ -130,7 +130,10 @@ private:
             odom.reset_counter = 0;
             odom.quality = 0;
 
-            _odom_pub[data->id - 1]->publish(odom);
+            static int px4_count[3] = {0, 0, 0};
+            px4_count[data->id - 1]++;
+            if (px4_count[data->id - 1] % 2 == 0)
+                _odom_pub[data->id - 1]->publish(odom);
         }
 
         // To Leader

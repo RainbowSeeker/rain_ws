@@ -23,7 +23,8 @@ namespace mqsls {
             } \
         } while (0)
 
-inline Eigen::Vector3d array_to_vector3(const auto &d) {
+template <typename T>
+inline Eigen::Vector3d array_to_vector3(const T &d) {
     return Eigen::Vector3d(d[0], d[1], d[2]);
 }
 
@@ -112,10 +113,6 @@ private:
         auto pos_pid_controller = [&, this](int index, Eigen::Vector3d &position_err, Eigen::Vector3d &acceleration_sp) -> void
         {
             #define SINGLE_TEST 0
-
-            const double KP = 3.0;
-            const double KD = 2.0;
-
 #if SINGLE_TEST
             TrajectoryGenerator::traj_out traj_out;
             static std::shared_ptr<TrajectoryGenerator> traj_gen {std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -0.5), 1, deg2rad(4))};
@@ -140,7 +137,8 @@ private:
             const Eigen::Vector3d velocity_now = array_to_vector3(_follower_msg[index].velocity_uav);
 
             position_err = position_sp - position_now;
-            acceleration_sp = KP * position_err - KD * velocity_now;
+
+            acceleration_sp = _pid_controller[index].computeCommand(position_err, -velocity_now, _dt);
 
             RCLCPP_INFO(this->get_logger(), "UAV%d pos: %f %f %f, pos_sp: %f %f %f\nacc_sp: %f %f %f", 
                         index, position_now[0], position_now[1], position_now[2], 
@@ -307,7 +305,7 @@ private:
         #undef FILL_OUTPUT_FORCE
     }
 
-    const CodeGenController::OutputBus &controller_step(const TrajectoryGenerator::traj_out &traj_out)
+    void input_update()
     {
         for (int i = 0; i < 3; i++) {
             _control_input.Payload_Out.pL[i] = _follower_msg[0].position_load[i];
@@ -318,9 +316,6 @@ private:
             _control_input.Payload_Out.v_1[i] = _follower_msg[0].velocity_uav[i];
             _control_input.Payload_Out.v_2[i] = _follower_msg[1].velocity_uav[i];
             _control_input.Payload_Out.v_3[i] = _follower_msg[2].velocity_uav[i];
-            _control_input.Traj_sp.pos_sp[i] = traj_out.position[i];
-            _control_input.Traj_sp.vel_sp[i] = traj_out.velocity[i];
-            _control_input.Traj_sp.acc_ff[i] = traj_out.acceleration[i];
         }
         _control_input.Payload_Out.timestamp = _follower_msg[0].timestamp;
 
@@ -330,6 +325,15 @@ private:
             _control_input.Dir_sp.q_sp1[i] = _cable_dir_sp[0][i];
             _control_input.Dir_sp.q_sp2[i] = _cable_dir_sp[1][i];
             _control_input.Dir_sp.q_sp3[i] = _cable_dir_sp[2][i];
+        }
+    }
+
+    const CodeGenController::OutputBus &controller_step(const TrajectoryGenerator::traj_out &traj_out)
+    {
+        for (int i = 0; i < 3; i++) {
+            _control_input.Traj_sp.pos_sp[i] = traj_out.position[i];
+            _control_input.Traj_sp.vel_sp[i] = traj_out.velocity[i];
+            _control_input.Traj_sp.acc_ff[i] = traj_out.acceleration[i];
         }
 
         // running
@@ -349,6 +353,8 @@ private:
         _running_time = running_time;
 
         parameter_update();
+
+        input_update();
 
         CodeGenController::OutputBus output;
 
@@ -399,6 +405,21 @@ private:
         CONTROL_PARAM.CABLE_LEN = _cable_len;
         CONTROL_PARAM.MASS_LOAD = _load_mass;
         CONTROL_PARAM.MASS_UAV = _uav_mass;
+
+        const double MC_POS_KP = 1.0;
+        const double MC_POS_KI = 0.1;
+        const double MC_POS_KD = 2.0;
+        const double MC_POS_KI_MAX = 2.0;
+        const double MC_POS_KI_MIN = -2.0;
+        for (int i = 0; i < 3; i++) {
+            _pid_controller[i].initPid(
+                    MC_POS_KP * MC_POS_KD * Eigen::Vector3d::Ones(), 
+                    MC_POS_KI * Eigen::Vector3d::Ones(),
+                    MC_POS_KD * Eigen::Vector3d::Ones(),
+                    MC_POS_KI_MAX * Eigen::Vector3d::Ones(),
+                    MC_POS_KI_MIN * Eigen::Vector3d::Ones(),
+                    true);
+        }
     }
 
     void parameter_update()
@@ -489,6 +510,7 @@ private:
     // controller
     CodeGenController::InputBus _control_input;
     CodeGenController _controller;
+    mqsls::Pid<Eigen::Vector3d> _pid_controller[3]; // 0: leader, 1: follower 2, 2: follower 3
     std::shared_ptr<TrajectoryGenerator> _traj_gen {make_trajectory_generator(_traj_type)};
 
     // recorder
@@ -507,10 +529,14 @@ private:
         frame.uav_velocity[2] = array_to_vector3(_control_input.Payload_Out.v_3);
         
         frame.dL = array_to_vector3(_controller.getOutput().state.dL);
+        frame.tau = array_to_vector3(_controller.getOutput().state.tau);
         frame.margin = _controller.getOutput().state.margin;
 
         frame.load_position_sp = array_to_vector3(_control_input.Traj_sp.pos_sp);
         frame.load_velocity_sp = array_to_vector3(_control_input.Traj_sp.vel_sp);
+        frame.cable_dir_sp[0] = array_to_vector3(_control_input.Dir_sp.q_sp1);
+        frame.cable_dir_sp[1] = array_to_vector3(_control_input.Dir_sp.q_sp2);
+        frame.cable_dir_sp[2] = array_to_vector3(_control_input.Dir_sp.q_sp3);
         
         _recorder.push(frame);
     }

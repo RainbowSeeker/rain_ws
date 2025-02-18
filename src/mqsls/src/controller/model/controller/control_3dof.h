@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'control_3dof'.
  *
- * Model version                  : 1.756
+ * Model version                  : 1.764
  * Simulink Coder version         : 24.2 (R2024b) 21-Jun-2024
- * C/C++ source code generated on : Wed Feb 12 10:21:57 2025
+ * C/C++ source code generated on : Tue Feb 18 17:13:26 2025
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Custom Processor->Custom Processor
@@ -109,6 +109,9 @@ typedef struct {
 
   /* Payload Disturbance Force */
   real_T dL[3];
+
+  /* virtual force (3X1) */
+  real_T tau[3];
   real_T margin;
 } Control_State_Bus;
 
@@ -209,7 +212,7 @@ typedef struct {
 typedef struct {
   real_T A_wrench_tmp[18];
   real_T state_f[12];                  /* '<S6>/Vertical Control' */
-  real_T Q_new[9];                     /* '<S20>/Vector Concatenate' */
+  real_T Q_new[9];                     /* '<S19>/Vector Concatenate' */
   real_T rtb_Q_new_m[9];
   real_T dv[9];
   real_T V[9];
@@ -223,11 +226,11 @@ typedef struct {
   real_T q_3[3];
   real_T F_trim[3];
   real_T F_var[3];
-  real_T xv[3];
   real_T e_2[3];
   real_T rtb_control_in1_w[3];
   real_T rtb_control_in2_vforce[3];
   real_T rtb_control_in2_w[3];
+  real_T rtb_control_in3_vforce[3];
   real_T rtb_control_in3_w[3];
   real_T f_vertical[3];                /* '<S6>/Vertical Control' */
   real_T dot_err_g[3];                 /* '<S6>/Vertical Control' */
@@ -328,7 +331,7 @@ typedef struct {
   int32_T k_jz;
   int32_T i4;
   int32_T k_o;
-  boolean_T FixPtRelationalOperator;   /* '<S23>/FixPt Relational Operator' */
+  boolean_T FixPtRelationalOperator;   /* '<S22>/FixPt Relational Operator' */
   boolean_T p;
   boolean_T doscale;
   boolean_T apply_transform;
@@ -348,7 +351,7 @@ typedef struct {
 /* Block states (default storage) for system '<Root>' */
 typedef struct {
   pos_2nd_eso_control_3dof_T obj;      /* '<S4>/Position 2nd ESO' */
-  real_T Delay_DSTATE[9];              /* '<S20>/Delay' */
+  real_T Delay_DSTATE[9];              /* '<S19>/Delay' */
   real_T UnitDelay_DSTATE[3];          /* '<S4>/Unit Delay' */
   real_T DiscreteTimeIntegrator_DSTATE[3];/* '<S21>/Discrete-Time Integrator' */
   real_T DiscreteTimeIntegrator_DSTATE_p[3];/* '<S14>/Discrete-Time Integrator' */
@@ -357,9 +360,9 @@ typedef struct {
   real_T UnitDelay_DSTATE_a[3];        /* '<S2>/Unit Delay' */
   real_T DiscreteTimeIntegrator_DSTAT_pb[3];/* '<S6>/Discrete-Time Integrator' */
   real_T UnitDelay_DSTATE_f[3];        /* '<S1>/Unit Delay' */
-  uint64_T DelayInput1_DSTATE;         /* '<S23>/Delay Input1' */
-  uint64_T Accumulator_DSTATE;         /* '<S22>/Accumulator' */
-  boolean_T icLoad;                    /* '<S20>/Delay' */
+  uint64_T DelayInput1_DSTATE;         /* '<S22>/Delay Input1' */
+  uint64_T Accumulator_DSTATE;         /* '<S20>/Accumulator' */
+  boolean_T icLoad;                    /* '<S19>/Delay' */
   DW_MATLABSystem_control_3dof_T MATLABSystem_a;/* '<S1>/MATLAB System' */
   DW_MATLABSystem_control_3dof_T MATLABSystem_g;/* '<S1>/MATLAB System' */
   DW_MATLABSystem_control_3dof_T MATLABSystem;/* '<S1>/MATLAB System' */
@@ -432,7 +435,7 @@ extern struct_e7GeJ2KaE57MoQuFkrFyOD CONTROL_PARAM;/* Variable: CONTROL_PARAM
                                                     *   '<S21>/KPI'
                                                     */
 extern struct_s1X7MNNw1KKuxbD9HCjUEH CONTROL_EXPORT;/* Variable: CONTROL_EXPORT
-                                                     * Referenced by: '<S22>/Period [ms]'
+                                                     * Referenced by: '<S20>/Period [ms]'
                                                      */
 
 /* Model entry point functions */
@@ -476,11 +479,10 @@ extern RT_MODEL_control_3dof_T *const control_3dof_M;
  * '<S16>'  : 'control_3dof/Cable Controller2/Vertical Control/Vertical Control'
  * '<S17>'  : 'control_3dof/Payload Controller/Force Saturation && Disturbution'
  * '<S18>'  : 'control_3dof/Payload Controller/Load Control Force'
- * '<S19>'  : 'control_3dof/Payload Controller/State Bus Creater'
- * '<S20>'  : 'control_3dof/Payload Controller/Update Cable Direction'
+ * '<S19>'  : 'control_3dof/Payload Controller/Update Cable Direction'
+ * '<S20>'  : 'control_3dof/Payload Controller/timestamp'
  * '<S21>'  : 'control_3dof/Payload Controller/Load Control Force/PI'
- * '<S22>'  : 'control_3dof/Payload Controller/State Bus Creater/timestamp'
- * '<S23>'  : 'control_3dof/Payload Controller/Update Cable Direction/Detect Change'
+ * '<S22>'  : 'control_3dof/Payload Controller/Update Cable Direction/Detect Change'
  */
 #endif                                 /* control_3dof_h_ */
 
