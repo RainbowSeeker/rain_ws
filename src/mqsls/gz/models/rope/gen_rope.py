@@ -183,7 +183,7 @@ class RopeGenerator:
 
 
 if __name__ == '__main__':
-    rope_length = 2 # m
+    rope_length = 1.5 # m
     seg_num = 10
     rope_gen = RopeGenerator(rope_length, seg_num)
 

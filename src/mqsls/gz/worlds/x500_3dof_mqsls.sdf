@@ -129,42 +129,43 @@
     <!-- !!! IMPORTANT !!! The force on uav is always in ENU.-->
     <!-- mi = 1.5 mr = ~0 mL = 1 avg = 17.966666666666669-->
     <wind>
-      <linear_velocity>0 0 0</linear_velocity>
+      <linear_velocity>1.2 1.2 2</linear_velocity>
+      <!-- <linear_velocity>0 1 0</linear_velocity> -->
     </wind>
     <plugin
       filename="gz-sim-wind-effects-system"
       name="gz::sim::systems::WindEffects">
       <force_approximation_scaling_factor>1</force_approximation_scaling_factor>
       <horizontal>
-        <!-- <magnitude>
-          <time_for_rise>8</time_for_rise>
+        <magnitude>
+          <time_for_rise>1</time_for_rise>
           <sin>
-            <amplitude_percent>0.05</amplitude_percent>
-            <period>60</period>
+            <amplitude_percent>0.3</amplitude_percent>
+            <period>2</period>
           </sin>
           <noise type="gaussian">
            <mean>0</mean>
-           <stddev>0.0002</stddev>
+           <stddev>0.02</stddev>
           </noise>
-        </magnitude> -->
-        <!-- <direction>
+        </magnitude>
+        <direction>
           <time_for_rise>30</time_for_rise>
           <sin>
             <amplitude>5</amplitude>
-            <period>20</period>
+            <period>2</period>
           </sin>
           <noise type="gaussian">
            <mean>0</mean>
            <stddev>0.03</stddev>
           </noise>
-        </direction> -->
+        </direction>
       </horizontal>
-      <!-- <vertical>
+      <vertical>
         <noise type="gaussian">
          <mean>0</mean>
          <stddev>0.03</stddev>
         </noise>
-      </vertical> -->
+      </vertical>
     </plugin>
     <!-- put your model here -->
     <!-- payload -->
@@ -175,7 +176,7 @@
     </include>
     <include>
       <name>x500_1</name>
-      <pose>0 2 0 0 0 1.570796326794897</pose>
+      <pose>0 1.5 0 0 0 1.570796326794897</pose>
       <uri>model://x500</uri>
     </include>
     <include>
@@ -199,12 +200,12 @@
     <!-- addon -->
     <include>
       <name>x500_2</name>
-      <pose>1.7321 -1 0 0 0 1.570796326794897</pose>
+      <pose>1.2991 -0.75 0 0 0 1.570796326794897</pose>
       <uri>model://x500</uri>
     </include>
     <include>
       <name>x500_3</name>
-      <pose>-1.7321 -1 0 0 0 1.570796326794897</pose>
+      <pose>-1.2991 -0.75 0 0 0 1.570796326794897</pose>
       <uri>model://x500</uri>
     </include>
     <include>

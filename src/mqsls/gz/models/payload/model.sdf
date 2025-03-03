@@ -24,7 +24,7 @@
         </material>
       </visual>
       <inertial>
-        <mass>1</mass> <!-- kg -->
+        <mass>0.5</mass> <!-- kg -->
         <inertia>
           <ixx>1/6*(0.2*0.2)</ixx>
           <iyy>1/6*(0.2*0.2)</iyy>

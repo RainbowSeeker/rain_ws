@@ -22,7 +22,8 @@ def generate_launch_description():
     # declare launch arguments
     args = [DeclareLaunchArgument('amc_id', default_value='1', description='AMC ID'),
             DeclareLaunchArgument('dds_baudrate', default_value=str(dds_baudrate), description='DDS baudrate'),
-            DeclareLaunchArgument('gcs_ip', default_value=str(gcs_ip), description='target GCS IP address')]
+            DeclareLaunchArgument('gcs_ip', default_value=str(gcs_ip), description='target GCS IP address'),
+            DeclareLaunchArgument('hil_enable', default_value='False', description='HIL simulation enable'),]
 
     dds_agent = ExecuteProcess(
         cmd=[
@@ -32,6 +33,7 @@ def generate_launch_description():
         shell=True,
         output='screen',
         name='dds_agent',
+        condition=IfCondition(PythonExpression(["'", LaunchConfiguration('hil_enable'), "' == 'False'"])),
     )
     
     gcs_map = Node(
@@ -40,6 +42,7 @@ def generate_launch_description():
         output='screen',
         shell=True,
         arguments=[LaunchConfiguration('gcs_ip'), '14550'],
+        condition=IfCondition(PythonExpression(["'", LaunchConfiguration('hil_enable'), "' == 'False'"])),
     )
     
     px4_actuator = Node(

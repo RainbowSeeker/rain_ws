@@ -54,7 +54,7 @@ sync() {
 }
 
 prelaunch() {
-    every_run "prelaunch" true "$source_cmd; ros2 launch mqsls actual_3dof_mqsls_prelaunch.py amc_id:=\$amc_id"
+    every_run "prelaunch" true "$source_cmd; ros2 launch mqsls actual_3dof_mqsls_prelaunch.py amc_id:=\$amc_id hil_enable:=False"
 }
 
 launch() {

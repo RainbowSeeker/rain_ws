@@ -16,6 +16,26 @@ public:
     virtual void update(const uint64_t dt, traj_out &out) = 0;
 };
 
+class PointTrajectoryGenerator : public TrajectoryGenerator
+{
+public:
+    PointTrajectoryGenerator(const Eigen::Vector3d &position)
+        : _position(position)
+    {
+    }
+
+    void update(const uint64_t dt, traj_out &out) override
+    {
+        out.position = _position;
+        out.velocity = Eigen::Vector3d::Zero();
+        out.acceleration = Eigen::Vector3d::Zero();
+    }
+
+private:
+    const Eigen::Vector3d _position;
+};
+
+
 #define usec2sec(x) ((double)(x) / 1e6)
 
 class LineTrajectoryGenerator : public TrajectoryGenerator
@@ -186,19 +206,27 @@ private:
     double _passed_time = 0.0;
 };
 
-static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std::string &traj_type)
+static std::shared_ptr<TrajectoryGenerator> make_trajectory_generator(const std::string &traj_type, const std::string &test_mode)
 {
-    #define deg2rad(x) ((x) * M_PI / 180)
+    #define deg2rad(x)  ((x) * M_PI / 180)
 
-    if (traj_type == "line") {
-        return std::make_shared<LineTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(50, 0, -10), 2.0);
+    double HGT_DEFAULT = -0.3;
+    if (test_mode == "sil" || test_mode == "hil") {
+        HGT_DEFAULT = -1;
+    }
+
+    if (traj_type == "point") {
+        return std::make_shared<PointTrajectoryGenerator>(Eigen::Vector3d(0, 0, HGT_DEFAULT));
+    } else if (traj_type == "line") {
+        return std::make_shared<LineTrajectoryGenerator>(Eigen::Vector3d(2, 0, HGT_DEFAULT), Eigen::Vector3d(-2, 0, HGT_DEFAULT), 0.25);
     } else if (traj_type == "circle") {
-        return std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -0.4), 1, deg2rad(9));
+        return std::make_shared<CircleTrajectoryGenerator>(Eigen::Vector3d(0, 0, HGT_DEFAULT), 10, deg2rad(12));
     } else if (traj_type == "rectangle") {
-        return std::make_shared<RectangleTrajectoryGenerator>(Eigen::Vector3d(0, 0, -10), Eigen::Vector3d(20, 20, -10), 2);
+        return std::make_shared<RectangleTrajectoryGenerator>(Eigen::Vector3d(0, 0, HGT_DEFAULT), Eigen::Vector3d(20, 20, HGT_DEFAULT), 2);
     } else if (traj_type == "lissajous") {
-        return std::make_shared<LissajousTrajectoryGenerator>(Eigen::Vector3d(0, 0, -1), 2, 2, deg2rad(20), deg2rad(40), deg2rad(90));
+        return std::make_shared<LissajousTrajectoryGenerator>(Eigen::Vector3d(0, 0, HGT_DEFAULT), 2, 1, deg2rad(12), deg2rad(24), deg2rad(90));
     } else {
-        throw std::runtime_error("Invalid trajectory type");
+        std::cerr << "Invalid trajectory type: " << traj_type << std::endl;
+        return nullptr;
     }
 }

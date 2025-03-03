@@ -8,7 +8,7 @@ namespace mqsls {
 #define PERIODIC_RUN(__now, __period, __func) \
         do { \
             static auto __last_time = __now; \
-            if (__now - __last_time > __period) { \
+            if (((__now)) - __last_time > ((__period))) { \
                 __func; \
                 __last_time = __now; \
             } \
@@ -17,7 +17,7 @@ namespace mqsls {
 #define DELAYED_RUN_IF(__now, __delay, __func, __cond) \
         do { \
             static auto __last_time = __now; \
-            if (__now - __last_time > __delay && __cond) { \
+            if (((__now)) - __last_time > ((__delay)) && ((__cond))) { \
                 __func; \
                 __last_time = __now; \
             } \
@@ -81,7 +81,7 @@ private:
         {
         case STATE_PREPARE:
             if (state_prepare(output)) {
-                // _state = STATE_RUNNING;
+                _state = STATE_RUNNING;
             }
             break;
         case STATE_RUNNING:
@@ -174,20 +174,7 @@ private:
             }
         }
 
-        return false;
-
-        bool ready_for_10s = false;
-        static uint64_t start_time = _running_time;
-        if (!all_in_position) {
-            start_time = _running_time;
-        }
-        else if (_running_time - start_time > 10_s) {
-            ready_for_10s = true;
-        }
-
-        RCLCPP_INFO(this->get_logger(), "All Ready left time: %f", (double)(10_s - (_running_time - start_time)) / 1_s);
-
-        return ready_for_10s;
+        return all_in_position;
     }
 
     bool state_running(CodeGenController::OutputBus &output)
@@ -195,12 +182,6 @@ private:
         // trajectory generator
         TrajectoryGenerator::traj_out traj_out;
         _traj_gen->update(CONTROL_PERIOD, traj_out);
-
-#if 1
-        traj_out.position = Eigen::Vector3d(0, 0, -0.2);
-        traj_out.velocity = Eigen::Vector3d::Zero();
-        traj_out.acceleration = Eigen::Vector3d::Zero();
-#endif
 
         // controller step
         output = controller_step(traj_out);
@@ -222,22 +203,27 @@ private:
             RCLCPP_INFO(this->get_logger(), "Request ForceOpt: [%f %f %f]", trim_acc_filter.getState()[0], trim_acc_filter.getState()[1], trim_acc_filter.getState()[2]);
         };
 
-#if 0
-        static int sp_count = 0;
-        if (traj_out.position.x() == 2) {
-            sp_count++;
-            if (sp_count == 2) {
-                accs_update();
+        const bool accs_enable = this->get_parameter("accs_enable").as_bool();
+        if (accs_enable)
+        {
+#if 1
+            #define EPSILON 1e-3
+            static int sp_count = 0;
+            if (_traj_type == "line" && std::abs(traj_out.position.x() - 0) < EPSILON) {
+                sp_count++;
+                if (sp_count == 1) {
+                    accs_update();
+                }
             }
-        }
 #else
-        bool need_accs_update = this->get_parameter("accs_enable").as_bool() && output.state.margin < _opt_margin * 0.2; // 20% threshold
-        DELAYED_RUN_IF(_running_time, 
-                        5_s, 
-                        accs_update(),
-                        need_accs_update
-        );
+            bool need_accs_update = output.state.margin < _opt_margin * 0.2; // 20% threshold
+            DELAYED_RUN_IF(_running_time, 
+                            5_s, 
+                            accs_update(),
+                            need_accs_update
+            );
 #endif
+        }
         RCLCPP_DEBUG(this->get_logger(), "\nPOS1: %f %f %f VEL1: %f %f %f\nPOS2: %f %f %f VEL2: %f %f %f\nPOS3: %f %f %f VEL3: %f %f %f\n", 
                     _control_input.Payload_Out.p_1[0], _control_input.Payload_Out.p_1[1], _control_input.Payload_Out.p_1[2], 
                     _control_input.Payload_Out.v_1[0], _control_input.Payload_Out.v_1[1], _control_input.Payload_Out.v_1[2],
@@ -247,7 +233,8 @@ private:
                     _control_input.Payload_Out.v_3[0], _control_input.Payload_Out.v_3[1], _control_input.Payload_Out.v_3[2]);
 
         RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 500, "Disturbance: [%.2f %.2f %.2f], Margin: %.2f%%",output.state.dL[0], output.state.dL[1], output.state.dL[2], output.state.margin * 100 / _opt_margin);
-    
+        RCLCPP_INFO_THROTTLE(this->get_logger(), *get_clock(), 1000, "running time: %f", (double)_running_time / 1_s);
+        
         if (_running_time < _lasting_time) {
             return false;
         }
@@ -388,6 +375,11 @@ private:
     // parameters
     void parameter_declare()
     {
+        // parameters check
+        if (_test_phase != "sil" && _test_phase != "hil" && _test_phase != "actual") {
+            throw std::runtime_error("Invalid test phase: " + _test_phase);
+        }
+
         // controller parameters
         this->declare_parameter("eso_enable", true);
         this->declare_parameter("pwas_enable", true);
@@ -401,19 +393,21 @@ private:
         this->declare_parameter("kq", 1.0);
         this->declare_parameter("kw", 1.0);
 
+        this->declare_parameter("traj_type", "point");
+
         // Immutable control parameters
         CONTROL_PARAM.CABLE_LEN = _cable_len;
         CONTROL_PARAM.MASS_LOAD = _load_mass;
         CONTROL_PARAM.MASS_UAV = _uav_mass;
 
-        const double MC_POS_KP = 1.0;
-        const double MC_POS_KI = 0.1;
+        const double MC_POS_KP = 3.4;
+        const double MC_POS_KI = 0.2;
         const double MC_POS_KD = 2.0;
-        const double MC_POS_KI_MAX = 2.0;
-        const double MC_POS_KI_MIN = -2.0;
+        const double MC_POS_KI_MAX = 3.0;
+        const double MC_POS_KI_MIN = -3.0;
         for (int i = 0; i < 3; i++) {
             _pid_controller[i].initPid(
-                    MC_POS_KP * MC_POS_KD * Eigen::Vector3d::Ones(), 
+                    MC_POS_KP * Eigen::Vector3d::Ones(), 
                     MC_POS_KI * Eigen::Vector3d::Ones(),
                     MC_POS_KD * Eigen::Vector3d::Ones(),
                     MC_POS_KI_MAX * Eigen::Vector3d::Ones(),
@@ -445,6 +439,19 @@ private:
         }
         CONTROL_PARAM.KPI = eso_enable ? 0 : 0.2;
         CONTROL_PARAM.KQI = eso_enable ? 0 : 0.2;
+
+        const std::string new_traj_type = this->get_parameter("traj_type").as_string();
+        if (new_traj_type != _traj_type) {
+            auto traj_gen = make_trajectory_generator(new_traj_type, _test_phase);
+            if (traj_gen) {
+                _traj_gen = traj_gen;
+                _traj_type = new_traj_type;
+                RCLCPP_INFO(this->get_logger(), "Trajectory type changed to: %s", new_traj_type.c_str());
+            }
+            else {
+                RCLCPP_ERROR(this->get_logger(), "Invalid trajectory type: %s", new_traj_type.c_str());
+            }
+        }
     }
 
     void async_request_force_opt(const Eigen::Vector3d &center)
@@ -489,11 +496,11 @@ private:
     rclcpp::TimerBase::SharedPtr _timer;
 
     // Inmutable parameters
+    const std::string _test_phase = this->declare_parameter("test_phase", "sil"); // sil, hil, actual
     const double _load_mass = this->declare_parameter("load_mass", 1.0); // kg
     const double _uav_mass = this->declare_parameter("uav_mass", 1.5); // kg
     const double _cable_len = this->declare_parameter("cable_len", 1.0); // m
     const double _hover_thrust = this->declare_parameter("hover_thrust", 0.5); // percent %
-    const std::string _traj_type = this->declare_parameter("traj_type", "line");
     const uint64_t _lasting_time = this->declare_parameter("lasting_time", 60) * 1_s; // s
 
     // detail
@@ -511,7 +518,8 @@ private:
     CodeGenController::InputBus _control_input;
     CodeGenController _controller;
     mqsls::Pid<Eigen::Vector3d> _pid_controller[3]; // 0: leader, 1: follower 2, 2: follower 3
-    std::shared_ptr<TrajectoryGenerator> _traj_gen {make_trajectory_generator(_traj_type)};
+    std::string _traj_type {"invalid"};
+    std::shared_ptr<TrajectoryGenerator> _traj_gen;
 
     // recorder
     void record()

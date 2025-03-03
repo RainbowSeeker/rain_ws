@@ -22,7 +22,7 @@ def generate_launch_description():
             DeclareLaunchArgument('eso_enable', default_value='True', description='Enable ESO'),
             DeclareLaunchArgument('pwas_enable', default_value='True', description='Enable PWAS'),
             DeclareLaunchArgument('accs_enable', default_value='True', description='Enable ACCS'),
-            DeclareLaunchArgument('traj_type', default_value='circle', description='Trajectory type')]
+            DeclareLaunchArgument('traj_type', default_value='point', description='Trajectory type')]
 
     controller = Node(
         package='mqsls',
@@ -31,7 +31,8 @@ def generate_launch_description():
         shell=True,
         name='Controller',
         parameters=[{
-            'cable_len': 2.0,
+            'test_phase': 'actual',
+            'cable_len': 1.5,
             'load_mass': 0.5,
             'uav_mass': 1.6,
             'hover_thrust': 0.42,
@@ -42,9 +43,9 @@ def generate_launch_description():
             'eso_enable':  LaunchConfiguration('eso_enable'),
             'pwas_enable': LaunchConfiguration('pwas_enable'),
             'accs_enable': LaunchConfiguration('accs_enable'),
-            'min_tension': 0.5,
-            'max_tension': 5.0,
-            'traj_type': LaunchConfiguration('traj_type'), # 'line', 'circle', 'rectangle', 'lissajous'
+            'min_tension': 1.0,
+            'max_tension': 7.0,
+            'traj_type': LaunchConfiguration('traj_type'), # 'point', 'line', 'circle', 'rectangle', 'lissajous'
             'lasting_time': 70,
         }],
         condition=IfCondition(PythonExpression(["'", LaunchConfiguration('amc_id'), "' == '", str(control_id), "'"])),
