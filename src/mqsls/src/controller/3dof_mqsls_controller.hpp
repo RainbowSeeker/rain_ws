@@ -50,7 +50,6 @@ struct MqslsDataFrame {
         for (int i = 0; i < 3; i++) {
             os << frame.cable_dir_sp[i].x() << ' ' << frame.cable_dir_sp[i].y() << ' ' << frame.cable_dir_sp[i].z() << ' ';
         }
-        os << '\n';
         return os;
     }
 

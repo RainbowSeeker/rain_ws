@@ -40,7 +40,7 @@ public:
         }
 
         // write to file
-        _file << frame;
+        _file << frame << '\n';
 
         _write_cnt++;
         if (_write_cnt % _throttle == 0 || avail_size() < _buffer_size / 2) {
