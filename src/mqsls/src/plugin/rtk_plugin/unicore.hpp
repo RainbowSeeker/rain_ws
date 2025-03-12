@@ -114,9 +114,11 @@ namespace unicore // driver for UM982 of unicore
 
 		enum id : uint16_t
 		{
-			MSG_ID_BESTNAVXYZ = 240,
-			MSG_ID_BESTNAVXYZH = 242,
-			MSG_ID_UNIHEADING = 972,
+			MSG_ID_BESTNAVXYZ 	= 240,
+			MSG_ID_BESTNAVXYZH 	= 242,
+			MSG_ID_BESTNAV 		= 2118,
+			MSG_ID_BESTNAVH 	= 2119,	
+			MSG_ID_UNIHEADING 	= 972,
 		};
 
 		struct body_binary

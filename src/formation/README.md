@@ -33,5 +33,5 @@ source install/setup.bash
 ros2 launch formation mc_formation_launch.py
 # Real-world
 ros2 launch formation mc_single_prelaunch.py amc_id:=1 # amc_id: 1-3
-ros2 launch formation mc_single_launch.py
+ros2 launch formation mc_single_launch.py amc_id:= 1 # amc_id: 1-3
 ```

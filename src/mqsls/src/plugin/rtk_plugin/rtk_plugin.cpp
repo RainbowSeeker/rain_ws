@@ -5,6 +5,7 @@
 #include <string>
 #include <array>
 
+#include "mqsls/perf_counter.hpp"
 #include "unicore.hpp"
 
 using namespace boost::asio;
@@ -56,8 +57,8 @@ private:
             if (!error)
             {
                 std::string recv_data(_recv_buf.data(), bytes_transferred);
-                RCLCPP_INFO(this->get_logger(), "Received data: %s", recv_data.c_str());
                 parse_package(recv_data);
+
                 do_async_read();
             }
             else
@@ -73,7 +74,6 @@ private:
         for (const auto &ch : raw)
         {
             if (unicore::parse(ch, msg) == 0) {
-                RCLCPP_INFO(this->get_logger(), "Parsed message: %d", msg.header.msg_id);
                 switch (msg.header.msg_id) {
                     case unicore::msg::MSG_ID_BESTNAVXYZ:
                     {
@@ -81,7 +81,7 @@ private:
                         _follower_send_msg.velocity_uav[0] = body->vel[0];
                         _follower_send_msg.velocity_uav[1] = -body->vel[1];
                         _follower_send_msg.velocity_uav[2] = -body->vel[2];
-                        RCLCPP_INFO(this->get_logger(), "BESTNAVXYZ: %f, %f, %f", _follower_send_msg.velocity_uav[0], _follower_send_msg.velocity_uav[1], _follower_send_msg.velocity_uav[2]);
+                        // RCLCPP_INFO(this->get_logger(), "BESTNAVXYZ: %f, %f, %f", _follower_send_msg.velocity_uav[0], _follower_send_msg.velocity_uav[1], _follower_send_msg.velocity_uav[2]);
                         break;
                     }
                     case unicore::msg::MSG_ID_BESTNAVXYZH:
@@ -90,7 +90,7 @@ private:
                         _follower_send_msg.velocity_load[0] = body->vel[0];
                         _follower_send_msg.velocity_load[1] = -body->vel[1];
                         _follower_send_msg.velocity_load[2] = -body->vel[2];
-                        RCLCPP_INFO(this->get_logger(), "BESTNAVXYZH: %f, %f, %f", _follower_send_msg.velocity_load[0], _follower_send_msg.velocity_load[1], _follower_send_msg.velocity_load[2]);
+                        // RCLCPP_INFO(this->get_logger(), "BESTNAVXYZH: %f, %f, %f", _follower_send_msg.velocity_load[0], _follower_send_msg.velocity_load[1], _follower_send_msg.velocity_load[2]);
                         break;
                     }
                     case unicore::msg::MSG_ID_UNIHEADING:
@@ -112,8 +112,13 @@ private:
                         _follower_send_msg.timestamp = absolute_time();
                         _follower_send_pub->publish(_follower_send_msg);
         
-                        RCLCPP_INFO(this->get_logger(), "UNIHEADING: len: %.3f, heading: %.2f, pitch: %.2f", (double)body->baseline, (double)body->heading, (double)body->pitch);
-                        RCLCPP_INFO(this->get_logger(), "UNIHEADING: delta_pos: %.3f, %.3f, %.3f", _follower_send_msg.position_load[0] - _follower_send_msg.position_uav[0], _follower_send_msg.position_load[1] - _follower_send_msg.position_uav[1], _follower_send_msg.position_load[2] - _follower_send_msg.position_uav[2]);
+                        // RCLCPP_INFO(this->get_logger(), "UNIHEADING: len: %.3f, heading: %.2f, pitch: %.2f", (double)body->baseline, (double)body->heading, (double)body->pitch);
+                        // RCLCPP_INFO(this->get_logger(), "UNIHEADING: delta_pos: %.3f, %.3f, %.3f", _follower_send_msg.position_load[0] - _follower_send_msg.position_uav[0], _follower_send_msg.position_load[1] - _follower_send_msg.position_uav[1], _follower_send_msg.position_load[2] - _follower_send_msg.position_uav[2]);
+
+                        _perf_counter.tick();
+                        if (_perf_counter.count() % 100 == 0) {
+                            _perf_counter.print();
+                        }
                         break;
                     }
                     default:
@@ -137,6 +142,7 @@ private:
 
     // status
     std::atomic<bool> _is_running = false;
+    PerfCounter _perf_counter {PerfCounterType::INTERVAL, "RTKPlugin"};
 
     // serial
     io_context _io;
