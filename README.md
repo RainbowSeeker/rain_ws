@@ -52,7 +52,7 @@ ros2 launch mqsls hil_3dof_mqsls_launch.py
 Each onboard computer:
 ```bash
 ros2 launch mqsls actual_3dof_mqsls_launch.py
-```bash
+```
 or Using `form_tools.sh`:
 ```bash
 ./form_tools.sh --launch
