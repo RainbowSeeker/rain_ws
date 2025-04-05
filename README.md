@@ -25,16 +25,19 @@ echo "export PX4_HOME=$PX4_HOME" >> ~/.bashrc && source ~/.bashrc
 # ROS2
 wget http://fishros.com/install -O fishros && . fishros
 
-# PX4 + Gazebo
-git clone https://github.com/PX4/PX4-Autopilot.git $PX4_HOME -b v1.14.3 --recursive --depth 1
-bash PX4-Autopilot/Tools/setup/ubuntu.sh
-
 # DDS
 git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git --depth 1
 cd Micro-XRCE-DDS-Agent
 mkdir build && cd build
 cmake .. && make
 sudo make install && sudo ldconfig /usr/local/lib/
+
+# PX4 + Gazebo
+git clone https://github.com/PX4/PX4-Autopilot.git $PX4_HOME -b v1.14.3 --recursive --depth 1
+cd $PX4_HOME
+bash Tools/setup/ubuntu.sh
+echo 'commander mode offboard' >> ROMFS/px4fmu_common/init.d-posix/rcS
+DONT_RUN=1 make px4_sitl gz_x500
 ```
 ## How to use
 ### SIL simulation

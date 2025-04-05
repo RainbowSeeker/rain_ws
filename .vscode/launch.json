@@ -8,7 +8,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/install/mqsls/lib/mqsls/3dof_mqsls_controller_node",
+            "program": "${workspaceFolder}/install/pcl_det/lib/pcl_det/pcl_det_node",
             "args": ["1"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
