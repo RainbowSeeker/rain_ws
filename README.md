@@ -5,7 +5,7 @@ Hi~, This is my ROS2 workspace!
 git clone https://github.com/RainbowSeeker/rain_ws.git --recursive --depth 1
 bash setup.sh
 ```
-![Anno](./asset/accs_anno.gif)
+![Anno](asset/accs_anno.gif)
 
 ## Requirement
 
@@ -15,7 +15,7 @@ If you have Ubuntu 22.04, you can try this way:
 |-----------------|------------|
 | Operating System| Ubuntu 22.04|
 | ROS2            | Humble    |
-| PX4             | v1.14.3   |
+| PX4             | 1.14.3    |
 | Gazebo          | gz-garden |
 ```bash
 # Env
