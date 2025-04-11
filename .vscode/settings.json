@@ -103,7 +103,8 @@
         "sparseqr": "cpp",
         "core": "cpp",
         "*.txx": "cpp",
-        "cfloat": "cpp"
+        "cfloat": "cpp",
+        "rope": "cpp"
     },
     "cSpell.words": [
         "baudrate",
