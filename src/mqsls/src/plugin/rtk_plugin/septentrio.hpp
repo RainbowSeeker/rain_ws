@@ -1,4 +1,6 @@
 #pragma once
+#include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/byte_multi_array.hpp>
 
 #include <vector>
 #include <cstdint>
@@ -181,8 +183,6 @@ namespace msg
     };
 }
 
-#include <rclcpp/rclcpp.hpp>
-
 class Component
 {
 public:
@@ -199,19 +199,40 @@ class BaseStationComponent : public Component
 public:
     explicit BaseStationComponent(const rclcpp::Node::SharedPtr &node) : _node(node)
     {
-        _corr_out_pub = _node->create_publisher<std_msgs::msg::String>("corrections_out", 10);
+        _bytes_msg.data.reserve(2048);
+
+        _corr_out_pub = _node->create_publisher<std_msgs::msg::ByteMultiArray>("corrections_out", 10);
     }
 
     void handle_recv_message(const std::string &bytes) override
     {
-        std_msgs::msg::String msg;
-        msg.data = bytes;
-        _corr_out_pub->publish(msg);
+        auto &data = _bytes_msg.data;
+        // check if buffer is full
+        if (data.size() + bytes.size() > data.capacity()) {
+            RCLCPP_WARN(_node->get_logger(), "Buffer overflow");
+            return;
+        }
+
+        // append to buffer
+        data.insert(data.end(), bytes.begin(), bytes.end());
+
+        // publish when buffer is half full or timeout
+        auto pass_time_ms = (_node->now() - _last_pub_time).nanoseconds() / 1e6;
+        if (data.size() > 100 || pass_time_ms > 20) {
+            _corr_out_pub->publish(_bytes_msg);
+            RCLCPP_DEBUG(_node->get_logger(), "Published %zu bytes", data.size());
+            data.clear();
+            _last_pub_time = _node->now();
+        }
     }
 
 private:
     const rclcpp::Node::SharedPtr _node;
-    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr _corr_out_pub;
+    rclcpp::Publisher<std_msgs::msg::ByteMultiArray>::SharedPtr _corr_out_pub;
+    std_msgs::msg::ByteMultiArray _bytes_msg {};
+
+    // details
+    rclcpp::Time _last_pub_time {_node->now()};
 };
 
 #ifndef DEG2RAD
@@ -225,13 +246,14 @@ private:
 class RoverComponent : public Component
 {
 public:
-    explicit RoverComponent(const rclcpp::Node::SharedPtr &node, std::function<void(const std::string &bytes)> wr_handle) : _node(node), _write_handle(wr_handle)
+    explicit RoverComponent(const rclcpp::Node::SharedPtr &node, std::function<void(const std::vector<uint8_t> &bytes)> wr_handle) : _node(node), _write_handle(wr_handle)
     {
         const int amc_id = _node->get_parameter("amc_id").as_int();
 
-        _corr_in_sub = _node->create_subscription<std_msgs::msg::String>("corrections_out", 10,
-            [this](std_msgs::msg::String::SharedPtr msg) {
-                RCLCPP_INFO(_node->get_logger(), "Received message: %s", msg->data.c_str());
+        _corr_in_sub = _node->create_subscription<std_msgs::msg::ByteMultiArray>("corrections_out", 10,
+            [this](std_msgs::msg::ByteMultiArray::SharedPtr msg) {
+                RCLCPP_DEBUG(_node->get_logger(), "Received %zu bytes", msg->data.size());
+                // send to serial port
                 _write_handle(msg->data);
             });
         
@@ -296,9 +318,9 @@ public:
 
 private:
     const rclcpp::Node::SharedPtr _node;
-    std::function<void(const std::string &bytes)> _write_handle;
+    std::function<void(const std::vector<uint8_t> &bytes)> _write_handle;
 
-    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr _corr_in_sub;
+    rclcpp::Subscription<std_msgs::msg::ByteMultiArray>::SharedPtr _corr_in_sub;
     rclcpp::Publisher<mqsls::msg::FollowerSend>::SharedPtr _follower_send_pub;
     mqsls::msg::FollowerSend _follower_send_msg {};
 

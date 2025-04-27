@@ -1,5 +1,4 @@
 #include <rclcpp/rclcpp.hpp>
-#include <std_msgs/msg/string.hpp>
 #include <boost/asio.hpp>
 #include <mqsls/msg/follower_send.hpp>
 #include <iostream>
@@ -53,9 +52,10 @@ public:
         if (_amc_id == 0) {
             _sep_component = std::make_shared<septentrio::BaseStationComponent>(this->shared_from_this());
         } else {
-            _sep_component = std::make_shared<septentrio::RoverComponent>(this->shared_from_this(), [this](const std::string &bytes) {
-                boost::asio::async_write(_serial, buffer(bytes), [=](const boost::system::error_code &error, size_t bytes_transferred) {
-                    if (error) {
+            _sep_component = std::make_shared<septentrio::RoverComponent>(this->shared_from_this(), [this](const std::vector<uint8_t> &bytes) {
+                _serial.async_write_some(buffer(bytes), [=](const boost::system::error_code &error, size_t bytes_transferred) {
+                    if (error)
+                    {
                         RCLCPP_ERROR(this->get_logger(), "Error writing to serial port: %s", error.message().c_str());
                     }
                 });
@@ -204,7 +204,7 @@ private:
     // serial port
     io_context _io;
     serial_port _serial {_io};
-    std::array<char, 1024> _recv_buf;
+    std::array<char, 10240> _recv_buf;
 };
 
 int main(int argc, char *argv[])
