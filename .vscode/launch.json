@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/install/mqsls/lib/mqsls/rtk_plugin_node",
-            "args": [],
+            "args": ["--ros-args", "-p", "port_name:=/dev/ttyACM0"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],

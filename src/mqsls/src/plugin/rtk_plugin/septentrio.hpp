@@ -180,4 +180,132 @@ namespace msg
         std::vector<char> _buffer;
     };
 }
+
+#include <rclcpp/rclcpp.hpp>
+
+class Component
+{
+public:
+    RCLCPP_SMART_PTR_DEFINITIONS(Component)
+
+    virtual void handle_recv_message(const std::string &bytes) = 0;
+
+    virtual ~Component() = default;
+};
+
+
+class BaseStationComponent : public Component
+{
+public:
+    explicit BaseStationComponent(const rclcpp::Node::SharedPtr &node) : _node(node)
+    {
+        _corr_out_pub = _node->create_publisher<std_msgs::msg::String>("corrections_out", 10);
+    }
+
+    void handle_recv_message(const std::string &bytes) override
+    {
+        std_msgs::msg::String msg;
+        msg.data = bytes;
+        _corr_out_pub->publish(msg);
+    }
+
+private:
+    const rclcpp::Node::SharedPtr _node;
+    rclcpp::Publisher<std_msgs::msg::String>::SharedPtr _corr_out_pub;
+};
+
+#ifndef DEG2RAD
+#define DEG2RAD(x) ((x) * 0.01745329251994329575)
+#endif
+
+#ifndef RAD2DEG
+#define RAD2DEG(x) ((x) * 57.29577951308232087721)
+#endif
+
+class RoverComponent : public Component
+{
+public:
+    explicit RoverComponent(const rclcpp::Node::SharedPtr &node, std::function<void(const std::string &bytes)> wr_handle) : _node(node), _write_handle(wr_handle)
+    {
+        const int amc_id = _node->get_parameter("amc_id").as_int();
+
+        _corr_in_sub = _node->create_subscription<std_msgs::msg::String>("corrections_out", 10,
+            [this](std_msgs::msg::String::SharedPtr msg) {
+                RCLCPP_INFO(_node->get_logger(), "Received message: %s", msg->data.c_str());
+                _write_handle(msg->data);
+            });
+        
+        _follower_send_pub = _node->create_publisher<mqsls::msg::FollowerSend>("follower_send" + std::to_string(amc_id), 10);
+    }
+
+    void handle_recv_message(const std::string &bytes) override
+    {
+        _parser.handle_message(bytes, [this]() {
+            auto msg_id = _parser.get_message_id();
+            switch (msg_id)
+            {
+                case septentrio::msg::MSG_ID_POSITION_CARTESIAN:
+                {
+                    auto body = _parser.get_position_cartesian();
+                    _follower_send_msg.position_load[0] = body.X;
+                    _follower_send_msg.position_load[1] = body.Y;
+                    _follower_send_msg.position_load[2] = body.Z;
+                    _follower_send_msg.position_uav[0] = body.Base2RoverX;
+                    _follower_send_msg.position_uav[1] = body.Base2RoverY;
+                    _follower_send_msg.position_uav[2] = body.Base2RoverZ;
+                    _follower_send_msg.timestamp = _node->get_clock()->now().nanoseconds() / 1e3; // [us]
+                    RCLCPP_INFO(_node->get_logger(), "POSITION_CARTESIAN: %f, %f, %f", _follower_send_msg.position_uav[0], _follower_send_msg.position_uav[1], _follower_send_msg.position_uav[2]);
+                    break;
+                }
+                case septentrio::msg::MSG_ID_ATTITUDE_EULER:
+                {
+                    auto body = _parser.get_attitude_euler();
+                    double heading_rad = DEG2RAD(body.Heading);
+                    if (heading_rad > M_PI) {
+                        heading_rad -= 2. * M_PI;
+                    }
+                    double pitch_rad = DEG2RAD(body.Pitch);
+
+                    // auto filtered = _filter.update({body.Heading, heading_rad, pitch_rad});
+
+                    // // Update uav position && load position
+                    // _follower_send_msg.position_uav[0] = 0;
+                    // _follower_send_msg.position_uav[1] = 0;
+                    // _follower_send_msg.position_uav[2] = 0;
+                    // _follower_send_msg.position_load[0] = _follower_send_msg.position_uav[0] + cosf(heading_rad) * cosf(pitch_rad) * body.Base2RoverX;
+                    // _follower_send_msg.position_load[1] = _follower_send_msg.position_uav[1] + sinf(heading_rad) * cosf(pitch_rad) * body.Base2RoverY;
+                    // _follower_send_msg.position_load[2] = _follower_send_msg.position_uav[2] - sinf(pitch_rad) * body.Base2RoverZ;
+                    // _follower_send_msg.timestamp = absolute_time();
+                    // _follower_send_pub->publish(_follower_send_msg);
+
+                    RCLCPP_INFO(_node->get_logger(), "ATTITUDE_EULER: heading: %.2f, pitch: %.2f, roll: %.2f", body.Heading, body.Pitch, body.Roll);
+                    RCLCPP_INFO(_node->get_logger(), "ATTITUDE_EULER: heading_dot: %.2f, pitch_dot: %.2f, roll_dot: %.2f", body.HeadingDot, body.PitchDot, body.RollDot);
+
+                    _perf_counter.tick();
+                    if (_perf_counter.count() % 100 == 0) {
+                        _perf_counter.print();
+                    }
+                    break;
+                }
+                default:
+                    RCLCPP_ERROR(_node->get_logger(), "Unknown message ID: %d", msg_id);
+                    break;
+            }
+        });
+    }
+
+private:
+    const rclcpp::Node::SharedPtr _node;
+    std::function<void(const std::string &bytes)> _write_handle;
+
+    rclcpp::Subscription<std_msgs::msg::String>::SharedPtr _corr_in_sub;
+    rclcpp::Publisher<mqsls::msg::FollowerSend>::SharedPtr _follower_send_pub;
+    mqsls::msg::FollowerSend _follower_send_msg {};
+
+    // decode
+    msg::Parser _parser {};
+
+    PerfCounter _perf_counter {PerfCounterType::INTERVAL, "RTKPlugin"};
+};
+
 }

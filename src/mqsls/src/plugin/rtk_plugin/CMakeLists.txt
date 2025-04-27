@@ -11,5 +11,5 @@ if(RTK_TESTING)
 endif()
 
 target_link_libraries(rtk_plugin_node "${cpp_typesupport_target}")
-ament_target_dependencies(rtk_plugin_node rclcpp)
+ament_target_dependencies(rtk_plugin_node rclcpp std_msgs)
 install(TARGETS rtk_plugin_node DESTINATION lib/${PROJECT_NAME})

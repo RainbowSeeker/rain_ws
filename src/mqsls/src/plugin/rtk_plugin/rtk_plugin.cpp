@@ -1,4 +1,5 @@
 #include <rclcpp/rclcpp.hpp>
+#include <std_msgs/msg/string.hpp>
 #include <boost/asio.hpp>
 #include <mqsls/msg/follower_send.hpp>
 #include <iostream>
@@ -20,14 +21,6 @@
 #error "RTK_MANUFACTURER_SELECT is not defined"
 #endif
 
-#ifndef DEG2RAD
-#define DEG2RAD(x) ((x) * 0.01745329251994329575)
-#endif
-
-#ifndef RAD2DEG
-#define RAD2DEG(x) ((x) * 57.29577951308232087721)
-#endif
-
 using namespace boost::asio;
 
 class RTKPlugin : public rclcpp::Node
@@ -35,6 +28,11 @@ class RTKPlugin : public rclcpp::Node
 public:
     RTKPlugin() : Node("rtk_plugin")
     {
+        // parameters check
+        if (_amc_id < 0 || _amc_id > 3) {
+            throw std::invalid_argument("Invalid amc_id");
+        }
+
         // configure serial port
         _serial.open(_port_name);
         _serial.set_option(serial_port::baud_rate(_baudrate));
@@ -43,34 +41,36 @@ public:
         _serial.set_option(serial_port::stop_bits(serial_port::stop_bits::one));
         _serial.set_option(serial_port::character_size(8));
 
-        // ros2
-        _follower_send_pub = this->create_publisher<mqsls::msg::FollowerSend>("follower_send" + std::to_string(_amc_id), 10);
-
-        // start
-        start();
-
         RCLCPP_INFO(this->get_logger(), "RTK plugin started for AMC %d", _amc_id);
     }
 
     ~RTKPlugin() {}
 
-private:
     void start()
     {
-        if (_is_running) {
-            RCLCPP_INFO(this->get_logger(), "Already running");
-            return;
+        // select component
+#if RTK_MANUFACTURER_SELECT == RTK_SEPTENTRIO
+        if (_amc_id == 0) {
+            _sep_component = std::make_shared<septentrio::BaseStationComponent>(this->shared_from_this());
+        } else {
+            _sep_component = std::make_shared<septentrio::RoverComponent>(this->shared_from_this(), [this](const std::string &bytes) {
+                boost::asio::async_write(_serial, buffer(bytes), [=](const boost::system::error_code &error, size_t bytes_transferred) {
+                    if (error) {
+                        RCLCPP_ERROR(this->get_logger(), "Error writing to serial port: %s", error.message().c_str());
+                    }
+                });
+            });
         }
-        
+#endif
+
         do_async_read();
 
         std::thread([this]() {
             _io.run();
         }).detach();
-
-        _is_running = true;
     }
 
+private:
     void do_async_read()
     {
         _serial.async_read_some(buffer(_recv_buf), [this](const boost::system::error_code &error, size_t bytes_transferred) {
@@ -132,7 +132,7 @@ private:
                         _follower_send_msg.position_load[0] = _follower_send_msg.position_uav[0] + cosf(heading_rad) * cosf(pitch_rad) * body->baseline;
                         _follower_send_msg.position_load[1] = _follower_send_msg.position_uav[1] + sinf(heading_rad) * cosf(pitch_rad) * body->baseline;
                         _follower_send_msg.position_load[2] = _follower_send_msg.position_uav[2] - sinf(pitch_rad) * body->baseline;
-                        _follower_send_msg.timestamp = absolute_time();
+                        _follower_send_msg.timestamp = this->get_clock()->now().nanoseconds() / 1e3; // [us]
                         _follower_send_pub->publish(_follower_send_msg);
 
                         RCLCPP_INFO(this->get_logger(), "UNIHEADING: len: %.3f, heading: %.2f, pitch: %.2f", filtered.baseline, RAD2DEG(filtered.heading), RAD2DEG(filtered.pitch));
@@ -151,80 +151,18 @@ private:
             }
         }
 #elif RTK_MANUFACTURER_SELECT == RTK_SEPTENTRIO
-        _parser.handle_message(raw, [this]() {
-            auto msg_id = _parser.get_message_id();
-            switch (msg_id)
-            {
-                case septentrio::msg::MSG_ID_POSITION_CARTESIAN:
-                {
-                    auto body = _parser.get_position_cartesian();
-                    _follower_send_msg.position_load[0] = body.X;
-                    _follower_send_msg.position_load[1] = body.Y;
-                    _follower_send_msg.position_load[2] = body.Z;
-                    _follower_send_msg.position_uav[0] = body.Base2RoverX;
-                    _follower_send_msg.position_uav[1] = body.Base2RoverY;
-                    _follower_send_msg.position_uav[2] = body.Base2RoverZ;
-                    _follower_send_msg.timestamp = absolute_time();
-                    RCLCPP_INFO(this->get_logger(), "POSITION_CARTESIAN: %f, %f, %f", _follower_send_msg.position_uav[0], _follower_send_msg.position_uav[1], _follower_send_msg.position_uav[2]);
-                    break;
-                }
-                case septentrio::msg::MSG_ID_ATTITUDE_EULER:
-                {
-                    auto body = _parser.get_attitude_euler();
-                    double heading_rad = DEG2RAD(body.Heading);
-                    if (heading_rad > M_PI) {
-                        heading_rad -= 2. * M_PI;
-                    }
-                    double pitch_rad = DEG2RAD(body.Pitch);
-
-                    // auto filtered = _filter.update({body.Heading, heading_rad, pitch_rad});
-
-                    // // Update uav position && load position
-                    // _follower_send_msg.position_uav[0] = 0;
-                    // _follower_send_msg.position_uav[1] = 0;
-                    // _follower_send_msg.position_uav[2] = 0;
-                    // _follower_send_msg.position_load[0] = _follower_send_msg.position_uav[0] + cosf(heading_rad) * cosf(pitch_rad) * body.Base2RoverX;
-                    // _follower_send_msg.position_load[1] = _follower_send_msg.position_uav[1] + sinf(heading_rad) * cosf(pitch_rad) * body.Base2RoverY;
-                    // _follower_send_msg.position_load[2] = _follower_send_msg.position_uav[2] - sinf(pitch_rad) * body.Base2RoverZ;
-                    // _follower_send_msg.timestamp = absolute_time();
-                    // _follower_send_pub->publish(_follower_send_msg);
-
-                    RCLCPP_INFO(this->get_logger(), "ATTITUDE_EULER: heading: %.2f, pitch: %.2f, roll: %.2f", body.Heading, body.Pitch, body.Roll);
-                    RCLCPP_INFO(this->get_logger(), "ATTITUDE_EULER: heading_dot: %.2f, pitch_dot: %.2f, roll_dot: %.2f", body.HeadingDot, body.PitchDot, body.RollDot);
-
-                    _perf_counter.tick();
-                    if (_perf_counter.count() % 100 == 0) {
-                        _perf_counter.print();
-                    }
-                    break;
-                }
-                default:
-                    RCLCPP_ERROR(this->get_logger(), "Unknown message ID: %d", msg_id);
-                    break;
-            }
-        });
+        _sep_component->handle_recv_message(raw);
 #endif
-    }
-
-    inline uint64_t absolute_time() {
-        return this->get_clock()->now().nanoseconds() / 1e3; // [us]
     }
     
     // parameters
-    const int _amc_id = this->declare_parameter("amc_id", 1);
+    const int _amc_id = this->declare_parameter("amc_id", 1); // 0 : base station; 1-3 : rover
+    const std::string _port_name = this->declare_parameter<std::string>("port_name", "/dev/ttyUSB0");
+    const int _baudrate = this->declare_parameter<int>("baudrate", 115200);
 
-    // decode
 #if RTK_MANUFACTURER_SELECT == RTK_SEPTENTRIO
-    septentrio::msg::Parser _parser {};
+    septentrio::Component::SharedPtr _sep_component;
 #endif
-
-    // publisher
-    rclcpp::Publisher<mqsls::msg::FollowerSend>::SharedPtr _follower_send_pub;
-    mqsls::msg::FollowerSend _follower_send_msg {};
-
-    // status
-    std::atomic<bool> _is_running = false;
-    PerfCounter _perf_counter {PerfCounterType::INTERVAL, "RTKPlugin"};
 
     // filter
     struct RefTranslation
@@ -263,9 +201,7 @@ private:
     };
     SlidingWindowFilter<RefTranslation> _filter {10};
 
-    // serial
-    const std::string _port_name = this->declare_parameter<std::string>("port_name", "/dev/ttyUSB0");
-    const int _baudrate = this->declare_parameter<int>("baudrate", 115200);
+    // serial port
     io_context _io;
     serial_port _serial {_io};
     std::array<char, 1024> _recv_buf;
@@ -275,7 +211,11 @@ int main(int argc, char *argv[])
 {
     rclcpp::init(argc, argv);
 
-    rclcpp::spin(std::make_shared<RTKPlugin>());
+    auto node = std::make_shared<RTKPlugin>();
+
+    node->start();
+    
+    rclcpp::spin(node);
     
     rclcpp::shutdown();
 
