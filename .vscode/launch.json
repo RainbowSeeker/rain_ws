@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(gdb) Launch",
+            "name": "RTK Plugin",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/install/pcl_det/lib/pcl_det/pcl_det_node",
-            "args": ["1"],
+            "program": "${workspaceFolder}/install/mqsls/lib/mqsls/rtk_plugin_node",
+            "args": [],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
@@ -27,8 +27,54 @@
                     "ignoreFailures": true
                 }
             ]
-        }
-        
-
+        },
+        {
+            "name": "3DOF Controller",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/install/mqsls/lib/mqsls/3dof_mqsls_controller_node",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "PCL Det",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/install/pcl_det/lib/pcl_det/pcl_det_node",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },
     ]
 }
