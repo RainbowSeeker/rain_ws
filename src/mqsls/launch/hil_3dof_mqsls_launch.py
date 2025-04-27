@@ -10,7 +10,6 @@ def generate_launch_description():
 
     world_name = 'x500_3dof_mqsls'
     args = [DeclareLaunchArgument('world_name', default_value=world_name, description='World name'),
-            DeclareLaunchArgument('gzsim_options', default_value='', description='Additional options to pass to gz sim'),
             DeclareLaunchArgument('eso_enable', default_value='True', description='Enable ESO'),
             DeclareLaunchArgument('pwas_enable', default_value='True', description='Enable PWAS'),
             DeclareLaunchArgument('accs_enable', default_value='True', description='Enable ACCS'),

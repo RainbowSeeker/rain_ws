@@ -20,13 +20,13 @@ If you have Ubuntu 22.04, you can try this way:
 ```bash
 # Env
 PX4_HOME=~/PX4-Autopilot
-echo "export PX4_HOME=$PX4_HOME" >> ~/.bashrc && source ~/.bashrc
+echo -e "export PX4_HOME=$PX4_HOME\nexport GZ_IP=127.0.0.1" >> ~/.bashrc && source ~/.bashrc
 
 # ROS2
 wget http://fishros.com/install -O fishros && . fishros
 
 # DDS
-git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git --depth 1
+git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent.git -b v2.4.3 --depth 1
 cd Micro-XRCE-DDS-Agent
 mkdir build && cd build
 cmake .. && make

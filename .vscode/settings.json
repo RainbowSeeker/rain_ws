@@ -104,7 +104,21 @@
         "core": "cpp",
         "*.txx": "cpp",
         "cfloat": "cpp",
-        "rope": "cpp"
+        "rope": "cpp",
+        "csetjmp": "cpp",
+        "barrier": "cpp",
+        "charconv": "cpp",
+        "cuchar": "cpp",
+        "netfwd": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp",
+        "slist": "cpp",
+        "latch": "cpp",
+        "ranges": "cpp",
+        "scoped_allocator": "cpp",
+        "span": "cpp",
+        "syncstream": "cpp",
+        "valarray": "cpp"
     },
     "cSpell.words": [
         "baudrate",
