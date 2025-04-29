@@ -239,4 +239,59 @@ namespace unicore // driver for UM982 of unicore
 		}
 		return -EAGAIN;
 	}
+
+class DualAntennaComponent : public RTKComponent
+{
+public:
+	int handle_recv_message(const std::string &raw, RefTranslation &result) override
+	{
+		static unicore::msg::body_binary msg = {};
+        for (const auto &ch : raw)
+        {
+            if (unicore::parse(ch, msg) == 0) {
+                switch (msg.header.msg_id) {
+                    case unicore::msg::MSG_ID_BESTNAVXYZ:
+                    {
+                        auto body = reinterpret_cast<unicore::msg::bestnavxyz *>(&msg.payload);
+                        // _follower_send_msg.velocity_uav[0] = body->vel[0];
+                        // _follower_send_msg.velocity_uav[1] = -body->vel[1];
+                        // _follower_send_msg.velocity_uav[2] = -body->vel[2];
+                        // RCLCPP_DEBUG(this->get_logger(), "BESTNAVXYZ: %f, %f, %f", _follower_send_msg.velocity_uav[0], _follower_send_msg.velocity_uav[1], _follower_send_msg.velocity_uav[2]);
+                        break;
+                    }
+                    case unicore::msg::MSG_ID_BESTNAVXYZH:
+                    {
+                        auto body = reinterpret_cast<unicore::msg::bestnavxyz *>(&msg.payload);
+                        // _follower_send_msg.velocity_load[0] = body->vel[0];
+                        // _follower_send_msg.velocity_load[1] = -body->vel[1];
+                        // _follower_send_msg.velocity_load[2] = -body->vel[2];
+                        // RCLCPP_DEBUG(this->get_logger(), "BESTNAVXYZH: %f, %f, %f", _follower_send_msg.velocity_load[0], _follower_send_msg.velocity_load[1], _follower_send_msg.velocity_load[2]);
+                        break;
+                    }
+                    case unicore::msg::MSG_ID_UNIHEADING:
+                    {
+                        auto body = reinterpret_cast<unicore::msg::uniheading *>(&msg.payload);
+                        double heading_rad = DEG2RAD(body->heading);
+                        if (heading_rad > M_PI) {
+                            heading_rad -= 2. * M_PI;
+                        }
+                        double pitch_rad = DEG2RAD(body->pitch);
+        
+                        // Update uav position && load position
+						result.delta_xyz[0] = cosf(heading_rad) * cosf(pitch_rad) * body->baseline;
+						result.delta_xyz[1] = sinf(heading_rad) * cosf(pitch_rad) * body->baseline;
+						result.delta_xyz[2] = - sinf(pitch_rad) * body->baseline;
+
+                        RCLCPP_INFO(this->get_logger(), "UNIHEADING: len: %.3f, heading: %.2f, pitch: %.2f", filtered.baseline, RAD2DEG(filtered.heading), RAD2DEG(filtered.pitch));
+                        RCLCPP_INFO(this->get_logger(), "UNIHEADING: delta_pos: %.3f, %.3f, %.3f", filtered.delta_x(), filtered.delta_y(), filtered.delta_z());
+                        break;
+                    }
+                    default:
+                        RCLCPP_ERROR(this->get_logger(), "Unknown message ID: %d", msg.header.msg_id);
+                        break;
+                }
+            }
+        }
+	}
+};
 } // namespace unicore

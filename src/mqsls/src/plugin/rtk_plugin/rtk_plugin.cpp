@@ -5,6 +5,7 @@
 #include <string>
 #include <array>
 
+#include "rtk_plugin.hpp"
 #include "mqsls/perf_counter.hpp"
 #include "mqsls/SlidingWindowFilter.hpp"
 
@@ -40,6 +41,9 @@ public:
         _serial.set_option(serial_port::stop_bits(serial_port::stop_bits::one));
         _serial.set_option(serial_port::character_size(8));
 
+        // publisher
+        _follower_send_pub = this->create_publisher<mqsls::msg::FollowerSend>("follower_send" + std::to_string(_amc_id), 10);
+
         RCLCPP_INFO(this->get_logger(), "RTK plugin started for AMC %d", _amc_id);
     }
 
@@ -48,11 +52,13 @@ public:
     void start()
     {
         // select component
-#if RTK_MANUFACTURER_SELECT == RTK_SEPTENTRIO
+#if RTK_MANUFACTURER_SELECT == RTK_UNICORE
+        _rtk_component = std::make_shared<unicore::DualAntennaComponent>(this->shared_from_this());
+#elif RTK_MANUFACTURER_SELECT == RTK_SEPTENTRIO
         if (_amc_id == 0) {
-            _sep_component = std::make_shared<septentrio::BaseStationComponent>(this->shared_from_this());
+            _rtk_component = std::make_shared<septentrio::BaseStationComponent>(this->shared_from_this());
         } else {
-            _sep_component = std::make_shared<septentrio::RoverComponent>(this->shared_from_this(), [this](const std::vector<uint8_t> &bytes) {
+            _rtk_component = std::make_shared<septentrio::RoverComponent>(this->shared_from_this(), [this](const std::vector<uint8_t> &bytes) {
                 _serial.async_write_some(buffer(bytes), [=](const boost::system::error_code &error, size_t bytes_transferred) {
                     if (error)
                     {
@@ -90,69 +96,23 @@ private:
 
     void parse_package(const std::string &raw)
     {
-#if RTK_MANUFACTURER_SELECT == RTK_UNICORE
-        static unicore::msg::body_binary msg = {};
-        for (const auto &ch : raw)
-        {
-            if (unicore::parse(ch, msg) == 0) {
-                switch (msg.header.msg_id) {
-                    case unicore::msg::MSG_ID_BESTNAVXYZ:
-                    {
-                        auto body = reinterpret_cast<unicore::msg::bestnavxyz *>(&msg.payload);
-                        _follower_send_msg.velocity_uav[0] = body->vel[0];
-                        _follower_send_msg.velocity_uav[1] = -body->vel[1];
-                        _follower_send_msg.velocity_uav[2] = -body->vel[2];
-                        RCLCPP_DEBUG(this->get_logger(), "BESTNAVXYZ: %f, %f, %f", _follower_send_msg.velocity_uav[0], _follower_send_msg.velocity_uav[1], _follower_send_msg.velocity_uav[2]);
-                        break;
-                    }
-                    case unicore::msg::MSG_ID_BESTNAVXYZH:
-                    {
-                        auto body = reinterpret_cast<unicore::msg::bestnavxyz *>(&msg.payload);
-                        _follower_send_msg.velocity_load[0] = body->vel[0];
-                        _follower_send_msg.velocity_load[1] = -body->vel[1];
-                        _follower_send_msg.velocity_load[2] = -body->vel[2];
-                        RCLCPP_DEBUG(this->get_logger(), "BESTNAVXYZH: %f, %f, %f", _follower_send_msg.velocity_load[0], _follower_send_msg.velocity_load[1], _follower_send_msg.velocity_load[2]);
-                        break;
-                    }
-                    case unicore::msg::MSG_ID_UNIHEADING:
-                    {
-                        auto body = reinterpret_cast<unicore::msg::uniheading *>(&msg.payload);
-                        double heading_rad = DEG2RAD(body->heading);
-                        if (heading_rad > M_PI) {
-                            heading_rad -= 2. * M_PI;
-                        }
-                        double pitch_rad = DEG2RAD(body->pitch);
+        // handle the message
+        auto result = RefTranslation();
+        int ret = _rtk_component->handle_recv_message(raw, result);
+        if (ret > 0) {
+            // publish the result
+            auto msg = mqsls::msg::FollowerSend();
+            msg.position_uav[0] = result.delta_xyz[0];
+            msg.position_uav[1] = result.delta_xyz[1];
+            msg.position_uav[2] = result.delta_xyz[2];
+            msg.timestamp = this->get_clock()->now().nanoseconds() / 1e3; // [us]
+            _follower_send_pub->publish(msg);
 
-                        auto filtered = _filter.update({body->baseline, heading_rad, pitch_rad});
-        
-                        // Update uav position && load position
-                        _follower_send_msg.position_uav[0] = 0;
-                        _follower_send_msg.position_uav[1] = 0;
-                        _follower_send_msg.position_uav[2] = 0;
-                        _follower_send_msg.position_load[0] = _follower_send_msg.position_uav[0] + cosf(heading_rad) * cosf(pitch_rad) * body->baseline;
-                        _follower_send_msg.position_load[1] = _follower_send_msg.position_uav[1] + sinf(heading_rad) * cosf(pitch_rad) * body->baseline;
-                        _follower_send_msg.position_load[2] = _follower_send_msg.position_uav[2] - sinf(pitch_rad) * body->baseline;
-                        _follower_send_msg.timestamp = this->get_clock()->now().nanoseconds() / 1e3; // [us]
-                        _follower_send_pub->publish(_follower_send_msg);
-
-                        RCLCPP_INFO(this->get_logger(), "UNIHEADING: len: %.3f, heading: %.2f, pitch: %.2f", filtered.baseline, RAD2DEG(filtered.heading), RAD2DEG(filtered.pitch));
-                        RCLCPP_INFO(this->get_logger(), "UNIHEADING: delta_pos: %.3f, %.3f, %.3f", filtered.delta_x(), filtered.delta_y(), filtered.delta_z());
-
-                        _perf_counter.tick();
-                        if (_perf_counter.count() % 100 == 0) {
-                            _perf_counter.print();
-                        }
-                        break;
-                    }
-                    default:
-                        RCLCPP_ERROR(this->get_logger(), "Unknown message ID: %d", msg.header.msg_id);
-                        break;
-                }
+            _perf_counter.tick();
+            if (_perf_counter.count() % 100 == 0) {
+                _perf_counter.print();
             }
         }
-#elif RTK_MANUFACTURER_SELECT == RTK_SEPTENTRIO
-        _sep_component->handle_recv_message(raw);
-#endif
     }
     
     // parameters
@@ -160,46 +120,15 @@ private:
     const std::string _port_name = this->declare_parameter<std::string>("port_name", "/dev/ttyUSB0");
     const int _baudrate = this->declare_parameter<int>("baudrate", 115200);
 
-#if RTK_MANUFACTURER_SELECT == RTK_SEPTENTRIO
-    septentrio::Component::SharedPtr _sep_component;
-#endif
+    // publisher
+    rclcpp::Publisher<mqsls::msg::FollowerSend>::SharedPtr _follower_send_pub;
+
+    // details
+    RTKComponent::SharedPtr _rtk_component;
 
     // filter
-    struct RefTranslation
-    {
-        double baseline;
-        double heading;
-        double pitch;
-
-        double delta_x() const
-        {
-            return baseline * cosf(heading) * cosf(pitch);
-        }
-
-        double delta_y() const
-        {
-            return baseline * sinf(heading) * cosf(pitch);
-        }
-
-        double delta_z() const
-        {
-            return -baseline * sinf(pitch);
-        }
-
-        const RefTranslation operator+(const RefTranslation &other) const
-        {
-            return {baseline + other.baseline, heading + other.heading, pitch + other.pitch};
-        }
-        const RefTranslation operator-(const RefTranslation &other) const
-        {
-            return {baseline - other.baseline, heading - other.heading, pitch - other.pitch};
-        }
-        const RefTranslation operator/(const double &other) const
-        {
-            return {baseline / other, heading / other, pitch / other};
-        }
-    };
     SlidingWindowFilter<RefTranslation> _filter {10};
+    PerfCounter _perf_counter {PerfCounterType::INTERVAL, "RTKPlugin"};
 
     // serial port
     io_context _io;

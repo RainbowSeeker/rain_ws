@@ -7,6 +7,7 @@
 #include <string>
 #include <functional>
 
+#include "rtk_plugin.hpp"
 #include "crc16.h"
 
 namespace septentrio {
@@ -183,18 +184,8 @@ namespace msg
     };
 }
 
-class Component
-{
-public:
-    RCLCPP_SMART_PTR_DEFINITIONS(Component)
 
-    virtual void handle_recv_message(const std::string &bytes) = 0;
-
-    virtual ~Component() = default;
-};
-
-
-class BaseStationComponent : public Component
+class BaseStationComponent : public RTKComponent
 {
 public:
     explicit BaseStationComponent(const rclcpp::Node::SharedPtr &node) : _node(node)
@@ -204,13 +195,14 @@ public:
         _corr_out_pub = _node->create_publisher<std_msgs::msg::ByteMultiArray>("corrections_out", 10);
     }
 
-    void handle_recv_message(const std::string &bytes) override
+    int handle_recv_message(const std::string &bytes, RefTranslation &) override
     {
         auto &data = _bytes_msg.data;
         // check if buffer is full
         if (data.size() + bytes.size() > data.capacity()) {
             RCLCPP_WARN(_node->get_logger(), "Buffer overflow");
-            return;
+            reset();
+            return 0;
         }
 
         // append to buffer
@@ -221,12 +213,19 @@ public:
         if (data.size() > 100 || pass_time_ms > 20) {
             _corr_out_pub->publish(_bytes_msg);
             RCLCPP_DEBUG(_node->get_logger(), "Published %zu bytes", data.size());
-            data.clear();
-            _last_pub_time = _node->now();
+            reset();
         }
+
+        return 0;
     }
 
 private:
+    void reset()
+    {
+        _bytes_msg.data.clear();
+        _last_pub_time = _node->now();
+    }
+
     const rclcpp::Node::SharedPtr _node;
     rclcpp::Publisher<std_msgs::msg::ByteMultiArray>::SharedPtr _corr_out_pub;
     std_msgs::msg::ByteMultiArray _bytes_msg {};
@@ -243,40 +242,35 @@ private:
 #define RAD2DEG(x) ((x) * 57.29577951308232087721)
 #endif
 
-class RoverComponent : public Component
+class RoverComponent : public RTKComponent
 {
 public:
     explicit RoverComponent(const rclcpp::Node::SharedPtr &node, std::function<void(const std::vector<uint8_t> &bytes)> wr_handle) : _node(node), _write_handle(wr_handle)
     {
-        const int amc_id = _node->get_parameter("amc_id").as_int();
-
         _corr_in_sub = _node->create_subscription<std_msgs::msg::ByteMultiArray>("corrections_out", 10,
             [this](std_msgs::msg::ByteMultiArray::SharedPtr msg) {
                 RCLCPP_DEBUG(_node->get_logger(), "Received %zu bytes", msg->data.size());
                 // send to serial port
                 _write_handle(msg->data);
             });
-        
-        _follower_send_pub = _node->create_publisher<mqsls::msg::FollowerSend>("follower_send" + std::to_string(amc_id), 10);
     }
 
-    void handle_recv_message(const std::string &bytes) override
+    int handle_recv_message(const std::string &bytes, RefTranslation &result) override
     {
-        _parser.handle_message(bytes, [this]() {
+        int ret = 0;
+        _parser.handle_message(bytes, [&, this]() {
             auto msg_id = _parser.get_message_id();
             switch (msg_id)
             {
                 case septentrio::msg::MSG_ID_POSITION_CARTESIAN:
                 {
                     auto body = _parser.get_position_cartesian();
-                    _follower_send_msg.position_load[0] = body.X;
-                    _follower_send_msg.position_load[1] = body.Y;
-                    _follower_send_msg.position_load[2] = body.Z;
-                    _follower_send_msg.position_uav[0] = body.Base2RoverX;
-                    _follower_send_msg.position_uav[1] = body.Base2RoverY;
-                    _follower_send_msg.position_uav[2] = body.Base2RoverZ;
-                    _follower_send_msg.timestamp = _node->get_clock()->now().nanoseconds() / 1e3; // [us]
-                    RCLCPP_INFO(_node->get_logger(), "POSITION_CARTESIAN: %f, %f, %f", _follower_send_msg.position_uav[0], _follower_send_msg.position_uav[1], _follower_send_msg.position_uav[2]);
+                    result.delta_xyz[0] = body.Base2RoverX;
+                    result.delta_xyz[1] = body.Base2RoverY;
+                    result.delta_xyz[2] = body.Base2RoverZ;
+
+                    ret = 1; // finished
+                    RCLCPP_INFO(_node->get_logger(), "POSITION_CARTESIAN: %f, %f, %f", body.Base2RoverX, body.Base2RoverY, body.Base2RoverZ);
                     break;
                 }
                 case septentrio::msg::MSG_ID_ATTITUDE_EULER:
@@ -288,32 +282,17 @@ public:
                     }
                     double pitch_rad = DEG2RAD(body.Pitch);
 
-                    // auto filtered = _filter.update({body.Heading, heading_rad, pitch_rad});
-
-                    // // Update uav position && load position
-                    // _follower_send_msg.position_uav[0] = 0;
-                    // _follower_send_msg.position_uav[1] = 0;
-                    // _follower_send_msg.position_uav[2] = 0;
-                    // _follower_send_msg.position_load[0] = _follower_send_msg.position_uav[0] + cosf(heading_rad) * cosf(pitch_rad) * body.Base2RoverX;
-                    // _follower_send_msg.position_load[1] = _follower_send_msg.position_uav[1] + sinf(heading_rad) * cosf(pitch_rad) * body.Base2RoverY;
-                    // _follower_send_msg.position_load[2] = _follower_send_msg.position_uav[2] - sinf(pitch_rad) * body.Base2RoverZ;
-                    // _follower_send_msg.timestamp = absolute_time();
-                    // _follower_send_pub->publish(_follower_send_msg);
-
                     RCLCPP_INFO(_node->get_logger(), "ATTITUDE_EULER: heading: %.2f, pitch: %.2f, roll: %.2f", body.Heading, body.Pitch, body.Roll);
-                    RCLCPP_INFO(_node->get_logger(), "ATTITUDE_EULER: heading_dot: %.2f, pitch_dot: %.2f, roll_dot: %.2f", body.HeadingDot, body.PitchDot, body.RollDot);
-
-                    _perf_counter.tick();
-                    if (_perf_counter.count() % 100 == 0) {
-                        _perf_counter.print();
-                    }
                     break;
                 }
                 default:
+                    ret = -1;
                     RCLCPP_ERROR(_node->get_logger(), "Unknown message ID: %d", msg_id);
                     break;
             }
         });
+
+        return ret;
     }
 
 private:
@@ -321,13 +300,9 @@ private:
     std::function<void(const std::vector<uint8_t> &bytes)> _write_handle;
 
     rclcpp::Subscription<std_msgs::msg::ByteMultiArray>::SharedPtr _corr_in_sub;
-    rclcpp::Publisher<mqsls::msg::FollowerSend>::SharedPtr _follower_send_pub;
-    mqsls::msg::FollowerSend _follower_send_msg {};
 
     // decode
     msg::Parser _parser {};
-
-    PerfCounter _perf_counter {PerfCounterType::INTERVAL, "RTKPlugin"};
 };
 
 }
